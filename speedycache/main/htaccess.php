@@ -72,6 +72,7 @@ RewriteBase /';
 	RewriteCond %{REQUEST_METHOD} GET
 	RewriteCond %{HTTP_USER_AGENT} !(Mediatoolkitbot|facebookexternalhit|SpeedyCacheCCSS)
 	RewriteCond %{HTTP_USER_AGENT} (Mobile|Android|Silk\/|Kindle|Opera\sMini|BlackBerry|Opera\sMobi) [NC]
+	RewriteCond %{QUERY_STRING} =""
 	RewriteCond %{HTTP:Cookie} !comment_author_
 	'.$admin_cookie.'
 	RewriteCond %{REQUEST_URI} !(\/){2}$
@@ -83,6 +84,7 @@ RewriteBase /';
 $htaccess_rules .= '
 	RewriteCond %{REQUEST_METHOD} GET
 	RewriteCond %{HTTP_USER_AGENT} !(Mediatoolkitbot|facebookexternalhit|SpeedyCacheCCSS)
+	RewriteCond %{QUERY_STRING} =""
 	RewriteCond %{HTTP:Cookie} !comment_author_
 	'.$admin_cookie."\n";
 

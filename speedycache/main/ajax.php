@@ -56,18 +56,18 @@ class Ajax{
 
 		$options = get_option('speedycache_options');
 
-		$options['status'] = isset($_POST['status']);
-		$options['preload'] = isset($_POST['preload']);
-		$options['preload_interval'] = (int) Util::sanitize_post('preload_interval', 0);
-		$options['logged_in_user'] = isset($_POST['logged_in_user']);
-		$options['mobile'] = isset($_POST['mobile']);
-		$options['mobile_theme'] = isset($_POST['mobile_theme']);
-		$options['lbc'] = isset($_POST['lbc']);
-		$options['gzip'] = isset($_POST['gzip']);
-		$options['purge_varnish'] = isset($_POST['purge_varnish']);
-		$options['varniship'] = !empty($_POST['varniship']) ? Util::sanitize_post('varniship') : '';
-		$options['purge_interval'] = (int) Util::sanitize_post('purge_interval', 0);
-		$options['purge_interval_unit'] = Util::sanitize_post('purge_interval_unit', 'days');
+		$options['status'] = isset($_REQUEST['status']);
+		$options['preload'] = isset($_REQUEST['preload']);
+		$options['preload_interval'] = (int) Util::sanitize_request('preload_interval', 0);
+		$options['logged_in_user'] = isset($_REQUEST['logged_in_user']);
+		$options['mobile'] = isset($_REQUEST['mobile']);
+		$options['mobile_theme'] = isset($_REQUEST['mobile_theme']);
+		$options['lbc'] = isset($_REQUEST['lbc']);
+		$options['gzip'] = isset($_REQUEST['gzip']);
+		$options['purge_varnish'] = isset($_REQUEST['purge_varnish']);
+		$options['varniship'] = !empty($_REQUEST['varniship']) ? Util::sanitize_request('varniship') : '';
+		$options['purge_interval'] = (int) Util::sanitize_request('purge_interval', 0);
+		$options['purge_interval_unit'] = Util::sanitize_request('purge_interval_unit', 'days');
 
 		wp_clear_scheduled_hook('speedycache_purge_cache');
 		wp_clear_scheduled_hook('speedycache_preload');
@@ -94,30 +94,30 @@ class Ajax{
 		$options = get_option('speedycache_options', []);
 		
 		// CSS options
-		$options['minify_html'] = isset($_POST['minify_html']);
-		$options['minify_css'] = isset($_POST['minify_css']);
-		$options['combine_css'] = isset($_POST['combine_css']);
+		$options['minify_html'] = isset($_REQUEST['minify_html']);
+		$options['minify_css'] = isset($_REQUEST['minify_css']);
+		$options['combine_css'] = isset($_REQUEST['combine_css']);
 
-		$options['unused_css'] = isset($_POST['unused_css']);
-		$options['critical_css'] = isset($_POST['critical_css']);
-		$options['unusedcss_load'] = Util::sanitize_post('unusedcss_load');
-		$options['unused_css_exclude_stylesheets'] = !empty($_POST['unused_css_exclude_stylesheets']) ? explode("\n", sanitize_textarea_field(wp_unslash($_POST['unused_css_exclude_stylesheets']))) : [];
-		$options['unusedcss_include_selector'] = !empty($_POST['unusedcss_include_selector']) ? explode("\n", sanitize_textarea_field(wp_unslash($_POST['unusedcss_include_selector']))) : [];
+		$options['unused_css'] = isset($_REQUEST['unused_css']);
+		$options['critical_css'] = isset($_REQUEST['critical_css']);
+		$options['unusedcss_load'] = Util::sanitize_request('unusedcss_load');
+		$options['unused_css_exclude_stylesheets'] = !empty($_REQUEST['unused_css_exclude_stylesheets']) ? explode("\n", sanitize_textarea_field(wp_unslash($_REQUEST['unused_css_exclude_stylesheets']))) : [];
+		$options['unusedcss_include_selector'] = !empty($_REQUEST['unusedcss_include_selector']) ? explode("\n", sanitize_textarea_field(wp_unslash($_REQUEST['unusedcss_include_selector']))) : [];
 
 		// JS options
-		$options['minify_js'] = isset($_POST['minify_js']);
-		$options['combine_js'] = isset($_POST['combine_js']);
-		$options['delay_js'] = isset($_POST['delay_js']);
-		$options['delay_js_mode'] = isset($_POST['delay_js_mode']) ? Util::sanitize_post('delay_js_mode') : '';
-		$options['delay_js_excludes'] = !empty($_POST['delay_js_excludes']) ? explode("\n", sanitize_textarea_field(wp_unslash($_POST['delay_js_excludes']))) : [];
-		$options['delay_js_scripts'] = !empty($_POST['delay_js_scripts']) ? explode("\n", sanitize_textarea_field(wp_unslash($_POST['delay_js_scripts']))) : [];
-		$options['render_blocking'] = isset($_POST['render_blocking']);
-		$options['render_blocking_excludes'] = isset($_POST['render_blocking_excludes']) ? explode("\n", sanitize_textarea_field(wp_unslash($_POST['render_blocking_excludes']))) : [];
-		$options['disable_emojis'] = isset($_POST['disable_emojis']);
-		$options['lazy_load_html'] = isset($_POST['lazy_load_html']);
+		$options['minify_js'] = isset($_REQUEST['minify_js']);
+		$options['combine_js'] = isset($_REQUEST['combine_js']);
+		$options['delay_js'] = isset($_REQUEST['delay_js']);
+		$options['delay_js_mode'] = isset($_REQUEST['delay_js_mode']) ? Util::sanitize_request('delay_js_mode') : '';
+		$options['delay_js_excludes'] = !empty($_REQUEST['delay_js_excludes']) ? explode("\n", sanitize_textarea_field(wp_unslash($_REQUEST['delay_js_excludes']))) : [];
+		$options['delay_js_scripts'] = !empty($_REQUEST['delay_js_scripts']) ? explode("\n", sanitize_textarea_field(wp_unslash($_REQUEST['delay_js_scripts']))) : [];
+		$options['render_blocking'] = isset($_REQUEST['render_blocking']);
+		$options['render_blocking_excludes'] = isset($_REQUEST['render_blocking_excludes']) ? explode("\n", sanitize_textarea_field(wp_unslash($_REQUEST['render_blocking_excludes']))) : [];
+		$options['disable_emojis'] = isset($_REQUEST['disable_emojis']);
+		$options['lazy_load_html'] = isset($_REQUEST['lazy_load_html']);
 
-		if(isset($_POST['lazy_load_html_elements'])){
-			$options['lazy_load_html_elements'] = !empty($_POST['lazy_load_html_elements']) ? explode("\n", sanitize_textarea_field(wp_unslash($_POST['lazy_load_html_elements']))) : [];
+		if(isset($_REQUEST['lazy_load_html_elements'])){
+			$options['lazy_load_html_elements'] = !empty($_REQUEST['lazy_load_html_elements']) ? explode("\n", sanitize_textarea_field(wp_unslash($_REQUEST['lazy_load_html_elements']))) : [];
 		}
 
 		$speedycache->options = $options;
@@ -137,16 +137,16 @@ class Ajax{
 		
 		$options = get_option('speedycache_options');
 		
-		$options['critical_images'] = isset($_POST['critical_images']);
-		$options['critical_image_count'] = isset($_POST['critical_images']) ? Util::sanitize_post('critical_image_count') : '';
-		$options['instant_page'] = isset($_POST['instant_page']);
-		$options['dns_prefetch'] = isset($_POST['dns_prefetch']);
-		if(!empty($_POST['dns_urls'])){
-			$options['dns_urls'] = explode("\n", sanitize_textarea_field(wp_unslash($_POST['dns_urls'])));
+		$options['critical_images'] = isset($_REQUEST['critical_images']);
+		$options['critical_image_count'] = isset($_REQUEST['critical_images']) ? Util::sanitize_request('critical_image_count') : '';
+		$options['instant_page'] = isset($_REQUEST['instant_page']);
+		$options['dns_prefetch'] = isset($_REQUEST['dns_prefetch']);
+		if(!empty($_REQUEST['dns_urls'])){
+			$options['dns_urls'] = explode("\n", sanitize_textarea_field(wp_unslash($_REQUEST['dns_urls'])));
 		}
 
-		$options['preload_resources'] = isset($_POST['preload_resources']);
-		$options['pre_connect'] = isset($_POST['pre_connect']);
+		$options['preload_resources'] = isset($_REQUEST['preload_resources']);
+		$options['pre_connect'] = isset($_REQUEST['pre_connect']);
 		
 		// TODO: here more options will be added after all modals have been added.
 		$speedycache->options = $options;
@@ -165,26 +165,26 @@ class Ajax{
 		global $speedycache;
 		
 		$options = get_option('speedycache_options');
-		$options['gravatar_cache'] = isset($_POST['gravatar_cache']);
-		$options['lazy_load'] = isset($_POST['lazy_load']);
-		$options['lazy_load_placeholder'] = Util::sanitize_post('lazy_load_placeholder');
+		$options['gravatar_cache'] = isset($_REQUEST['gravatar_cache']);
+		$options['lazy_load'] = isset($_REQUEST['lazy_load']);
+		$options['lazy_load_placeholder'] = Util::sanitize_request('lazy_load_placeholder');
 		
-		if(isset($_POST['lazy_load_placeholder_custom_url'])){
-			$options['lazy_load_placeholder_custom_url'] = !empty($_POST['lazy_load_placeholder_custom_url']) ? sanitize_url(wp_unslash($_POST['lazy_load_placeholder_custom_url'])) : '';
+		if(isset($_REQUEST['lazy_load_placeholder_custom_url'])){
+			$options['lazy_load_placeholder_custom_url'] = !empty($_REQUEST['lazy_load_placeholder_custom_url']) ? sanitize_url(wp_unslash($_REQUEST['lazy_load_placeholder_custom_url'])) : '';
 		}
 		
-		if(isset($_POST['exclude_above_fold'])){
-			$options['exclude_above_fold'] = !empty($_POST['exclude_above_fold']) ? Util::sanitize_post('exclude_above_fold') : '';
+		if(isset($_REQUEST['exclude_above_fold'])){
+			$options['exclude_above_fold'] = !empty($_REQUEST['exclude_above_fold']) ? Util::sanitize_request('exclude_above_fold') : '';
 		}
 		
-		if(isset($_POST['lazy_load_keywords'])){
-			$options['lazy_load_keywords'] = !empty($_POST['lazy_load_keywords']) ? explode("\n", sanitize_textarea_field(wp_unslash($_POST['lazy_load_keywords']))) : [];
+		if(isset($_REQUEST['lazy_load_keywords'])){
+			$options['lazy_load_keywords'] = !empty($_REQUEST['lazy_load_keywords']) ? explode("\n", sanitize_textarea_field(wp_unslash($_REQUEST['lazy_load_keywords']))) : [];
 		}
 		
-		$options['image_dimensions'] = isset($_POST['image_dimensions']);
-		$options['local_gfonts'] = isset($_POST['local_gfonts']);
-		$options['google_fonts'] = isset($_POST['google_fonts']);
-		$options['font_rendering'] = isset($_POST['font_rendering']);
+		$options['image_dimensions'] = isset($_REQUEST['image_dimensions']);
+		$options['local_gfonts'] = isset($_REQUEST['local_gfonts']);
+		$options['google_fonts'] = isset($_REQUEST['google_fonts']);
+		$options['font_rendering'] = isset($_REQUEST['font_rendering']);
 
 		// TODO: here more options will be added after all modals have been added.
 		$speedycache->options = $options;
@@ -209,18 +209,18 @@ class Ajax{
 		}
 
 		$options = get_option('speedycache_object_cache', []);
-		$options['enable'] = isset($_POST['enable_object']);
-		$options['host'] = Util::sanitize_post('host');
-		$options['port'] = Util::sanitize_post('port');
-		$options['username'] = Util::sanitize_post('username');
-		$options['password'] = Util::sanitize_post('password');
-		$options['ttl'] = Util::sanitize_post('ttl', 0);
-		$options['db-id'] = Util::sanitize_post('db-id', 0);
-		$options['persistent'] = isset($_POST['persistent']);
-		$options['admin'] = isset($_POST['admin']);
-		$options['async_flush'] = isset($_POST['async_flush']);
-		$options['serialization'] = Util::sanitize_post('serialization');
-		$options['compress'] = Util::sanitize_post('compress');
+		$options['enable'] = isset($_REQUEST['enable_object']);
+		$options['host'] = Util::sanitize_request('host');
+		$options['port'] = Util::sanitize_request('port');
+		$options['username'] = Util::sanitize_request('username');
+		$options['password'] = Util::sanitize_request('password');
+		$options['ttl'] = Util::sanitize_request('ttl', 0);
+		$options['db-id'] = Util::sanitize_request('db-id', 0);
+		$options['persistent'] = isset($_REQUEST['persistent']);
+		$options['admin'] = isset($_REQUEST['admin']);
+		$options['async_flush'] = isset($_REQUEST['async_flush']);
+		$options['serialization'] = Util::sanitize_request('serialization');
+		$options['compress'] = Util::sanitize_request('compress');
 		$options['non_cache_group'] = !empty('non_cache_group') ? explode("\n", sanitize_textarea_field(wp_unslash('non_cache_group'))) : [];
 	
 		$speedycache->object = $options;
@@ -265,13 +265,13 @@ class Ajax{
 			$options = [];
 		}
 
-		$options['enabled'] = isset($_POST['enable_cdn']);
-		$options['cdn_type'] = Util::sanitize_post('cdn_type');
-		$options['cdn_key'] = sanitize_key(wp_unslash($_POST['cdn_key']));
-		$options['cdn_url'] = sanitize_url(wp_unslash($_POST['cdn_url']));
-		$options['excludekeywords'] = !empty($_POST['excludekeywords']) ? explode("\n", sanitize_textarea_field(wp_unslash($_POST['excludekeywords']))) : [];
-		$options['file_types'] = !empty($_POST['file_types']) ? explode("\n", sanitize_textarea_field(wp_unslash($_POST['file_types']))) : [];
-		$options['keywords'] = !empty($_POST['keywords']) ? explode("\n", sanitize_textarea_field(wp_unslash($_POST['keywords']))) : [];
+		$options['enabled'] = isset($_REQUEST['enable_cdn']);
+		$options['cdn_type'] = Util::sanitize_request('cdn_type');
+		$options['cdn_key'] = sanitize_text_field(wp_unslash($_REQUEST['cdn_key']));
+		$options['cdn_url'] = sanitize_url(wp_unslash($_REQUEST['cdn_url']));
+		$options['excludekeywords'] = !empty($_REQUEST['excludekeywords']) ? explode("\n", sanitize_textarea_field(wp_unslash($_REQUEST['excludekeywords']))) : [];
+		$options['file_types'] = !empty($_REQUEST['file_types']) ? explode("\n", sanitize_textarea_field(wp_unslash($_REQUEST['file_types']))) : [];
+		$options['keywords'] = !empty($_REQUEST['keywords']) ? explode("\n", sanitize_textarea_field(wp_unslash($_REQUEST['keywords']))) : [];
 		
 		if(!empty($options['file_types'])){
 			$options['file_types'] = map_deep($options['file_types'], 'trim');
@@ -316,21 +316,21 @@ class Ajax{
 		global $speedycache;
 		
 		$options = get_option('speedycache_bloat', []);
-		$options['disable_xmlrpc'] = isset($_POST['disable_xmlrpc']);
-		$options['remove_gfonts'] = isset($_POST['remove_gfonts']);
-		$options['disable_jmigrate'] = isset($_POST['disable_jmigrate']);
-		$options['disable_dashicons'] = isset($_POST['disable_dashicons']);
-		$options['disable_gutenberg'] = isset($_POST['disable_gutenberg']);
-		$options['disable_block_css'] = isset($_POST['disable_block_css']);
-		$options['disable_oembeds'] = isset($_POST['disable_oembeds']);
-		$options['disable_cart_fragment'] = isset($_POST['disable_cart_fragment']);
-		$options['disable_woo_assets'] = isset($_POST['disable_woo_assets']);
-		$options['disable_rss'] = isset($_POST['disable_rss']);
-		$options['update_heartbeat'] = isset($_POST['update_heartbeat']);
-		$options['heartbeat_frequency'] = Util::sanitize_post('heartbeat_frequency');
-		$options['disable_heartbeat'] = Util::sanitize_post('disable_heartbeat');
-		$options['limit_post_revision'] = isset($_POST['limit_post_revision']);
-		$options['post_revision_count'] = Util::sanitize_post('post_revision_count');
+		$options['disable_xmlrpc'] = isset($_REQUEST['disable_xmlrpc']);
+		$options['remove_gfonts'] = isset($_REQUEST['remove_gfonts']);
+		$options['disable_jmigrate'] = isset($_REQUEST['disable_jmigrate']);
+		$options['disable_dashicons'] = isset($_REQUEST['disable_dashicons']);
+		$options['disable_gutenberg'] = isset($_REQUEST['disable_gutenberg']);
+		$options['disable_block_css'] = isset($_REQUEST['disable_block_css']);
+		$options['disable_oembeds'] = isset($_REQUEST['disable_oembeds']);
+		$options['disable_cart_fragment'] = isset($_REQUEST['disable_cart_fragment']);
+		$options['disable_woo_assets'] = isset($_REQUEST['disable_woo_assets']);
+		$options['disable_rss'] = isset($_REQUEST['disable_rss']);
+		$options['update_heartbeat'] = isset($_REQUEST['update_heartbeat']);
+		$options['heartbeat_frequency'] = Util::sanitize_request('heartbeat_frequency');
+		$options['disable_heartbeat'] = Util::sanitize_request('disable_heartbeat');
+		$options['limit_post_revision'] = isset($_REQUEST['limit_post_revision']);
+		$options['post_revision_count'] = Util::sanitize_request('post_revision_count');
 
 		$speedycache->bloat = $options;
 		update_option('speedycache_bloat', $options);
@@ -359,7 +359,7 @@ class Ajax{
 			wp_send_json_error(__('Could not figure out type of the setting being saved!', 'speedycache'));
 		}
 
-		if(empty($_POST['settings'])){
+		if(empty($_REQUEST['settings'])){
 			wp_send_json_error(__('No settings provided to save', 'speedycache'));
 		}
 		
@@ -368,13 +368,13 @@ class Ajax{
 		}
 		
 		$settings = [];
-		if(empty($_POST['settings']['resource'])){
+		if(empty($_REQUEST['settings']['resource'])){
 			wp_send_json_error(__('No resource provided!', 'speedycache'));
 		}
 
-		$settings['resource'] = sanitize_url(wp_unslash($_POST['settings']['resource']));
-		$settings['crossorigin'] = isset($_POST['settings']['crossorigin']);
-		$settings['type'] = sanitize_text_field(wp_unslash($_POST['settings']['type']));
+		$settings['resource'] = sanitize_url(wp_unslash($_REQUEST['settings']['resource']));
+		$settings['crossorigin'] = isset($_REQUEST['settings']['crossorigin']);
+		$settings['type'] = sanitize_text_field(wp_unslash($_REQUEST['settings']['type']));
 
 		$index = count($speedycache->options[$type]);
 		
@@ -489,20 +489,20 @@ class Ajax{
 			wp_send_json_error(__('You do not have required permission.', 'speedycache'));
 		}
 		
-		if(empty($_POST['type'])){
+		if(empty($_REQUEST['type'])){
 			wp_send_json_error(__('You need to select a Exclude type', 'speedycache'));
 		}
 		
-		if(empty($_POST['prefix'])){
+		if(empty($_REQUEST['prefix'])){
 			wp_send_json_error(__('You have not selected, the exclude option', 'speedycache'));
 		}
 		
-		$type = Util::sanitize_post('type');
-		$prefix = Util::sanitize_post('prefix');
+		$type = Util::sanitize_request('type');
+		$prefix = Util::sanitize_request('prefix');
 		
 		$single_prefixes = ['homepage', 'category', 'tag', 'post', 'page', 'archive', 'attachment', 'googleanalytics', 'woocommerce_items_in_cart'];
 		
-		if(empty($_POST['content']) && !in_array($prefix, $single_prefixes)){
+		if(empty($_REQUEST['content']) && !in_array($prefix, $single_prefixes)){
 			wp_send_json_error(__('You need to fill the content field', 'speedycache'));
 		}
 		
@@ -510,7 +510,7 @@ class Ajax{
 		
 		$rule['type'] = $type;
 		$rule['prefix'] = $prefix;
-		$rule['content'] = !empty($_POST['content']) ? Util::sanitize_post('content') : '';
+		$rule['content'] = !empty($_REQUEST['content']) ? Util::sanitize_request('content') : '';
 		array_push($excludes, $rule);
 		
 		update_option('speedycache_exclude', $excludes);
@@ -529,7 +529,7 @@ class Ajax{
 			wp_send_json_error(__('You do not have required permission.', 'speedycache'));
 		}
 		
-		if(!isset($_POST['rule_id'])){
+		if(!isset($_REQUEST['rule_id'])){
 			wp_send_json_error(__('No rule ID provided to delete', 'speedycache'));
 		}
 		
@@ -539,7 +539,7 @@ class Ajax{
 			wp_send_json_error(__('Exclude rule list is already empty', 'speedycache'));
 		}
 		
-		$rule_id = sanitize_text_field(wp_unslash($_POST['rule_id']));
+		$rule_id = sanitize_text_field(wp_unslash($_REQUEST['rule_id']));
 		
 		if(!isset($excludes[$rule_id])){
 			wp_send_json_error(__('There is not rule with the given rule id', 'speedycache'));
@@ -560,11 +560,11 @@ class Ajax{
 			wp_send_json_error(__('You do not have required permission.', 'speedycache'));
 		}
 		
-		if(!isset($_POST['db_action'])){
+		if(!isset($_REQUEST['db_action'])){
 			wp_send_json_error(__('No Database optimization action present', 'speedycache'));
 		}
 		
-		$db_action = \SpeedyCache\Util::sanitize_post('db_action');
+		$db_action = \SpeedyCache\Util::sanitize_request('db_action');
 		
 		if(!defined('SPEEDYCACHE_PRO')){
 			wp_send_json_error(__('This is a Pro feature you can not use this with a Free version', 'speedycache'));
