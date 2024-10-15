@@ -12,7 +12,7 @@
 
 namespace SpeedyCache\lib\Minify;
 
-use MatthiasMullie\Minify\Exceptions\IOException;
+use SpeedyCache\lib\Minify\Exceptions\IOException;
 use Psr\Cache\CacheItemInterface;
 
 /**

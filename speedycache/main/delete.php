@@ -94,39 +94,43 @@ class Delete{
 	static function url($urls){
 		global $speedycache;
 
-		if(!is_array($urls)){
-			$urls = [$urls];
-		}
-		
+		$urls = (array) $urls;
+		$cache_paths = [];
+
 		foreach($urls as $url){
 			$parsed_url = wp_parse_url($url);
-			$path = $parsed_url['path'];
+			$path = !empty($parsed_url['path']) ? $parsed_url['path'] : '';
 			
-			$file = '';
-			if(empty($path) || $path == '/'){
-				$file = 'index.html';
-			} else {
-				$file = trim($path, '/') . '/index.html';
+			// Path to be used in glob so that we can get all the variations of file created like for language or currency
+			$file = (empty($path) || $path == '/') ? 'index*html' : trim($path, '/') . '/index*html';
+
+			// Cache path for desktop cache
+			$all_path = glob(Util::cache_path('all') . $file);
+			if(!empty($all_path)){
+				$cache_paths = array_merge($cache_paths, $all_path);
 			}
 
-			$cache_path = [];
-			$cache_path[] = Util::cache_path('all') . $file;
+			// Cache path for Mobile cache
 			if(!empty($speedycache->options['mobile_theme'])){
-				$cache_path[] = Util::cache_path('mobile-cache') . $file;
+				$mobile_path = glob(Util::cache_path('mobile-cache') . $file);
+
+				if(!empty($mobile_path)){
+					$cache_paths = array_merge($cache_paths, $mobile_path);
+				}
+			}
+		}
+
+		foreach($cache_paths as $cache_path){
+			if(!file_exists($cache_path)){
+				continue;
 			}
 
-			foreach($cache_path as $c_path){
-				if(!file_exists($c_path)){
-					continue;
-				}
-
-				if(is_dir($c_path)){
-					self::rmdir($c_path);
-					continue;
-				}
-
-				unlink($c_path);
+			if(is_dir($cache_path)){
+				self::rmdir($cache_path);
+				continue;
 			}
+
+			unlink($cache_path);
 		}
 	}
 
@@ -296,11 +300,15 @@ class Delete{
 		
 		foreach($cache_path as $path){		
 			if(!file_exists($path)){
-				return;
+				continue;
 			}
 
 			self::rec_clean_expired($path);
 		}
+		
+		// We will delete it even if the cache does not gets deleted
+		delete_option('speedycache_html_size');
+		delete_option('speedycache_assets_size');
 		
 		if(class_exists('\SpeedyCache\Logs')){
 			\SpeedyCache\Logs::log('delete');
@@ -321,10 +329,13 @@ class Delete{
 
 			if(is_dir($file_path)){
 				self::rec_clean_expired($file_path);
-				return;
+				continue;
 			}
 
-			if((filemtime($file_path) + self::$cache_lifespan) < time()){
+			// We will delete all cache if the lifespan is greater than 10 hours to prevent nonce issues,
+			// We could delete all the cache for lifespan above 10 hrs, but for larger sites deleting 
+			// everything colud be a overhead.
+			if((self::$cache_lifespan >= 10 * HOUR_IN_SECONDS) || ((filemtime($file_path) + self::$cache_lifespan) < time())){
 				unlink($file_path);
 			}
 		}
@@ -354,11 +365,11 @@ class Delete{
 		if($new_status == 'publish'){
 			self::cache($post->ID);
 		}
-		
+
 		// Deleting the cache of home page and blog page
 		$home_page_id = get_option('page_on_front');
 		self::cache($home_page_id);
-		
+
 		// For some sites home page and blog page could be same
 		$blog_page_id = get_option('page_for_posts');
 		if($home_page_id !== $blog_page_id){
@@ -368,10 +379,21 @@ class Delete{
 		// Deleting the author page cache
 		$author_page_url = get_author_posts_url($post->post_author);
 		self::url($author_page_url);
-		
+
 		// Deleting cache of related terms
 		self::terms($post->ID);
 		
+		// Delete shop page when product status changes.
+		if(function_exists('wc_get_page_id')){
+			$shop_page_id = wc_get_page_id('shop');
+			
+			if($home_page_id !== $shop_page_id){
+				self::cache($shop_page_id);
+			}
+		}
+
+		// This is used to delete post which may have the current post as the related post / product in them
+		self::adjacent_posts_urls();
 	}
 
 	// Deletes cache of the page where a comments status got change.
@@ -399,23 +421,86 @@ class Delete{
 			return;
 		}
 
-		$terms = wp_get_post_terms($post_id);
+		$post_type = get_post_type($post_id);
+    
+		if(empty($post_type)){
+			return;
+		}
+
+		// Get all taxonomies for the post type
+		$taxonomies = get_object_taxonomies($post_type, 'objects');
+
+		// Filter to keep only public taxonomies
+		$public_taxonomies = [];
+		foreach($taxonomies as $taxonomy){
+			if($taxonomy->public){
+				$public_taxonomies[] = $taxonomy->name;
+			}
+		}
+
+		if(empty($public_taxonomies)){
+			return;
+		}
+
+		$terms = wp_get_post_terms($post_id, $public_taxonomies);
+
+		if(empty($terms) || is_wp_error($terms)){
+			return;
+		}
 
 		$deletable_links = [];
 		foreach($terms as $term){
 			$link = get_term_link($term->term_id);
-			
+
 			$deletable_links[] = $link;
+
+			$ancestors = get_ancestors($term->term_id, $term->taxonomy);
+			if(!empty($ancestors)){
+				foreach($ancestors as $ancestor){
+					$deletable_links[] = get_term_link($ancestor);
+				}
+			}
 		}
 
 		if(empty($deletable_links)){
 			return;
 		}
 		
+		$deletable_links = array_unique($deletable_links);
+		
 		self::url($deletable_links);
 		
 		if(!empty($speedycache->options['preload'])){
 			\SpeedyCache\Preload::url($deletable_links);
+		}
+	}
+	
+	static function adjacent_posts_urls(){
+		$post_urls = [];
+		
+		$prev_post = get_adjacent_post();
+		$prev_post_term = get_adjacent_post(true, '');
+		$next_post = get_adjacent_post(false, '', true);
+		$next_post_term = get_adjacent_post(true, '', true);
+		
+		if(!empty($prev_post)){
+			$post_urls[] = get_permalink($prev_post);
+		}
+
+		if(!empty($prev_post_term)){
+			$post_urls[] = get_permalink($prev_post_term);
+		}
+		
+		if(!empty($next_post)){
+			$post_urls[] = get_permalink($next_post);
+		}
+		
+		if(!empty($next_post_term)){
+			$post_urls[] = get_permalink($next_post_term);
+		}
+
+		if(!empty($post_urls)){
+			self::url($post_urls);
 		}
 	}
 

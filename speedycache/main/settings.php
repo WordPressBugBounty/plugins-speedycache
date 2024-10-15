@@ -429,12 +429,23 @@ class Settings{
 		</div>
 
 		<h3>Cache Lifespan</h3>
-		<p>'.esc_html__('It is the after which the cache will be deleted', 'speedycache').'</p>
+		<p>'.esc_html__('This defines the time after which the cache will be automatically deleted. Set to 0 to disable automatic cache deletion.', 'speedycache').'</p>
 		<input type="number" min="0" name="purge_interval" value="'.(isset($speedycache->options['purge_interval']) ? esc_html($speedycache->options['purge_interval']) : 24).'"/>
 		<select name="purge_interval_unit">
 			<option value="hours" '.(!empty($speedycache->options['purge_interval_unit']) ? selected($speedycache->options['purge_interval_unit'], 'hours', false) : ' selected').'>'.esc_html__('Hours', 'speedycache').'</option>
 			<option value="days" '.(!empty($speedycache->options['purge_interval_unit']) ? selected($speedycache->options['purge_interval_unit'], 'days', false) : '').'>'.esc_html__('Days', 'speedycache').'</option>
-		</select>';
+		</select>
+		<div>
+		<input type="checkbox" id="speedycache-run-exact-time" name="purge_enable_exact_time" value="1" '.(!empty($speedycache->options['purge_enable_exact_time']) ? checked($speedycache->options['purge_enable_exact_time'], true, false) : '').'/>'.esc_html__('Run at exact time', 'speedycache').'
+		<div id="speedycache-exact-time-selector" style="'.(empty($speedycache->options['purge_enable_exact_time']) ? 'display:none;' : '').'">
+			<label>
+				<input type="time" name="purge_exact_time" value="'.(!empty($speedycache->options['purge_exact_time']) ? $speedycache->options['purge_exact_time'] : '').'"/>'.esc_html__('Select exact time', 'speedycache').'
+			</label>
+			<p class="description">'.esc_html__('This is dependent on WP Cron, which does not guarantee execution at an exact time. For more details, ', 'speedycache').'<a href="https://speedycache.com/docs/caching/running-cache-lifespan-at-specific-time/" target="_blank">click here</a>
+		</div>
+		
+		</div>
+		';
 
 		self::save_btn();
 		echo '</form>';

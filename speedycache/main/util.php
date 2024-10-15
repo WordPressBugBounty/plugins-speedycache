@@ -158,7 +158,9 @@ class Util{
 			return $schedule_time;
 		}
 
-		if($speedycache->options['purge_interval_unit'] == 'hours'){
+		if(!empty($speedycache->options['purge_enable_exact_time']) && !empty($speedycache->options['purge_exact_time'])){
+			$schedule_time = DAY_IN_SECONDS;
+		} elseif($speedycache->options['purge_interval_unit'] == 'hours'){
 			$schedule_time = HOUR_IN_SECONDS * $speedycache->options['purge_interval'];
 		} elseif($speedycache->options['purge_interval_unit'] == 'days'){
 			$schedule_time = DAY_IN_SECONDS * $speedycache->options['purge_interval'];
@@ -178,7 +180,21 @@ class Util{
 			return;
 		}
 
-		if($speedycache->options['purge_interval_unit'] == 'hours'){
+		if(!empty($speedycache->options['purge_enable_exact_time']) && !empty($speedycache->options['purge_exact_time'])){
+			// Getting the exact time of the user's timezone by using the offset and strtotime return gtm time.
+			$future_timestamp = strtotime('today '.$speedycache->options['purge_exact_time']);
+			$offset = get_option('gmt_offset') * HOUR_IN_SECONDS;
+			$current_time = time() - $offset;
+			$future_timestamp -= $offset;
+
+			if(time() > $future_timestamp){
+				$future_timestamp = strtotime('tomorrow '.$speedycache->options['purge_exact_time']);
+				$future_timestamp -= $offset;
+			}
+
+			$schedule_time = $future_timestamp - time();
+			
+		} elseif($speedycache->options['purge_interval_unit'] == 'hours'){
 			$schedule_time = HOUR_IN_SECONDS * $speedycache->options['purge_interval'];
 		} elseif($speedycache->options['purge_interval_unit'] == 'days'){
 			$schedule_time = DAY_IN_SECONDS * $speedycache->options['purge_interval'];

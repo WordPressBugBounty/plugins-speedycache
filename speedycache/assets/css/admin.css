@@ -1091,3 +1091,10 @@ border-radius: 2px;
 background-color: #0c6;
 color: white;
 }
+
+#speedycache-exact-time-selector{
+display:flex;
+flex-direction:column;
+gap:5px;
+margin-top:8px;
+}

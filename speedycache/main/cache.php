@@ -74,7 +74,7 @@ class Cache {
 			mkdir($cache_path, 0755, true);
 		}
 
-		$cache_path .= '/index.html';
+		$cache_path .= '/' . self::cache_file_name();
 		
 		$mobile = '';
 		if(strpos($cache_path, 'mobile-cache') !== FALSE){
@@ -87,6 +87,17 @@ class Cache {
 		delete_option('speedycache_html_size');
 		delete_option('speedycache_assets_size');
 	}
+	
+	static function cache_file_name(){		
+		$file_name = 'index';
+
+		if(isset($_COOKIE['wcu_current_currency'])){
+			$file_name .= '-'. strtolower(sanitize_file_name($_COOKIE['wcu_current_currency']));
+		}
+
+		return $file_name . '.html';
+	}
+	
 
 	static function cache_path(){
 		global $speedycache;
@@ -96,7 +107,7 @@ class Cache {
 		}
 
 		$host = $_SERVER['HTTP_HOST'];
-		$request_uri = sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI']));
+		$request_uri = urldecode(esc_url_raw(wp_unslash($_SERVER['REQUEST_URI'])));
 		$request_uri = preg_replace('/\.{2,}/', '', $request_uri); // Cleaning the path
 		$request_uri = remove_query_arg(self::$ignored_parameters, $request_uri); // Cleaning ignored query
 		$parsed_uri = wp_parse_url($request_uri);
@@ -133,7 +144,7 @@ class Cache {
 		
 		if(preg_match('/(wp-(?:admin|login|register|comments-post|cron|json))/', $_SERVER['REQUEST_URI'])) return false;
 		
-		if(preg_match('/html.*\s(amp|⚡)\s/', substr($content, 0, 300))) return false;
+		if(preg_match('/html.*\s(amp|⚡)/', substr($content, 0, 300))) return false;
 		
 		if(wp_is_mobile() && !empty($speedycache->options['mobile']) && empty($speedycache->options['mobile_theme'])) return false;
 
@@ -387,7 +398,7 @@ class Cache {
 	}
 	
 	static function is_useragent_excluded($rule){
-		return (bool) preg_match('/'.preg_quote($value['content'], '/').'/i', $_SERVER['HTTP_USER_AGENT']);
+		return (bool) preg_match('/'.preg_quote($rule['content'], '/').'/i', $_SERVER['HTTP_USER_AGENT']);
 	}
 	
 	// Adds DNS prefetch

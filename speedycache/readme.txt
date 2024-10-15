@@ -4,7 +4,7 @@ Tags: cache, minify, pagespeed, seo, cdn, wordpress cache, website cache, lazy l
 Requires at least: 4.7
 Tested up to: 6.6
 Requires PHP: 7.3
-Stable tag: 1.2.3
+Stable tag: 1.2.4
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -36,7 +36,7 @@ Other than caching SpeedyCache can also do the following:-
 * **Disable Emojis:** You can remove the emoji inline CSS and wp-emoji-release.min.js.
 * **Exclude:** You can exclude certain Pages, User-Agent, Cookies, CSS, or JS from being cached.
 * **CDN:** CDN helps improve website speed by placing the static files of your cached on their network of servers hence helping deliver content faster at any point in the world.
-* **Display Swap:** Adds dispaly swap to Google font URL, so when Google font loads the font will stay visible this is enabled by default.
+* **Display Swap:** Adds display swap to Google font URL, so when Google font loads the font will stay visible this is enabled by default.
 * **Purge Varnish:** If enabled it will purge Varnish cache, whenever cache from SpeedyCache is purged.
 * **Gravatar Cache:** Host Gravatars on your server.
 * *Improve Font Rendering:** Adding CSS property of text-rendering to prioritize speed of render of Fonts.
@@ -63,7 +63,7 @@ Get professional support and more features to make your website load faster with
 * **Preload:** Preload improves website performance by downloading resources in advance, before they are needed.
 * **Critical CSS:** Extracts the CSS used by the page in the visible viewport at the time of load.
 * **Unused CSS:** Removes the unused CSS, keeping the CSS that is being used by the paged, which reduces the size of CSS used on the page.
-* **Object Cache:** It makes the object to persist by using redis, to improve availibility of the cache.
+* **Object Cache:** It makes the object to persist by using redis, to improve availability of the cache.
 * **Bloat Remover:** Options to remove unnecessary features of WordPress or WooCommerce.
 * **Image Dimension:** Adds dimensions to the image tag which does not have width or height, to reduce (CLS)Cumulative Layout Shift.
 * **Lazy Render HTML:** User can lazy render HTML elements which are not in view-port.
@@ -147,6 +147,15 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Changelog ==
 
+= 1.2.4 (15th October 2024) =
+* [Feature] Option to make cache lifespan run on a specific time.
+* [Improvement] Handling cache for URI of non-ASCII characters.
+* [Improvement] Deletion of related posts.
+* [Improvement] Support for WBW Currency Switcher.
+* [Improvement] Deletion of Cache on saving Menu.
+* [Improvement] Deletion of cache of all the ancestors of the posts who's cache is being deleted.
+* [Bug-Fix] There was an issue with expiring cache, which has been fixed.
+
 = 1.2.3 (20th September 2024) =
 * [Bug-Fix] There was issue with query string serving homepage's cache that has been fixed.
 * [Bug-Fix] For a user the SpeedyCache admin requests type were getting overridden, speedycache has been made to handle that.
@@ -171,9 +180,9 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 = 1.2.0 (23nd August 2024) =
 * [Improvement] The UI has been improved, by reducing some unnecessary options or making them default.
 * [Improvement] CSS Minification has been improved.
-* [Improvement] We now use Advanced cache, for better cache load performace.
+* [Improvement] We now use Advanced cache, for better cache load performance.
 * [Improvement] Cache Preloads have been improved, with less options to configure.
-* This verison has some breaking changes. 
+* This version has some breaking changes. 
 
 = 1.1.9 (26th July 2024) =
 * [Security-Fix] A Security issue reported by Rafie Muhammad (Patchstack) has been fixed.
@@ -272,11 +281,11 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 = 1.0.2 =
 * [Feature] Purging Varnish cache when cache from SpeedyCache is purged.
 * [Feature][Pro] Display swap for Google fonts to keep fonts visible on a load of Google fonts.
-* [Feature][Pro] Critical CSS: Now SpeedyCache can extact critical CSS from your page to remove Render Blocking CSS to improve page speed.
+* [Feature][Pro] Critical CSS: Now SpeedyCache can extract critical CSS from your page to remove Render Blocking CSS to improve page speed.
 * [Tweak] The Cache folder structure has been updated, to follow common practice.
 * [Bug-Fix] Cloudflare prompt use to pop-up continuously if user website was being proxied through Cloudflare that has been fixed by converting that popup to an alert.
 * [Bug-Fix] PHP 8.2 warnings and deprecations have been fixed.
-* [Bug-Fix] There was an issue while clearing Cache if you have diabled cache in a metabox.
+* [Bug-Fix] There was an issue while clearing Cache if you have disabled cache in a meta box.
 * [Bug-Fix][Pro] There was an issue with LazyLoading Iframes that has been fixed.
 * [Bug-Fix][Pro] There was an issue with Delete Cache logs that has been fixed.
 * [Bug-Fix][Pro] There was an issue with linking License that has been fixed.

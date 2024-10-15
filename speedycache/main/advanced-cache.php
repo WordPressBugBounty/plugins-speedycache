@@ -32,10 +32,13 @@ function speedycache_ac_serve_cache(){
 
 	$ignored_parameters = ['fbclid', 'utm_id', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'utm_source_platform', 'gclid', 'dclid', 'msclkid', 'ref', 'fbaction_ids', 'fbc', 'fbp', 'clid', 'mc_cid', 'mc_eid', 'hsCtaTracking', 'hsa_cam', 'hsa_grp', 'hsa_mt', 'hsa_src', 'hsa_ad', 'hsa_acc', 'hsa_net', 'hsa_kw'];
 
+	$uri = '';
+	$parsed_uri = [];
 	$uri = $_SERVER['REQUEST_URI'];
+	$uri = urldecode($uri); // Users use other languages to write as well
 	$uri = preg_replace('/\.{2,}/', '', $uri); // Cleaning the path
 
-	$parsed_uri = parse_url($_SERVER['REQUEST_URI']);
+	$parsed_uri = parse_url($uri);
 	if(!empty($parsed_uri) && !empty($parsed_uri['query'])){
 		parse_str($parsed_uri['query'], $parsed_query);
 
@@ -64,19 +67,15 @@ function speedycache_ac_serve_cache(){
 		$site_dir = $path;
 	}
 
-	$config_file = WP_CONTENT_DIR . '/speedycache-config/' . $_SERVER['HTTP_HOST'] . '.php';
+	$config_file = WP_CONTENT_DIR . '/speedycache-config/' . basename($_SERVER['HTTP_HOST']) . '.php';
 
 	if(!file_exists($config_file)){
-		$config_file = WP_CONTENT_DIR . '/speedycache-config/' . $_SERVER['HTTP_HOST'] . '.'. $site_dir . '.php';
+		$config_file = WP_CONTENT_DIR . '/speedycache-config/' . basename($_SERVER['HTTP_HOST']) . '.'. $site_dir . '.php';
 		if(!file_exists($config_file)){
 			return;
 		}
 	}
 
-	// Accessing the config file
-	include_once $config_file;
-	
-	
 	if(!file_exists($config_file)){
 		return;
 	}
@@ -110,7 +109,7 @@ function speedycache_ac_serve_cache(){
 		return false;
 	}
 
-	$cache_path = WP_CONTENT_DIR.'/cache/speedycache/' . $_SERVER['HTTP_HOST'];
+	$cache_path = WP_CONTENT_DIR.'/cache/speedycache/' . basename($_SERVER['HTTP_HOST']);
 
 	// Check for Mobile
 	if(!empty($speedycache_ac_config['settings']['mobile']) && preg_match('/Mobile|Android|Silk\/|Kindle|BlackBerry|Opera (Mini|Mobi)/i', $_SERVER['HTTP_USER_AGENT'])) {
@@ -123,19 +122,26 @@ function speedycache_ac_serve_cache(){
 		// get path of file
 		$cache_path .= '/all'. $uri;
 	}
+	
+	$file_name = 'index';
+	if(isset($_COOKIE['wcu_current_currency'])){
+		$file_name .= '-' . strtolower($_COOKIE['wcu_current_currency']);
+		$file_name = preg_replace('/\.{2,}/', '', $file_name); // Cleaning the path
+	}
+	$file_name .= '.html';
 
 	//check file extension
 	$serving_gz = '';
-	if(isset($_SERVER['HTTP_ACCEPT_ENCODING']) && strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== FALSE && !empty($speedycache_ac_config['settings']['gzip']) && @file_exists($cache_path . 'index.html.gz')){
+	if(isset($_SERVER['HTTP_ACCEPT_ENCODING']) && strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== FALSE && !empty($speedycache_ac_config['settings']['gzip']) && @file_exists($cache_path . '/'. $file_name.'.gz')){
 		$serving_gz = '.gz';
 		header('Content-Encoding: gzip');
 	}
 
-	if(!file_exists($cache_path . '/index.html' . $serving_gz)){
+	if(!file_exists($cache_path . '/'.$file_name . $serving_gz)){
 		$serving_gz = '';
 	}
 	
-	if(!file_exists($cache_path . '/index.html' . $serving_gz)){
+	if(!file_exists($cache_path . '/'.$file_name . $serving_gz)){
 		return;
 	}
 
@@ -143,7 +149,7 @@ function speedycache_ac_serve_cache(){
 		header('x-speedycache-source: PHP');
 	}
 
-	$cache_created_at = filemtime($cache_path. '/index.html' . $serving_gz);
+	$cache_created_at = filemtime($cache_path. '/'.$file_name . $serving_gz);
 	header('Last-Modified: ' . gmdate( 'D, d M Y H:i:s', $cache_created_at) . ' GMT');
 
 	$if_modified_since = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : 0;
@@ -155,7 +161,7 @@ function speedycache_ac_serve_cache(){
 		exit();
 	}
 
-	readfile($cache_path. '/index.html' . $serving_gz);
+	readfile($cache_path. '/'.$file_name . $serving_gz);
 	exit();
 }
 

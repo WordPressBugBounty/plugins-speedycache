@@ -68,6 +68,8 @@ class Ajax{
 		$options['varniship'] = !empty($_REQUEST['varniship']) ? Util::sanitize_request('varniship') : '';
 		$options['purge_interval'] = (int) Util::sanitize_request('purge_interval', 0);
 		$options['purge_interval_unit'] = Util::sanitize_request('purge_interval_unit', 'days');
+		$options['purge_enable_exact_time'] = isset($_REQUEST['purge_enable_exact_time']);
+		$options['purge_exact_time'] = Util::sanitize_request('purge_exact_time', 0);
 
 		wp_clear_scheduled_hook('speedycache_purge_cache');
 		wp_clear_scheduled_hook('speedycache_preload');

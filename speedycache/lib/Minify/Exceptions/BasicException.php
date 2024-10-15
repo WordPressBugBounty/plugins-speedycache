@@ -12,7 +12,7 @@
 
 namespace SpeedyCache\lib\Minify\Exceptions;
 
-use MatthiasMullie\Minify\Exception;
+use SpeedyCache\lib\Minify\Exception;
 
 /**
  * Basic Exception Class.

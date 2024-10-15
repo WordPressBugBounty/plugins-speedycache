@@ -73,7 +73,7 @@ RewriteBase /';
 	RewriteCond %{HTTP_USER_AGENT} !(Mediatoolkitbot|facebookexternalhit|SpeedyCacheCCSS)
 	RewriteCond %{HTTP_USER_AGENT} (Mobile|Android|Silk\/|Kindle|Opera\sMini|BlackBerry|Opera\sMobi) [NC]
 	RewriteCond %{QUERY_STRING} =""
-	RewriteCond %{HTTP:Cookie} !comment_author_
+	'.self::cookie_excludes().'
 	'.$admin_cookie.'
 	RewriteCond %{REQUEST_URI} !(\/){2}$
 	RewriteCond %{REQUEST_URI} !^/(wp-(?:admin|login|register|comments-post|cron|json))/ [NC]
@@ -85,7 +85,7 @@ $htaccess_rules .= '
 	RewriteCond %{REQUEST_METHOD} GET
 	RewriteCond %{HTTP_USER_AGENT} !(Mediatoolkitbot|facebookexternalhit|SpeedyCacheCCSS)
 	RewriteCond %{QUERY_STRING} =""
-	RewriteCond %{HTTP:Cookie} !comment_author_
+	'.self::cookie_excludes().'
 	'.$admin_cookie."\n";
 
 	if(!empty($speedycache->options['mobile'])){
@@ -224,6 +224,20 @@ FileETag None
 	</IfModule>
 </FilesMatch>
 # END SpeedyCacheheaders'. PHP_EOL;
+	}
+	
+	static function cookie_excludes(){
+		$cookies = [];
+
+		$cookies[] = 'comment_author_';
+		if(is_plugin_active('woo-currency/wcu.php')){
+			$cookies[] = 'wcu_current_currency';
+		}
+
+		$cookies_to_exclude = implode('|', $cookies);
+		$cookies_to_exclude = preg_replace("/\s/", "\s", $cookies_to_exclude);
+
+		return 'RewriteCond %{HTTP:Cookie} !('.$cookies_to_exclude.')';
 	}
 
 }
