@@ -3,8 +3,8 @@ Contributors: softaculous
 Tags: cache, minify, pagespeed, seo, cdn, wordpress cache, website cache, lazy loading, mobile cache, minify css, combine css, minify js, combine js, gzip, browser caching, render blocking js, preload, widget cache, softaculous, speedycache, performance
 Requires at least: 4.7
 Tested up to: 6.6
-Requires PHP: 7.3
-Stable tag: 1.2.4
+Requires PHP: 7.0
+Stable tag: 1.2.5
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -146,6 +146,10 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 4. SpeedyCache Exclude page
 
 == Changelog ==
+
+= 1.2.5 (22th October 2024) =
+* [Task] SpeedyCache has been updated to support PHP 7.0 and later, expanding its compatibility from PHP 7.3.
+* [Bug-Fix] There was a bug releated to jQuery which was making it unable to switch tabs which has been fixed.
 
 = 1.2.4 (15th October 2024) =
 * [Feature] Option to make cache lifespan run on a specific time.

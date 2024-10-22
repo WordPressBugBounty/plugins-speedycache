@@ -256,7 +256,7 @@ function speedycache_handle_tab(){
 		tab.siblings().hide();
 		tab.css('display', 'flex');
 		nav.find('.speedycache-nav-selected').removeClass('speedycache-nav-selected');
-		nav.find('a[href=#'+hash+']').addClass('speedycache-nav-selected')
+		nav.find('a[href=\\#'+hash+']').addClass('speedycache-nav-selected')
 		return
 	}
 	
@@ -264,7 +264,7 @@ function speedycache_handle_tab(){
 	tab.siblings().hide();
 	tab.css('display', 'flex');
 	nav.find('.speedycache-nav-selected').removeClass('speedycache-nav-selected');
-	nav.find('a[href=#'+hash+']').addClass('speedycache-nav-selected')
+	nav.find('a[href=\\#'+hash+']').addClass('speedycache-nav-selected')
 
 }
 

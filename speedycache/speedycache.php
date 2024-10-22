@@ -3,7 +3,7 @@
 Plugin Name: SpeedyCache
 Plugin URI: https://speedycache.com
 Description: SpeedyCache is a plugin that helps you reduce the load time of your website by means of caching, minification, and compression of your website.
-Version: 1.2.4
+Version: 1.2.5
 Author: Softaculous Team
 Author URI: https://speedycache.com/
 Text Domain: speedycache
@@ -49,7 +49,7 @@ if(defined('SPEEDYCACHE_VERSION')) {
 	return;
 }
 
-define('SPEEDYCACHE_VERSION', '1.2.4');
+define('SPEEDYCACHE_VERSION', '1.2.5');
 define('SPEEDYCACHE_DIR', dirname(__FILE__));
 define('SPEEDYCACHE_FILE', __FILE__);
 define('SPEEDYCACHE_BASE', plugin_basename(SPEEDYCACHE_FILE));
@@ -131,12 +131,12 @@ function speedycache_load_plugin(){
 	$speedycache->object = get_option('speedycache_object_cache', ['admin' => true, 'persistent' => true]);
 	$speedycache->bloat = get_option('speedycache_bloat', []);
 	
-	if(!is_dir(SPEEDYCACHE_CACHE_DIR)){
+	if(!is_dir(SPEEDYCACHE_CACHE_DIR) && is_writable(WP_CONTENT_DIR)){
 		mkdir(SPEEDYCACHE_CACHE_DIR, 0755, true);
 	}
 	
 	// Creating config folder if it dosent exists
-	if(!is_dir(SPEEDYCACHE_CONFIG_DIR)){
+	if(!is_dir(SPEEDYCACHE_CONFIG_DIR) && is_writable(WP_CONTENT_DIR)){
 		mkdir(SPEEDYCACHE_CONFIG_DIR, 0755, true);
 	}
 
@@ -145,6 +145,7 @@ function speedycache_load_plugin(){
 		return; // we don't want to process anything else if it is Ajax
 	}
 
+	// NOTE:: If actions or code which are required to run on both admin and front grows then move that to a seperate file and keep this file small.
 	add_action('speedycache_purge_cache', '\SpeedyCache\Delete::expired_cache'); // Schedule action for cache lifespan
 	add_action('cron_schedules', '\SpeedyCache\Util::custom_expiry_cron');
 	add_action('cron_schedules', '\SpeedyCache\Util::custom_preload_cron');
