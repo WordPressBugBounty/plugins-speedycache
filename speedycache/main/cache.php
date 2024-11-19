@@ -120,8 +120,17 @@ class Cache {
 		} else {
 			$path .= '/all';
 		}
+			
+		// Handling WeGlot
+		if(function_exists('weglot_get_current_full_url')){
+			$weglot_url = weglot_get_current_full_url();
+			$weglot_path = parse_url($weglot_url, PHP_URL_PATH);
+			
+			$path .= $weglot_path;
+		} else {
+			$path .= $parsed_uri['path'];
+		}
 
-		$path .= $parsed_uri['path'];
 		self::$cache_file_path = $path;
 
 		return $path;
