@@ -4,7 +4,7 @@ Tags: cache, minify, pagespeed, seo, cdn, wordpress cache, website cache, lazy l
 Requires at least: 4.7
 Tested up to: 6.7
 Requires PHP: 7.0
-Stable tag: 1.2.6
+Stable tag: 1.2.7
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -146,6 +146,9 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 4. SpeedyCache Exclude page
 
 == Changelog ==
+
+= 1.2.7 (21st Nov 2024) =
+* [Bug-Fix] Licensing fix
 
 = 1.2.6 (19th Nov 2024) =
 * [Task] Tested compatibility with WordPress 6.7.
