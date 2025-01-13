@@ -52,15 +52,6 @@ class Htaccess {
 	
 	static function serving_rules(&$htaccess_rules){
 		global $speedycache;
-		
-		// Admin cookie rule
-		$admin_users = get_users(['role' => 'administrator', 'fields' => 'user_login']);
-		if(!empty($admin_users) && is_array($admin_users)){
-			$user_names = '';
-			$user_names = implode('|', $admin_users);
-			$user_names = preg_replace("/\s/", "\s", $user_names);
-			$admin_cookie = 'RewriteCond %{HTTP:Cookie} !wordpress_logged_in_[^\=]+\='.$user_names;
-		}
 
 		$htaccess_rules .= '# BEGIN speedycache
 <IfModule mod_rewrite.c>
@@ -74,7 +65,6 @@ RewriteBase /';
 	RewriteCond %{HTTP_USER_AGENT} (Mobile|Android|Silk\/|Kindle|Opera\sMini|BlackBerry|Opera\sMobi) [NC]
 	RewriteCond %{QUERY_STRING} =""
 	'.self::cookie_excludes().'
-	'.$admin_cookie.'
 	RewriteCond %{REQUEST_URI} !(\/){2}$
 	RewriteCond %{REQUEST_URI} !^/(wp-(?:admin|login|register|comments-post|cron|json))/ [NC]
 	RewriteCond %{DOCUMENT_ROOT}/wp-content/cache/speedycache/%{HTTP_HOST}/mobile-cache%{REQUEST_URI}/index.html -f
@@ -85,8 +75,7 @@ $htaccess_rules .= '
 	RewriteCond %{REQUEST_METHOD} GET
 	RewriteCond %{HTTP_USER_AGENT} !(Mediatoolkitbot|facebookexternalhit|SpeedyCacheCCSS)
 	RewriteCond %{QUERY_STRING} =""
-	'.self::cookie_excludes().'
-	'.$admin_cookie."\n";
+	'.self::cookie_excludes()."\n";
 
 	if(!empty($speedycache->options['mobile'])){
 		$htaccess_rules .= '
@@ -113,36 +102,36 @@ $htaccess_rules .= '
 <IfModule mod_expires.c>
 	ExpiresActive on
 	ExpiresDefault A0
-	ExpiresByType text/css A10368000
-	ExpiresByType text/javascript A10368000
-	ExpiresByType font/ttf A10368000
-	ExpiresByType font/otf A10368000
-	ExpiresByType font/woff A10368000
-	ExpiresByType font/woff2 A10368000
-	ExpiresByType image/jpg A10368000
-	ExpiresByType image/jpeg A10368000
-	ExpiresByType image/png A10368000
-	ExpiresByType image/gif A10368000
-	ExpiresByType image/webp A10368000
-	ExpiresByType image/x-icon A10368000
-	ExpiresByType image/svg+xml A10368000
-	ExpiresByType image/vnd.microsoft.icon A10368000
-	ExpiresByType video/ogg A10368000
-	ExpiresByType video/mp4 A10368000
-	ExpiresByType video/webm A10368000
-	ExpiresByType audio/ogg A10368000
-	ExpiresByType application/pdf A10368000
-	ExpiresByType application/javascript A10368000
-	ExpiresByType application/x-javascript A10368000
-	ExpiresByType application/x-font-ttf A10368000
-	ExpiresByType application/x-font-woff A10368000
-	ExpiresByType application/font-woff A10368000
-	ExpiresByType application/font-woff2 A10368000
-	ExpiresByType application/vnd.ms-fontobject A10368000
+	ExpiresByType text/css A31536000
+	ExpiresByType text/javascript A31536000
+	ExpiresByType font/ttf A31536000
+	ExpiresByType font/otf A31536000
+	ExpiresByType font/woff A31536000
+	ExpiresByType font/woff2 A31536000
+	ExpiresByType image/jpg A31536000
+	ExpiresByType image/jpeg A31536000
+	ExpiresByType image/png A31536000
+	ExpiresByType image/gif A31536000
+	ExpiresByType image/webp A31536000
+	ExpiresByType image/x-icon A31536000
+	ExpiresByType image/svg+xml A31536000
+	ExpiresByType image/vnd.microsoft.icon A31536000
+	ExpiresByType video/ogg A31536000
+	ExpiresByType video/mp4 A31536000
+	ExpiresByType video/webm A31536000
+	ExpiresByType audio/ogg A31536000
+	ExpiresByType application/pdf A31536000
+	ExpiresByType application/javascript A31536000
+	ExpiresByType application/x-javascript A31536000
+	ExpiresByType application/x-font-ttf A31536000
+	ExpiresByType application/x-font-woff A31536000
+	ExpiresByType application/font-woff A31536000
+	ExpiresByType application/font-woff2 A31536000
+	ExpiresByType application/vnd.ms-fontobject A31536000
 </IfModule>
 # END LBCspeedycache' . PHP_EOL;
 	}
-	
+
 	static function webp(&$htaccess_rules){
 		$htaccess_rules .= '# BEGIN WEBPspeedycache
 <IfModule mod_rewrite.c>
@@ -230,6 +219,7 @@ FileETag None
 		$cookies = [];
 
 		$cookies[] = 'comment_author_';
+		$cookies[] = 'wordpress_logged_in_';
 		if(is_plugin_active('woo-currency/wcu.php')){
 			$cookies[] = 'wcu_current_currency';
 		}

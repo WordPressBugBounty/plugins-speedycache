@@ -373,7 +373,7 @@ class Settings{
 			</label>
 			<div class="speedycache-option-info">
 				<span class="speedycache-option-name">'.esc_html__('Logged-in Users', 'speedycache').'</span>
-				<span class="speedycache-option-desc">'.esc_html__('Don\'t show the cached version for logged-in users', 'speedycache').'</span>
+				<span class="speedycache-option-desc">'.esc_html__('Serve cached version to logged in user.', 'speedycache').'</span>
 			</div>
 		</div>
 		
@@ -758,7 +758,7 @@ class Settings{
 						<label for="speedycache_render_blocking_excludes" style="width:100%;">
 							<span style="font-weight:500; margin:20px 0 3px 0; display:block;">'.esc_html__('Exclude script from Render Blocking JS', 'speedycache').'</span>
 							<span style="display:block; font-weight:400; font-size:12px; color: #2c2a2a;">'.esc_html__('Add one script per line ,Enter the script URL or script ID', 'speedycache').'</span>
-							<textarea name="render_blocking_excludes" id="speedycache_render_blocking_excludes" rows="4" style="width:100%">'.(!empty($speedycache->options['render_blocking_exclude']) && is_array($speedycache->options['render_blocking_exclude']) ? esc_html(implode("\n", $speedycache->options['render_blocking_exclude'])) : '').'</textarea>
+							<textarea name="render_blocking_excludes" id="speedycache_render_blocking_excludes" rows="4" style="width:100%">'.(!empty($speedycache->options['render_blocking_excludes']) && is_array($speedycache->options['render_blocking_excludes']) ? esc_html(implode("\n", $speedycache->options['render_blocking_excludes'])) : '').'</textarea>
 						</label>
 					</div>
 					<div class="speedycache-modal-footer">

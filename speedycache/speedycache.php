@@ -3,7 +3,7 @@
 Plugin Name: SpeedyCache
 Plugin URI: https://speedycache.com
 Description: SpeedyCache is a plugin that helps you reduce the load time of your website by means of caching, minification, and compression of your website.
-Version: 1.2.7
+Version: 1.2.8
 Author: Softaculous Team
 Author URI: https://speedycache.com/
 Text Domain: speedycache
@@ -49,7 +49,7 @@ if(defined('SPEEDYCACHE_VERSION')) {
 	return;
 }
 
-define('SPEEDYCACHE_VERSION', '1.2.7');
+define('SPEEDYCACHE_VERSION', '1.2.8');
 define('SPEEDYCACHE_DIR', dirname(__FILE__));
 define('SPEEDYCACHE_FILE', __FILE__);
 define('SPEEDYCACHE_BASE', plugin_basename(SPEEDYCACHE_FILE));
@@ -194,6 +194,14 @@ function speedycache_update_check(){
 		
 		\SpeedyCache\Install::activate();
 		\SpeedyCache\Util::set_config_file();
+	}
+	
+	// TODO: Remove when the version above 1.2.7 is 90% in adoption.
+	if(version_compare($current_version, '1.2.8', '<')){
+		$options = get_option('speedycache_options', []);
+		$options['logged_in_user'] = false;
+
+		update_option('speedycache_options', $options);
 	}
 
 	// Save the new Version

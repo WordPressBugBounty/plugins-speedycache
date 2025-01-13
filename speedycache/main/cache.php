@@ -158,10 +158,9 @@ class Cache {
 		if(wp_is_mobile() && !empty($speedycache->options['mobile']) && empty($speedycache->options['mobile_theme'])) return false;
 
 		if(is_admin()) return false;
-		
-		if(empty($speedycache->options['logged_in_user']) && is_user_logged_in()) return false;
-		
-		if(is_user_logged_in() && (current_user_can('administrator'))) return false;
+
+		// Since: 1.2.8 we will only cache the page if user is not logged-in.
+		if(is_user_logged_in()) return false;
 		
 		if(!preg_match( '/<\s*\/\s*html\s*>/i', $content)) return false;
 

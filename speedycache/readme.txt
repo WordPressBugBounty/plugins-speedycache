@@ -4,7 +4,7 @@ Tags: cache, minify, pagespeed, seo, cdn, wordpress cache, website cache, lazy l
 Requires at least: 4.7
 Tested up to: 6.7
 Requires PHP: 7.0
-Stable tag: 1.2.7
+Stable tag: 1.2.8
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -146,6 +146,12 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 4. SpeedyCache Exclude page
 
 == Changelog ==
+
+= 1.2.8 (13th Jan 2025) =
+* [Bug-Fix] There was an issue with Logged in user cache, that has been fixed.
+* [Bug-Fix Pro] There was an issue with Defer JS, that has been fixed.
+* [Bug-Fix Pro] The Defer JS exclude was not saving this has been fixed.
+* [Improvement Pro] Some WEBP converters were setting the URL of the original images to .webp that has been taken care of.
 
 = 1.2.7 (21st Nov 2024) =
 * [Bug-Fix] Licensing fix

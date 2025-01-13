@@ -100,7 +100,7 @@ function speedycache_ac_serve_cache(){
 		return;
 	}
 	
-	if(preg_grep('/^wordpress_logged_in_/i', array_keys($_COOKIE))){
+	if(empty($speedycache_ac_config['settings']['logged_in_user']) && preg_grep('/^wordpress_logged_in_/i', array_keys($_COOKIE))){
 		return false;
 	}
 
