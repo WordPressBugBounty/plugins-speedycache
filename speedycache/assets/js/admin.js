@@ -397,7 +397,7 @@ function speedycache_update_excluded_prefix(){
 	val = jEle.val(),
 	content = jQuery('#speedycache-exclude-rule-content').closest('.speedycache-input-wrap');
 	
-	if(val == 'contain' || val == 'exact' || val == 'startwith'){
+	if(val == 'contain' || val == 'exact' || val == 'startwith' || val == 'post_id'){
 		content.show();
 		return;
 	}
@@ -414,6 +414,16 @@ function speedycache_update_excludes(){
 	jEle.find('span').addClass('speedycache-spinner-active');
 	
 	form_data = form.serializeArray();
+	let prefix_field = form_data.find(field => field.name === 'prefix');
+	let content_field = form_data.find(field => field.name === 'content');
+
+	if (prefix_field && prefix_field.value === 'post_id' && content_field) {
+		if (!/^\d+(,\d+)*$/.test(content_field.value)) {
+			alert("Invalid format! Only numbers and commas are allowed, without starting, ending, or consecutive commas.");
+			jEle.find('span').removeClass('speedycache-spinner-active');
+			return;
+		}
+	}
 
 	jQuery.ajax({
 		url : speedycache_ajax.url,

@@ -367,6 +367,11 @@ class Cache {
 		if($rule['prefix'] === 'page'){
 			return is_page();
 		}
+
+		if($rule['prefix'] === 'post_id' && !empty($rule['content'])){
+			$excluded_ids = is_array($rule['content']) ? $rule['content'] : explode(',', $rule['content']);
+			return in_array(get_queried_object_id(), $excluded_ids);
+		}
 		
 		if($rule['prefix'] === 'category'){
 			return is_category();

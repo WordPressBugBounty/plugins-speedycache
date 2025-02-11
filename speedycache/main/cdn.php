@@ -70,9 +70,9 @@ class CDN{
 				return $matches[0];
 			}	
 		}
-
-		$file_extension = pathinfo($file_url, PATHINFO_EXTENSION);
-
+		
+		$file_extension = self::get_file_extension($file_url);
+		
 		// Check if the file extension is in the allowed list
 		if(in_array(strtolower($file_extension), self::$allowed_types)){
 			$home_url = home_url();
@@ -83,6 +83,14 @@ class CDN{
 
 		// If not in the allowed list, return the original URL
 		return $matches[0];
+	}
+	
+	static function get_file_extension($url) {
+		
+		$url = strtok($url, ' ');
+		$url = strtok($url, '?');
+		
+		return strtolower(pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
 	}
 	
 	static function is_excluded($url){

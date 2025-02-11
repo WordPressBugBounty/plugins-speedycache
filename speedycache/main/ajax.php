@@ -502,7 +502,7 @@ class Ajax{
 		$type = Util::sanitize_request('type');
 		$prefix = Util::sanitize_request('prefix');
 		
-		$single_prefixes = ['homepage', 'category', 'tag', 'post', 'page', 'archive', 'attachment', 'googleanalytics', 'woocommerce_items_in_cart'];
+		$single_prefixes = ['homepage', 'category', 'tag', 'post', 'page', 'archive', 'attachment', 'googleanalytics', 'woocommerce_items_in_cart', 'post_id'];
 		
 		if(empty($_REQUEST['content']) && !in_array($prefix, $single_prefixes)){
 			wp_send_json_error(__('You need to fill the content field', 'speedycache'));

@@ -1273,9 +1273,14 @@ class Settings{
 					foreach($excludes as $id => $exclude){
 						echo '<tr role="row" data-id='.esc_attr($id).'>
 							<td>'.esc_html($exclude['type']).'</td>
-							<td>'.esc_html($exclude['prefix']).'</td>
-							<td>'.esc_html($exclude['content']).'</td>
-							<td><button class="speedycache-button speedycache-delete-rule">Delete<span class="speedycache-spinner"></span></button>
+							<td>'.esc_html($exclude['prefix']).'</td>';
+							if($exclude['prefix'] == 'post_id'){
+								echo '<td>'.'#ID:'.esc_html($exclude['content']).'</td>';
+							}
+							else{
+								echo'<td>'.esc_html($exclude['content']).'</td>';
+							}
+							echo'<td><button class="speedycache-button speedycache-delete-rule">Delete<span class="speedycache-spinner"></span></button>
 						</tr>';
 					}
 				}
@@ -1315,6 +1320,7 @@ class Settings{
 								<option value="tag" data-partof="page">Tags</option>
 								<option value="post" data-partof="page">Posts</option>
 								<option value="page" data-partof="page">Pages</option>
+								<option value="post_id" data-partof="page">Post ID</option>
 								<option value="archive" data-partof="page">Archives</option>
 								<option value="attachment" data-partof="page">Attachments</option>
 								<option value="startwith" data-partof="page">Starts With</option>
