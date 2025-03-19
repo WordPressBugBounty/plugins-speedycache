@@ -169,6 +169,21 @@
 			speedycache_toggle_settings_link(jQuery(this));
 			speedycache_open_modal(jQuery(this));
 		});
+
+		// Add Suggested Scripts
+		var $textarea = jQuery('#speedycache_delay_js_scripts');
+
+		jQuery('.speedycache-delay-suggestions').on('click', function(event) {
+			event.preventDefault();
+			if($textarea.length){
+				var $suggestions_text = jQuery('.speedycache-modal-scripts').text().trim().replace(/<br\s*\/?>/gi, '\n').replace(/\n\s+/g, '\n').replace(/\s+\n/g, '\n').replace(/\n+/g, '\n'),
+				current_text = $textarea.val().trim(),
+				new_text = current_text ? current_text + '\n' + $suggestions_text : $suggestions_text;
+				//Only add unique values
+				var unique_text = [...new Set(new_text.split('\n'))].join('\n');
+				$textarea.val(unique_text);
+			}
+		});
 		
 		//Event Listener for Settings link for popup options
 		jQuery('.speedycache-modal-settings-link').off('click').click(function() {
@@ -453,6 +468,15 @@ function speedycache_update_excludes(){
 //Close SpeedyCache Modal
 function speedycache_close_modal() {
 	jQuery('.speedycache-modal-footer > button, .speedycache-close-modal').on('click', function() {
+
+		//Remove duplicate entries when Submit or Close Button is clicked
+		var $textarea = jQuery(this).closest('.speedycache-modal').find('#speedycache_delay_js_scripts');
+		if ($textarea.length) {
+			var current_text = $textarea.val().trim();
+			var unique_text = [...new Set(current_text.split('\n'))].join('\n');
+			$textarea.val(unique_text);
+		}
+
 		jQuery(this).closest('.speedycache-modal').find('form').trigger('reset');
 		jQuery(this).closest('.speedycache-modal *').off();
 		jQuery(this).closest('.speedycache-modal').css('visibility','hidden');

@@ -355,6 +355,23 @@ color: currentcolor;
 	width:100%;
 }
 
+.speedycache-delay-suggestions{
+position: absolute; 
+top: 12px;
+right: 40px;
+background: var(--speedycache-color);
+color: #fff; 
+border: none;
+border-radius: 7px;
+box-shadow: 1px 0 5px 0 #ccc;
+padding: 8px 20px;
+font-weight: bold;
+cursor: pointer;
+display: flex; 
+align-items: center; 
+gap: 10px;
+}
+
 /*Modal Classes start here*/
 .speedycache-modal{
 display:flex !important;
@@ -479,6 +496,12 @@ font-family: monospace;
 background-color: #e4dcdc;
 border-radius: 6px;
 padding: 10px;
+}
+
+.speedycache-modal-scripts{
+display: block;
+max-height: 100px;
+overflow-y: auto;
 }
 /*Ends Modal Classes*/
 

@@ -68,6 +68,8 @@ class Cache {
 	}
 
 	static function create(&$content){
+		global $speedycache;
+
 		$cache_path = self::cache_path();
 
 		if(!file_exists($cache_path)){
@@ -84,6 +86,12 @@ class Cache {
 		$cache_path = wp_normalize_path($cache_path);
 
 		file_put_contents($cache_path, $content . "\n<!-- ".esc_html($mobile)."Cache by SpeedyCache https://speedycache.com -->");
+
+		if(function_exists('gzencode') && !empty($speedycache->options['gzip'])){
+			$gzidded_content = gzencode($content . "\n<!-- ".esc_html($mobile)."Cache by SpeedyCache https://speedycache.com -->");
+			file_put_contents($cache_path . '.gz', $gzidded_content);
+		}
+
 		delete_option('speedycache_html_size');
 		delete_option('speedycache_assets_size');
 	}

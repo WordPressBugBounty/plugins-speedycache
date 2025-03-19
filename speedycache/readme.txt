@@ -4,7 +4,7 @@ Tags: cache, minify, pagespeed, seo, cdn, wordpress cache, website cache, lazy l
 Requires at least: 4.7
 Tested up to: 6.7
 Requires PHP: 7.0
-Stable tag: 1.2.9
+Stable tag: 1.3.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -146,6 +146,15 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 4. SpeedyCache Exclude page
 
 == Changelog ==
+
+= 1.3.0 (19th March 2025) =
+* [Improvement] Added option for deletion of Fonts and Gravatars on Cache Lifetime given cache lifetime is over 10 hours.
+* [Improvement] We have improved the list of Selections for Delay JS.
+* [Improvement Pro] Now you can also delay inline JS.
+* [Improvement Pro] Added metabox to media to optimize single image.
+* [Improvement-Pro] Now there will be a random prefix in Redis object keys, to prevent conflicts between sites.
+* [Bug-Fix] GZIP encoding of cache file was not working was only serving GZIP through htaccess rules, this has been fixed.
+* [Bug-Fix] There was an issue with Pagelayer post inline css background images not getting Auto Optimized that has been fixed.
 
 = 1.2.9 (11th Feb 2025) =
 * [Improvement] Now users can exclude pages from getting cached using Page, Post IDs.

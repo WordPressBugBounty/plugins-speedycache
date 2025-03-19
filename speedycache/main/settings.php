@@ -428,7 +428,7 @@ class Settings{
 			</div>
 		</div>
 
-		<h3>Cache Lifespan</h3>
+		<h3>'.esc_html__('Cache Lifespan', 'speedycache').'</h3>
 		<p>'.esc_html__('This defines the time after which the cache will be automatically deleted. Set to 0 to disable automatic cache deletion.', 'speedycache').'</p>
 		<input type="number" min="0" name="purge_interval" value="'.(isset($speedycache->options['purge_interval']) ? esc_html($speedycache->options['purge_interval']) : 24).'"/>
 		<select name="purge_interval_unit">
@@ -439,9 +439,15 @@ class Settings{
 		<input type="checkbox" id="speedycache-run-exact-time" name="purge_enable_exact_time" value="1" '.(!empty($speedycache->options['purge_enable_exact_time']) ? checked($speedycache->options['purge_enable_exact_time'], true, false) : '').'/>'.esc_html__('Run at exact time', 'speedycache').'
 		<div id="speedycache-exact-time-selector" style="'.(empty($speedycache->options['purge_enable_exact_time']) ? 'display:none;' : '').'">
 			<label>
-				<input type="time" name="purge_exact_time" value="'.(!empty($speedycache->options['purge_exact_time']) ? $speedycache->options['purge_exact_time'] : '').'"/>'.esc_html__('Select exact time', 'speedycache').'
+				<input type="time" name="purge_exact_time" value="'.(!empty($speedycache->options['purge_exact_time']) ? esc_attr($speedycache->options['purge_exact_time']) : '').'"/>'.esc_html__('Select exact time', 'speedycache').'
 			</label>
 			<p class="description">'.esc_html__('This is dependent on WP Cron, which does not guarantee execution at an exact time. For more details, ', 'speedycache').'<a href="https://speedycache.com/docs/caching/running-cache-lifespan-at-specific-time/" target="_blank">click here</a>
+		</div>
+		<div>
+			<input type="checkbox" name="auto_purge_fonts" value="1" '.(!empty($speedycache->options['auto_purge_fonts']) ? checked($speedycache->options['auto_purge_fonts'], true, false) : '').'/>'.esc_html__('Delete Fonts', 'speedycache').'
+			<input type="checkbox" name="auto_purge_gravatar" value="1" '.(!empty($speedycache->options['auto_purge_gravatar']) ? checked($speedycache->options['auto_purge_gravatar'], true, false) : '').'/>'.esc_html__(
+			'Delete Gravatar', 'speedycache').'
+			<p class="description">'.esc_html__('Deletion of these options only takes effect if the lifespan is more than 10 hours.', 'speedycache').'</p>
 		</div>
 		
 		</div>
@@ -696,17 +702,31 @@ class Settings{
 								<span style="display:block; font-weight:400; font-size:12px; color: #2c2a2a;">Enter Below The Scipts that you no not want to be delayed.</span>
 								<textarea name="delay_js_excludes" id="speedycache_delay_js_excludes" rows="4" placeholder="jquery.min">'.(!empty($speedycache->options['delay_js_excludes']) && is_array($speedycache->options['delay_js_excludes']) ? esc_html(implode("\n", $speedycache->options['delay_js_excludes'])) : '').'</textarea>
 							</label>
-							
+			
 							<label for="speedycache_delay_js_scripts" style="width:100%;">
 								<span style="font-weight:500; margin:20px 0 3px 0; dispaly:block;">Scripts to Delay</span>
 								<span style="display:block; font-weight:400; font-size:12px; color: #2c2a2a;">Enter the scripts that you want to be delayed like googletagmanager.com</span>
 								<textarea name="delay_js_scripts" id="speedycache_delay_js_scripts" rows="4" placeholder="googletagmanager.com">'.(!empty($speedycache->options['delay_js_scripts']) && is_array($speedycache->options['delay_js_scripts']) ? esc_html(implode("\n", $speedycache->options['delay_js_scripts'])) : '').'</textarea>
 								<h5>Suggestions</h5>
-								<p>
-								fbevents.js<br>
-								google-analytics.com<br>
-								adsbygoogle.js<br>
-								googletagmanager.com<br>
+								<p style="position: relative;">
+								<button class="speedycache-delay-suggestions">
+								<span>Use These</span>
+								<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="#e3e3e3"><path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z"/></svg>
+								</button>
+								<span class="speedycache-modal-scripts">
+									fbevents.js<br>
+									google-analytics.com<br>
+									adsbygoogle.js<br>
+									googletagmanager.com<br>
+									fbq(<br>
+									ga( \' <br>
+									ga(\'<br>
+									/gtm.js<br>
+									/gtag/js<br>
+									gtag(<br>
+									/gtm-<br>
+									/gtm.<br>
+								</span>
 								</p>
 							</label>
 						</div>

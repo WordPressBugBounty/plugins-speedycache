@@ -305,6 +305,22 @@ class Delete{
 
 			self::rec_clean_expired($path);
 		}
+
+		// Assets are deleted only if the lifetime is more than 10 hours,  
+		// because only then is the entire cache deleted.  
+		// Cached assets may be used on multiple pages,  
+		// so we must ensure they are not deleted unless all cached pages are removed.
+		if(self::$cache_lifespan > 10 * HOUR_IN_SECONDS){
+			self::minified();
+
+			if(!empty($speedycache->options['auto_purge_fonts'])){
+				self::local_fonts();
+			}
+
+			if(!empty($speedycache->options['auto_purge_gravatar'])){
+				self::gravatar();
+			}
+		}
 		
 		// We will delete it even if the cache does not gets deleted
 		delete_option('speedycache_html_size');
@@ -313,6 +329,11 @@ class Delete{
 		if(class_exists('\SpeedyCache\Logs')){
 			\SpeedyCache\Logs::log('delete');
 			\SpeedyCache\Logs::action();
+		}
+		
+		// Preload the cached
+		if(self::$cache_lifespan > 10 * HOUR_IN_SECONDS && !empty($speedycache->options['preload'])){
+			\SpeedyCache\Preload::build_preload_list();
 		}
 	}
 	

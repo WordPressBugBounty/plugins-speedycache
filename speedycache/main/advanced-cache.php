@@ -30,7 +30,7 @@ if(preg_match('/(\/){2}$/', $_SERVER['REQUEST_URI'])){
 
 function speedycache_ac_serve_cache(){
 
-	$ignored_parameters = ['fbclid', 'utm_id', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'utm_source_platform', 'gclid', 'dclid', 'msclkid', 'ref', 'fbaction_ids', 'fbc', 'fbp', 'clid', 'mc_cid', 'mc_eid', 'hsCtaTracking', 'hsa_cam', 'hsa_grp', 'hsa_mt', 'hsa_src', 'hsa_ad', 'hsa_acc', 'hsa_net', 'hsa_kw'];
+	$ignored_parameters = ['fbclid', 'utm_id', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'utm_source_platform', 'gclid', 'dclid', 'msclkid', 'ref', 'fbaction_ids', 'fbc', 'fbp', 'clid', 'mc_cid', 'mc_eid', 'hsCtaTracking', 'hsa_cam', 'hsa_grp', 'hsa_mt', 'hsa_src', 'hsa_ad', 'hsa_acc', 'hsa_net', 'hsa_kw', 'test_speedycache'];
 
 	$uri = '';
 	$parsed_uri = [];
@@ -111,8 +111,11 @@ function speedycache_ac_serve_cache(){
 
 	$cache_path = WP_CONTENT_DIR.'/cache/speedycache/' . basename($_SERVER['HTTP_HOST']);
 
-	// Check for Mobile
-	if(!empty($speedycache_ac_config['settings']['mobile']) && preg_match('/Mobile|Android|Silk\/|Kindle|BlackBerry|Opera (Mini|Mobi)/i', $_SERVER['HTTP_USER_AGENT'])) {
+	// For the test cache
+	if(isset($_GET['test_speedycache'])){
+		$cache_path = '/test'. $uri;
+	} else if(!empty($speedycache_ac_config['settings']['mobile']) && preg_match('/Mobile|Android|Silk\/|Kindle|BlackBerry|Opera (Mini|Mobi)/i', $_SERVER['HTTP_USER_AGENT'])) {
+		// Check for Mobile
 		if(!empty($speedycache_ac_config['settings']['mobile_theme'])){
 			$cache_path .= '/mobile-cache' . $uri;
 		} else {
