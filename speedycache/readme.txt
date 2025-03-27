@@ -4,7 +4,7 @@ Tags: cache, minify, pagespeed, seo, cdn, wordpress cache, website cache, lazy l
 Requires at least: 4.7
 Tested up to: 6.7
 Requires PHP: 7.0
-Stable tag: 1.3.0
+Stable tag: 1.3.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -146,6 +146,10 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 4. SpeedyCache Exclude page
 
 == Changelog ==
+
+= 1.3.1 (27th March 2025) =
+* [Improvement] Exclusion using Post ID now have links to the Page.
+* [Bug-Fix] If zlib.output_compression was on with SpeedyCache GZIP then the page was getting double encoded, this has been fixed.
 
 = 1.3.0 (19th March 2025) =
 * [Improvement] Added option for deletion of Fonts and Gravatars on Cache Lifetime given cache lifetime is over 10 hours.

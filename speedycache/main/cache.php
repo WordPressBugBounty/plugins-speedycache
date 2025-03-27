@@ -439,8 +439,8 @@ class Cache {
 		return $urls;
 	}
 	
-	// Deppricated since 1.2.0 do not use it
-	// Just to prevent site breaking
+	// Depricated since 1.2.0 do not use it
+	// Just to prevent site from breaking
 	static function create_dir($path, $content, $type = ''){
 	}
 	

@@ -1295,7 +1295,31 @@ class Settings{
 							<td>'.esc_html($exclude['type']).'</td>
 							<td>'.esc_html($exclude['prefix']).'</td>';
 							if($exclude['prefix'] == 'post_id'){
-								echo '<td>'.'#ID:'.esc_html($exclude['content']).'</td>';
+								if(!is_array($exclude['content'])){
+									$exclude['content'] = explode(',', $exclude['content']);
+								}
+
+								echo '<td>'.'#ID:';
+
+								foreach($exclude['content'] as $exclude){
+									$post = get_post($exclude);
+									
+									if(empty($post) || is_wp_error($post)){
+										continue;
+									}
+
+									$post_link = get_permalink($post->ID);
+									
+									echo '<a href="'.esc_url($post_link).'" class="speedycache-tooltip-link" target="_blank">'.esc_html($exclude);
+									
+									// We show a tool tip with the excluded page URL and title
+									echo '<div class="speedycache-link-tooltip">
+									<h4>'.esc_html($post->post_title).'</h4>
+									<p>'.esc_url($post_link).'</p>
+									</div></a>';
+								}
+								
+								echo '</td>';
 							}
 							else{
 								echo'<td>'.esc_html($exclude['content']).'</td>';

@@ -11,6 +11,21 @@
 		jQuery('.speedycache-save-settings-wrapper button').on('click', speedycache_save_settings);
 		jQuery('#speedycache-analyze').on('click', speedycache_analyze_speed);
 		
+		jQuery('.speedycache-tooltip-link').on('mouseover', function(){
+			let jEle = jQuery(this),
+			tooltip = jEle.find('.speedycache-link-tooltip'),
+			elementHeight = Math.ceil(tooltip.outerHeight()/2);
+
+			tooltip.fadeIn('fast').css({
+                top: `-${elementHeight+10}px`, // Position it above the parent
+            });
+		});
+		
+		jQuery('.speedycache-tooltip-link').on('mouseleave', function(){
+			let jEle = jQuery(this);
+			jEle.find('.speedycache-link-tooltip').hide();
+		});
+		
 		// Delay JS
 		jQuery('#speedycache_delay_js').change(function() {
 			if(!jQuery(this).is(':checked')){

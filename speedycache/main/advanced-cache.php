@@ -137,6 +137,12 @@ function speedycache_ac_serve_cache(){
 	$serving_gz = '';
 	if(isset($_SERVER['HTTP_ACCEPT_ENCODING']) && strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== FALSE && !empty($speedycache_ac_config['settings']['gzip']) && @file_exists($cache_path . '/'. $file_name.'.gz')){
 		$serving_gz = '.gz';
+		
+		// We do not want output compression to be enabled if we are gzipping the page.
+		if(function_exists('ini_set')){
+			ini_set('zlib.output_compression', 0);
+		}
+
 		header('Content-Encoding: gzip');
 	}
 

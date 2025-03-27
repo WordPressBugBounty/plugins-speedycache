@@ -516,6 +516,10 @@ class Ajax{
 		$rule['type'] = $type;
 		$rule['prefix'] = $prefix;
 		$rule['content'] = !empty($_REQUEST['content']) ? Util::sanitize_request('content') : '';
+		if($type == 'post_id' && !empty($rule['content'])){
+			$rule['content'] = explode(',', $rule['content']);
+		}
+
 		array_push($excludes, $rule);
 		
 		update_option('speedycache_exclude', $excludes);
