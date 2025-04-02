@@ -106,6 +106,13 @@ class Delete{
 
 			// Cache path for desktop cache
 			$all_path = glob(Util::cache_path('all') . $file);
+			$gz_path = glob(Util::cache_path('all') . $file .'.gz');
+			
+			$all_path = array_merge(
+				is_array($all_path) ? $all_path : [], 
+				is_array($gz_path) ? $gz_path : []
+			);
+
 			if(!empty($all_path)){
 				$cache_paths = array_merge($cache_paths, $all_path);
 			}
@@ -212,7 +219,7 @@ class Delete{
 
 		$files = array_diff(scandir($dir), ['..', '.']);
 
-		foreach($files as $file){			
+		foreach($files as $file){
 			if(is_dir($dir.'/'.$file)){
 				self::rmdir($dir.'/'.$file);
 				continue;

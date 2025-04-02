@@ -4,7 +4,7 @@ Tags: cache, minify, pagespeed, seo, cdn, wordpress cache, website cache, lazy l
 Requires at least: 4.7
 Tested up to: 6.7
 Requires PHP: 7.0
-Stable tag: 1.3.1
+Stable tag: 1.3.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -146,6 +146,10 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 4. SpeedyCache Exclude page
 
 == Changelog ==
+
+= 1.3.2 (2nd April 2025) =
+* [Bug-Fix] Gzipped Cache was not getting deleted on post status change, this has been fixed.
+* [Bug-Fix Pro] Self Hosted video was not getting lazy loaded but was making the video tag display as plain text, this has been fixed.
 
 = 1.3.1 (27th March 2025) =
 * [Improvement] Exclusion using Post ID now have links to the Page.
