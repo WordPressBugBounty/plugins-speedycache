@@ -321,7 +321,7 @@ cursor: pointer;
 padding: 8px 13px;
 border-radius: 3px;
 border: 1px solid transparent;
-transition: all .3s ease;
+transition: background .3s ease, border-color .3s ease;
 font-weight: 600;
 text-transform: uppercase;
 font-size: 11px;
@@ -1154,4 +1154,12 @@ text-overflow: ellipsis;
 .speedycache-tooltip-link{
 position:relative;
 margin: 0 2px;
+}
+
+.speedycache-deletion-roles{
+display:flex;
+flex-direction:row;
+flex-wrap:wrap;
+gap:15px;
+max-width:500px;
 }

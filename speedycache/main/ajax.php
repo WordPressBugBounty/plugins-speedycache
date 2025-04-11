@@ -20,6 +20,7 @@ class Ajax{
 		add_action('wp_ajax_speedycache_test_pagespeed', '\SpeedyCache\Ajax::test_pagespeed');
 		add_action('wp_ajax_speedycache_save_excludes', '\SpeedyCache\Ajax::save_excludes');
 		add_action('wp_ajax_speedycache_delete_exclude_rule', '\SpeedyCache\Ajax::delete_exclude_rule');
+		add_action('wp_ajax_speedycache_save_deletion_role_settings', '\SpeedyCache\Ajax::save_deletion_roles');
 		
 		if(defined('SPEEDYCACHE_PRO')){
 			add_action('wp_ajax_speedycache_optm_db', '\SpeedyCache\Ajax::optm_db');
@@ -226,7 +227,7 @@ class Ajax{
 		$options['async_flush'] = isset($_REQUEST['async_flush']);
 		$options['serialization'] = Util::sanitize_request('serialization');
 		$options['compress'] = Util::sanitize_request('compress');
-		$options['non_cache_group'] = !empty('non_cache_group') ? explode("\n", sanitize_textarea_field(wp_unslash('non_cache_group'))) : [];
+		$options['non_cache_group'] = !empty($_REQUEST['non_cache_group']) ? explode("\n", sanitize_textarea_field(wp_unslash($_REQUEST['non_cache_group']))) : [];
 	
 		$speedycache->object = $options;
 		
@@ -238,7 +239,9 @@ class Ajax{
 		if(!empty($speedycache->object['enable'])){
 			\SpeedyCache\ObjectCache::update_file();
 		} else {
-			unlink(WP_CONTENT_DIR . '/object-cache.php');
+			if(file_exists(WP_CONTENT_DIR . '/object-cache.php')){
+				unlink(WP_CONTENT_DIR . '/object-cache.php');
+			}
 		}
 		
 		try{
@@ -525,8 +528,23 @@ class Ajax{
 		update_option('speedycache_exclude', $excludes);
 		Util::set_config_file(); // Updates the config file
 
-		// TODO: updating the htaccess to include the excludes.
+		wp_send_json_success();
+	}
+	
+	static function save_deletion_roles(){
 
+		check_ajax_referer('speedycache_ajax_nonce');
+
+		if(!current_user_can('manage_options')){
+			wp_send_json_error(__('You do not have required permission.', 'speedycache'));
+		}
+		
+		$roles = [];
+		if(!empty($_POST['cache_deletion_roles'])){
+			$roles = Util::sanitize_post('cache_deletion_roles');
+		}
+
+		update_option('speedycache_deletion_roles', $roles);
 		wp_send_json_success();
 	}
 	

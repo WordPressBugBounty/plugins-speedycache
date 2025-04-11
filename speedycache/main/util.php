@@ -131,7 +131,9 @@ class Util{
 		$config_file_path = WP_CONTENT_DIR .'/speedycache-config/'. strtolower($file['host']) . $file['path'] . '.php';
 		
 		if(!file_exists(WP_CONTENT_DIR .'/speedycache-config/')){
-			mkdir(WP_CONTENT_DIR .'/speedycache-config/', 0755, true);
+			if(mkdir(WP_CONTENT_DIR .'/speedycache-config/', 0755, true)){
+				touch(WP_CONTENT_DIR .'/speedycache-config/index.html');
+			}
 		}
 
 		$config_temp = file_get_contents(SPEEDYCACHE_DIR . '/assets/config-template.php');

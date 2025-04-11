@@ -11,17 +11,14 @@ use \SpeedyCache\Util;
 class Cache {
 	static $cache_file_path = '';
 	static $ignored_parameters = ['fbclid', 'utm_id', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'utm_source_platform', 'gclid', 'dclid', 'msclkid', 'ref', 'fbaction_ids', 'fbc', 'fbp', 'clid', 'mc_cid', 'mc_eid', 'hsCtaTracking', 'hsa_cam', 'hsa_grp', 'hsa_mt', 'hsa_src', 'hsa_ad', 'hsa_acc', 'hsa_net', 'hsa_kw'];
+	
+	static $content = '';
 
 	static function init(){
 		global $speedycache;
 
 		if(!defined('SPEEDYCACHE_SERVER_HOST')){
 			define('SPEEDYCACHE_SERVER_HOST', Util::sanitize_server('HTTP_HOST'));
-		}
-
-		// Remove all the WP Bloat
-		if(class_exists('\SpeedyCache\Bloat') && !empty($speedycache->bloat)){
-			\SpeedyCache\Bloat::actions();
 		}
 
 		if(!empty($speedycache->options['dns_prefetch']) && !empty($speedycache->options['dns_urls'])){
@@ -67,7 +64,7 @@ class Cache {
 		ob_start('\SpeedyCache\Cache::optimize');
 	}
 
-	static function create(&$content){
+	static function create(){
 		global $speedycache;
 
 		$cache_path = self::cache_path();
@@ -85,10 +82,10 @@ class Cache {
 		
 		$cache_path = wp_normalize_path($cache_path);
 
-		file_put_contents($cache_path, $content . "\n<!-- ".esc_html($mobile)."Cache by SpeedyCache https://speedycache.com -->");
+		file_put_contents($cache_path, self::$content . "\n<!-- ".esc_html($mobile)."Cache by SpeedyCache https://speedycache.com -->");
 
 		if(function_exists('gzencode') && !empty($speedycache->options['gzip'])){
-			$gzidded_content = gzencode($content . "\n<!-- ".esc_html($mobile)."Cache by SpeedyCache https://speedycache.com -->");
+			$gzidded_content = gzencode(self::$content . "\n<!-- ".esc_html($mobile)."Cache by SpeedyCache https://speedycache.com -->");
 			file_put_contents($cache_path . '.gz', $gzidded_content);
 		}
 
@@ -111,7 +108,9 @@ class Cache {
 		global $speedycache;
 		
 		if(!file_exists(SPEEDYCACHE_CACHE_DIR)){
-			mkdir(SPEEDYCACHE_CACHE_DIR, 0755, true);
+			if(mkdir(SPEEDYCACHE_CACHE_DIR, 0755, true)){
+				touch(SPEEDYCACHE_CACHE_DIR . '/index.html');
+			}
 		}
 
 		$host = $_SERVER['HTTP_HOST'];
@@ -144,7 +143,7 @@ class Cache {
 		return $path;
 	}
 
-	static function can_cache(&$content){
+	static function can_cache(){
 		global $speedycache;
 		
 		if(empty($speedycache->options['status'])) return false;
@@ -161,7 +160,7 @@ class Cache {
 		
 		if(preg_match('/(wp-(?:admin|login|register|comments-post|cron|json))/', $_SERVER['REQUEST_URI'])) return false;
 		
-		if(preg_match('/html.*\s(amp|⚡)/', substr($content, 0, 300))) return false;
+		if(preg_match('/html.*\s(amp|⚡)/', substr(self::$content, 0, 300))) return false;
 		
 		if(wp_is_mobile() && !empty($speedycache->options['mobile']) && empty($speedycache->options['mobile_theme'])) return false;
 
@@ -170,7 +169,7 @@ class Cache {
 		// Since: 1.2.8 we will only cache the page if user is not logged-in.
 		if(is_user_logged_in()) return false;
 		
-		if(!preg_match( '/<\s*\/\s*html\s*>/i', $content)) return false;
+		if(!preg_match( '/<\s*\/\s*html\s*>/i', self::$content)) return false;
 
 		if(is_singular() && post_password_required()) return false;
 		
@@ -192,40 +191,42 @@ class Cache {
 	static function optimize($content){
 		global $speedycache;
 		
+		self::$content = &$content;
+		
 		$start_time = microtime(TRUE);
 
-		if(!self::can_cache($content)){
-			return $content;
+		if(!self::can_cache()){
+			return self::$content;
 		}
 		
-		self::clean_html($content);
+		self::clean_html();
 
 		// Minify HTML
 		if(class_exists('\SpeedyCache\Enhanced') && !empty($speedycache->options['minify_html']) && (defined('SPEEDYCACHE_PRO_VERSION') && version_compare(SPEEDYCACHE_PRO_VERSION, '1.2.0', '>='))){
 			\SpeedyCache\Enhanced::init();
-			\SpeedyCache\Enhanced::minify_html($content);
+			\SpeedyCache\Enhanced::minify_html(self::$content);
 		}
 
 		// ADD Font Rendering CSS
 		if(!empty($speedycache->options['font_rendering'])){
-			$content = str_replace('</head>', '<style>body{text-rendering: optimizeSpeed;}</style></head>', $content);
+			self::$content = str_replace('</head>', '<style>body{text-rendering: optimizeSpeed;}</style></head>', self::$content);
 		}
 		
 		// Lazy Load HTML elements
 		if(class_exists('\SpeedyCache\Enhanced') && !empty($speedycache->options['lazy_load_html']) && !empty($speedycache->options['lazy_load_html_elements'])){
-			$content = \SpeedyCache\Enhanced::lazy_load_html($content);
+			self::$content = \SpeedyCache\Enhanced::lazy_load_html(self::$content);
 		}
 
 		if(!empty($speedycache->options['combine_css'])){
-			\SpeedyCache\CSS::combine($content);
+			\SpeedyCache\CSS::combine(self::$content);
 		}
 
 		if(!empty($speedycache->options['minify_css'])){
-			\SpeedyCache\CSS::minify($content);
+			\SpeedyCache\CSS::minify(self::$content);
 		}
 		
 		if(!empty($speedycache->options['combine_js'])){
-			\SpeedyCache\JS::combine_head($content);
+			\SpeedyCache\JS::combine_head(self::$content);
 		}
 		
 		// if(class_exists('\SpeedyCache\Enhanced') && !empty($speedycache->options['combine_js'])){
@@ -233,43 +234,43 @@ class Cache {
 		// }
 		
 		if(!empty($speedycache->options['minify_js'])){
-			\SpeedyCache\JS::minify($content);
+			\SpeedyCache\JS::minify(self::$content);
 		}
 		
 		// Adds Image dimensions to the Image which does not have height or width
 		if(class_exists('\SpeedyCache\Enhanced') && !empty($speedycache->options['image_dimensions'])){
-			$content = \SpeedyCache\Enhanced::image_dimensions($content);
+			self::$content = \SpeedyCache\Enhanced::image_dimensions(self::$content);
 		}
 
 		// Google Fonts
 		if(class_exists('\SpeedyCache\GoogleFonts') && !empty($speedycache->options['local_gfonts'])){
 			\SpeedyCache\GoogleFonts::get($content);
-			$content = \SpeedyCache\GoogleFonts::replace($content);
-			$content = \SpeedyCache\GoogleFonts::add_swap($content);
+			self::$content = \SpeedyCache\GoogleFonts::replace(self::$content);
+			self::$content = \SpeedyCache\GoogleFonts::add_swap(self::$content);
 		}
 
 		// Preload Critical Images
 		if(class_exists('\SpeedyCache\Enhanced') && !empty($speedycache->options['critical_images'])){
-			$content = \SpeedyCache\Enhanced::preload_critical_images($content);
+			self::$content = \SpeedyCache\Enhanced::preload_critical_images(self::$content);
 		}
 		
 		// Delay JS
 		if(!empty($speedycache->options['delay_js']) && class_exists('\SpeedyCache\ProOptimizations')){
-			\SpeedyCache\ProOptimizations::delay_js($content);
+			\SpeedyCache\ProOptimizations::delay_js(self::$content);
 		}
 		
 		// Defer JS
 		if(!empty($speedycache->options['render_blocking']) && class_exists('\SpeedyCache\ProOptimizations')){
-			\SpeedyCache\ProOptimizations::defer_js($content);
+			\SpeedyCache\ProOptimizations::defer_js(self::$content);
 		}
 		
 		// IMG Lazy Load
 		if(class_exists('\SpeedyCache\ProOptimizations') && !empty($speedycache->options['lazy_load'])){
-			\SpeedyCache\ProOptimizations::img_lazy_load($content);
+			\SpeedyCache\ProOptimizations::img_lazy_load(self::$content);
 		}
 		
 		// For other plugins to hook into.
-		$content = (string) apply_filters('speedycache_content', $content);
+		self::$content = (string) apply_filters('speedycache_content', self::$content);
 
 		// ----- DO NOT DO ANY OPTIMIZATION BELOW THIS ------
 		// Unused and Critical CSS
@@ -299,23 +300,23 @@ class Cache {
 			!empty($speedycache->cdn['cdn_type']) && 
 			$speedycache->cdn['cdn_type'] !== 'cloudflare'
 		){
-			\SpeedyCache\CDN::rewrite($content);
+			\SpeedyCache\CDN::rewrite(self::$content);
 		}
 
-		self::create($content);
+		self::create();
 		$end_time = microtime(TRUE);
 
-		$content .= '<!-- Cached by SpeedyCache, it took '.($end_time - $start_time).'s-->';
-		$content .= '<!-- Refresh to see the cached version -->';
+		self::$content .= '<!-- Cached by SpeedyCache, it took '.($end_time - $start_time).'s-->';
+		self::$content .= '<!-- Refresh to see the cached version -->';
 		
 		if(file_exists(self::$cache_file_path)){
 			header('Last-Modified: ' . gmdate('D, d M Y H:i:s', filemtime(self::$cache_file_path)) . ' GMT');
 		}
-		return $content;
+		return self::$content;
 	}
 	
-	static function clean_html(&$content){
-		$content = str_replace("\r\n", "\n", trim($content));
+	static function clean_html(){
+		self::$content = str_replace("\r\n", "\n", trim(self::$content));
 	}
 	
 	static function is_excluded(){
@@ -354,7 +355,7 @@ class Cache {
 		$uri = sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI']));
 		$uri = remove_query_arg(self::$ignored_parameters, $uri);
 		$parsed_uri = wp_parse_url($uri);
-		
+
 		if(!empty($parsed_uri['query'])){
 			return false;
 		}
@@ -381,6 +382,13 @@ class Cache {
 			return in_array(get_queried_object_id(), $excluded_ids);
 		}
 		
+		// Excludes a page if it has the given shortcode.
+		if($rule['prefix'] === 'shortcode' && !empty($rule['content'])){
+			if(self::has_shortcode($rule['content'])){
+				return true;
+			}
+		}
+
 		if($rule['prefix'] === 'category'){
 			return is_category();
 		}
@@ -458,5 +466,15 @@ class Cache {
 	
 	static function instant_page(){
 		wp_enqueue_script('speedycache_instant_page', SPEEDYCACHE_PRO_URL . '/assets/js/instantpage.js', array(), SPEEDYCACHE_PRO_VERSION, ['strategy' => 'defer', 'in_footer' => true]);
+	}
+	
+	/*
+	* @param string $shortcode shortcode tag name.
+	* @return bool.
+	*/
+	static function has_shortcode($shortcode){
+		global $post;
+
+		return \has_shortcode($post->post_content, $shortcode);
 	}
 }

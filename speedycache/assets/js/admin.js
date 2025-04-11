@@ -8,7 +8,7 @@
 			speedycache_image_optimization();
 		}
 
-		jQuery('.speedycache-save-settings-wrapper button').on('click', speedycache_save_settings);
+		jQuery('.speedycache-save-settings-wrapper button, .speedycache-btn-spl-wrapper button').on('click', speedycache_save_settings);
 		jQuery('#speedycache-analyze').on('click', speedycache_analyze_speed);
 		
 		jQuery('.speedycache-tooltip-link').on('mouseover', function(){
@@ -27,7 +27,7 @@
 		});
 		
 		// Delay JS
-		jQuery('#speedycache_delay_js').change(function() {
+		jQuery('#speedycache_delay_js').on('change', function() {
 			if(!jQuery(this).is(':checked')){
 				speedycache_toggle_settings_link(jQuery(this));
 				return;
@@ -37,7 +37,7 @@
 			speedycache_open_modal(jQuery(this));
 		});
 		
-		jQuery('#speedycache_purge_varnish').change(function() {
+		jQuery('#speedycache_purge_varnish').on('change', function() {
 			if(!jQuery(this).is(':checked')){
 				speedycache_toggle_settings_link(jQuery(this));
 				return;
@@ -47,7 +47,7 @@
 			speedycache_open_modal(jQuery(this));
 		});
 		
-		jQuery('#speedycache_critical_images').change(function() {
+		jQuery('#speedycache_critical_images').on('change', function() {
 			if(!jQuery(this).is(':checked')){
 				speedycache_toggle_settings_link(jQuery(this));
 				return;
@@ -57,7 +57,7 @@
 			speedycache_open_modal(jQuery(this));
 		});
 		
-		jQuery('#speedycache_lazy_load_html').change(function() {
+		jQuery('#speedycache_lazy_load_html').on('change', function() {
 			if(!jQuery(this).is(':checked')){
 				speedycache_toggle_settings_link(jQuery(this));
 				return;
@@ -67,7 +67,7 @@
 			speedycache_open_modal(jQuery(this));
 		});
 		
-		jQuery('#speedycache_preload').change(function() {
+		jQuery('#speedycache_preload').on('change', function() {
 			if(!jQuery(this).is(':checked')){
 				speedycache_toggle_settings_link(jQuery(this));
 				return;
@@ -77,7 +77,7 @@
 			speedycache_open_modal(jQuery(this));
 		});
 		
-		jQuery('#speedycache_dns_prefetch').change(function() {
+		jQuery('#speedycache_dns_prefetch').on('change', function() {
 			if(!jQuery(this).is(':checked')){
 				speedycache_toggle_settings_link(jQuery(this));
 				return;
@@ -87,7 +87,7 @@
 			speedycache_open_modal(jQuery(this));
 		});
 		
-		jQuery('#speedycache_preload_resources').change(function() {
+		jQuery('#speedycache_preload_resources').on('change', function() {
 			if(!jQuery(this).is(':checked')){
 				speedycache_toggle_settings_link(jQuery(this));
 				return;
@@ -97,7 +97,7 @@
 			speedycache_open_modal(jQuery(this));
 		});
 
-		jQuery('#speedycache_render_blocking').change(function() {
+		jQuery('#speedycache_render_blocking').on('change', function() {
 			if(!jQuery(this).is(':checked')){
 				speedycache_toggle_settings_link(jQuery(this));
 				return;
@@ -108,7 +108,7 @@
 		});
 		
 		// Critical CSS Status
-		jQuery('#speedycache_critical_css').change(function(e) {
+		jQuery('#speedycache_critical_css').on('change', function(e) {
 			let prevent_open = true;
 
 			if(e.isTrigger){
@@ -124,7 +124,7 @@
 			speedycache_open_modal(jQuery(this), prevent_open);
 		});
 		
-		jQuery('#speedycache_pre_connect').change(function() {
+		jQuery('#speedycache_pre_connect').on('change', function() {
 			if(!jQuery(this).is(':checked')){
 				speedycache_toggle_settings_link(jQuery(this));
 				return;
@@ -134,7 +134,7 @@
 			speedycache_open_modal(jQuery(this));
 		});
 		
-		jQuery('#speedycache_unused_css').change(function() {
+		jQuery('#speedycache_unused_css').on('change', function() {
 			if(!jQuery(this).is(':checked')){
 				speedycache_toggle_settings_link(jQuery(this));
 				return;
@@ -155,7 +155,7 @@
 		});
 		
 		// Lazy Load
-		jQuery('#speedycache_lazy_load').change(function() {
+		jQuery('#speedycache_lazy_load').on('change', function() {
 			if(!jQuery(this).is(':checked')){
 				speedycache_toggle_settings_link(jQuery(this));
 				return;
@@ -165,7 +165,7 @@
 			speedycache_open_modal(jQuery(this));
 		});
 		
-		jQuery('#speedycache_update_heartbeat').change(function() {
+		jQuery('#speedycache_update_heartbeat').on('change', function() {
 			if(!jQuery(this).is(':checked')){
 				speedycache_toggle_settings_link(jQuery(this));
 				return;
@@ -175,7 +175,7 @@
 			speedycache_open_modal(jQuery(this));
 		});
 		
-		jQuery('#speedycache_limit_post_revision').change(function() {
+		jQuery('#speedycache_limit_post_revision').on('change', function() {
 			if(!jQuery(this).is(':checked')){
 				speedycache_toggle_settings_link(jQuery(this));
 				return;
@@ -201,7 +201,7 @@
 		});
 		
 		//Event Listener for Settings link for popup options
-		jQuery('.speedycache-modal-settings-link').off('click').click(function() {
+		jQuery('.speedycache-modal-settings-link').off('click').on('click', function() {
 			var id = jQuery(this).attr('setting-id'),
 			input = jQuery('#'+id);
 			
@@ -209,11 +209,11 @@
 		});
 		
 		// Add Excludes Btn
-		jQuery('#speedycache_add_excludes').click(function() {
+		jQuery('#speedycache_add_excludes').on('click', function() {
 			speedycache_open_modal(jQuery(this));
 		});
 		
-		jQuery('#speedycache-cdn-type').change(function(e){
+		jQuery('#speedycache-cdn-type').on('change', function(e){
 
 			let cdn_type = jQuery(e.target).val(),
 			cdn_key = jQuery('#speedycache-cdn-key').closest('.speedycache-stacked-option-wrap'),
@@ -239,7 +239,7 @@
 		});
 		
 		// Toggle exact time field of cache lifespan
-		jQuery('#speedycache-run-exact-time').click(function(e){
+		jQuery('#speedycache-run-exact-time').on('click', function(e){
 			if(jQuery(this).is(':checked')){
 				jQuery('#speedycache-exact-time-selector').css('display', 'flex');
 				return;
@@ -248,7 +248,7 @@
 			jQuery('#speedycache-exact-time-selector').hide();
 		});
 		
-		jQuery('#speedycache-ll-type').change(function(e){
+		jQuery('#speedycache-ll-type').on('change', function(e){
 			let type = jQuery(e.target).val(),
 			custom_input = jQuery('#speedycache-custom-ll-url');
 
@@ -425,10 +425,18 @@ function speedycache_update_excluded_options(){
 function speedycache_update_excluded_prefix(){
 	let jEle = jQuery(event.target),
 	val = jEle.val(),
-	content = jQuery('#speedycache-exclude-rule-content').closest('.speedycache-input-wrap');
+	content = jQuery('[for="speedycache-exclude-rule-content"]').closest('.speedycache-input-wrap');
 	
-	if(val == 'contain' || val == 'exact' || val == 'startwith' || val == 'post_id'){
+	if(val == 'contain' || val == 'exact' || val == 'startwith' || val == 'post_id' || val == 'shortcode'){
 		content.show();
+		content.find('textarea, input')?.remove();
+		let input = jQuery('<input>', {
+			type: 'text',
+			name: 'content',
+			id: 'speedycache-exclude-rule-content',
+			'class': 'speedycache-100',
+		});
+		content.append(input);
 		return;
 	}
 
@@ -857,8 +865,8 @@ function speedycache_image_optimization() {
 				<div class="speedycache-progress-value"></div>
 			</div>
 			<div class="speedycache-optm-close">
-				<button class="speedycache-image-optm-stop speedycache-btn speedycache-btn-danger">Stop</button>
-				<button class="speedycache-btn speedycache-btn-success speedycache-img-optm-close">Close</button></div>
+				<button class="speedycache-button speedycache-image-optm-stop speedycache-btn-black">Stop</button>
+				<button class="speedycache-button speedycache-img-optm-close">Close</button></div>
 			</div>`;
 		
 		

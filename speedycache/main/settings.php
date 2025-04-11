@@ -20,17 +20,18 @@ class Settings{
 					<span>version '.esc_html(SPEEDYCACHE_VERSION).'</span>
 				</div>
 				<ul>
-					<li><a href="#"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/dashboard.svg"/> Dashboard</a></li>
-					<li><a href="#cache"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/cache.svg"/> Cache</a></li>
-					<li><a href="#file"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/file.svg"/> File Optimization</a></li>
-					<li><a href="#excludes"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/excludes.svg"/> Excludes</a></li>
+					<li><a href="#"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/dashboard.svg"/>Dashboard</a></li>
+					<li><a href="#cache"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/cache.svg"/>Cache</a></li>
+					<li><a href="#file"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/file.svg"/>File Optimization</a></li>
+					<li><a href="#excludes"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/excludes.svg"/>Excludes</a></li>
 					<li><a href="#preload"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/preload.svg"/>Preloading</a></li>
-					<li><a href="#media"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/media.svg"/> Media</a></li>
-					<li><a href="#cdn"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/cdn.svg"/> CDN</a></li>
-					<li><a href="#object"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/object.svg"/> Object Cache</a></li>
+					<li><a href="#media"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/media.svg"/>Media</a></li>
+					<li><a href="#cdn"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/cdn.svg"/>CDN</a></li>
+					<li><a href="#object"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/object.svg"/>Object Cache</a></li>
 					<li><a href="#image"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/image.svg"/>Image Optimization</a></li>
 					<li><a href="#bloat"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/broom.svg"/>Bloat</a></li>
-					<li><a href="#db"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/db.svg"/> Database</a></li>';
+					<li><a href="#db"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/db.svg"/>Database</a></li>
+					<li><a href="#settings"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/settings.svg"/>Settings</a></li>';
 
 					if(defined('SPEEDYCACHE_PRO')){
 						echo '<li><a href="#license"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/license.svg"/> License</a></li>';
@@ -90,6 +91,10 @@ class Settings{
 					if(!defined('SPEEDYCACHE_PRO') || (defined('SPEEDYCACHE_PRO_VERSION') && version_compare(SPEEDYCACHE_PRO_VERSION, '1.2.0', '<'))){
 						self::pro_notice('DB Optimization');
 					}
+				echo '</div>
+
+				<div class="speedycache-tab" id="speedycache-settings">';
+					self::settings_tab('Settings');
 				echo '</div>';
 				
 					do_action('speedycache_license_tmpl');
@@ -1365,6 +1370,7 @@ class Settings{
 								<option value="post" data-partof="page">Posts</option>
 								<option value="page" data-partof="page">Pages</option>
 								<option value="post_id" data-partof="page">Post ID</option>
+								<option value="shortcode" data-partof="page">Shortcode</option>
 								<option value="archive" data-partof="page">Archives</option>
 								<option value="attachment" data-partof="page">Attachments</option>
 								<option value="startwith" data-partof="page">Starts With</option>
@@ -1376,7 +1382,6 @@ class Settings{
 						</div>
 						<div class="speedycache-input-wrap" style="display:none;">
 							<label for="speedycache-exclude-rule-content">Content</label>
-							<input type="text" name="content" id="speedycache-exclude-rule-content" class="speedycache-100"/>
 						</div>
 						<div class="speedycache-exclude-btn-wrap">
 							<button class="speedycache-button speedycache-btn-black">'.esc_html__('Save Rule', 'speedycache').'<span class="speedycache-spinner"></button>
@@ -1596,6 +1601,47 @@ class Settings{
 		echo '</form>';
 	}
 	
+	static function settings_tab(){
+		echo '<h2><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/settings.svg" height="32" width="32"/> '.esc_html__('General Settings', 'speedycache').'</h2>';
+		
+		$roles = get_editable_roles();
+		
+		if(!empty($roles)){
+			$saved_roles = get_option('speedycache_deletion_roles', []);
+			
+			echo '<div class="speedycache-option-info">
+			<span class="speedycache-option-name">'.esc_html__('Can Delete Cache', 'speedycache').'</span>
+			<span class="speedycache-option-desc">'.esc_html__('Allows roles to delete cache using Admin bar and post links, Admin is included by default', 'speedycache').'</span>
+			<form method="POST">';
+			wp_nonce_field('speedycache_ajax_nonce');
+		
+			echo '<input type="hidden" name="action" value="speedycache_save_deletion_role_settings"/>
+			<div class="speedycache-deletion-roles">';
+			foreach($roles as $key => $role){
+				// Admin will always have access to everything, so no need to give option to be able to enable it.
+				if($key == 'administrator'){
+					continue;
+				}
+
+				// We need to make sure the user has capability to publish_posts
+				// Giving access to anyone other than this capability does not makes sense
+				// As giving option to enable subscriber could cause issue becuase of human error.
+				if(empty($role['capabilities']) || !is_array($role['capabilities']) || !array_key_exists('publish_posts', $role['capabilities'])){
+					continue;
+				}
+				
+				$checked = false;
+				if(in_array($key, $saved_roles)){
+					$checked = 'checked';
+				}
+
+				echo '<label for="speedycache-admin-bar-cap-'.esc_attr($key).'"><input type="checkbox" id="speedycache-admin-bar-cap-'.esc_attr($key).'"name="cache_deletion_roles[]" value="'.esc_attr($key).'" '.esc_attr($checked).'/>'.esc_html($role['name']).'</label>';
+			}
+			echo '</div>
+			<div class="speedycache-btn-spl-wrapper"><button class="speedycache-button speedycache-btn-black" style="margin-top:10px;">Save<span class="speedycache-spinner"></span></button></div></form></div>';
+		}
+	}
+	
 	static  function preload_modal_options($field_name, $fields){	
 		if(empty($fields)){
 			return '';
@@ -1659,7 +1705,7 @@ class Settings{
 	}
 	
 	static function save_btn(){
-		echo '<div class="speedycache-save-settings-wrapper"><button class="speedycache-button speedycache-btn-black">'.esc_html__('Save Settings', 'speedycache').'<span class="speedycache-spinner"></button></div>';
+		echo '<div class="speedycache-save-settings-wrapper"><button class="speedycache-button speedycache-btn-black">'.esc_html__('Save Settings', 'speedycache').'<span class="speedycache-spinner"></span></button></div>';
 	}
 }
 

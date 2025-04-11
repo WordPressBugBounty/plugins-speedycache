@@ -13,19 +13,25 @@ class Admin{
 	static $conflicting_plugins = [];
 	
 	static function hooks(){
-		add_action('admin_notices', '\SpeedyCache\Admin::combitibility_notice');
-		add_action('admin_menu', '\SpeedyCache\Admin::list_menu');
-		do_action('speedycache_pro_admin_hooks'); // adds hooks for the pro-version.
-		add_action('admin_post_speedycache_delete_cache', '\SpeedyCache\Admin::delete_cache');
-		add_action('admin_post_speedycache_delete_single', '\SpeedyCache\Admin::delete_single');
-		add_action('admin_post_speedycache_delete_single_url', '\SpeedyCache\Admin::delete_single_url');
 		
-		$post_types = ['post', 'page', 'category', 'tag'];
-
-		foreach($post_types as $post_type){
-			add_filter($post_type.'_row_actions', '\SpeedyCache\Admin::delete_link', 10, 2 );
+		//NOTE:: Most actions will go here
+		if(current_user_can('manage_options')){
+			add_action('admin_notices', '\SpeedyCache\Admin::combitibility_notice');
+			add_action('admin_menu', '\SpeedyCache\Admin::list_menu');
+			do_action('speedycache_pro_admin_hooks'); // adds hooks for the pro-version.
 		}
+		
+		if(self::user_can_delete_cache()){
+			add_action('admin_post_speedycache_delete_cache', '\SpeedyCache\Admin::delete_cache');
+			add_action('admin_post_speedycache_delete_single', '\SpeedyCache\Admin::delete_single');
+			add_action('admin_post_speedycache_delete_single_url', '\SpeedyCache\Admin::delete_single_url');
+			
+			$post_types = ['post', 'page', 'category', 'tag'];
 
+			foreach($post_types as $post_type){
+				add_filter($post_type.'_row_actions', '\SpeedyCache\Admin::delete_link', 10, 2 );
+			}
+		}
 	}
 	
 	static function list_menu(){
@@ -62,7 +68,7 @@ class Admin{
 	static function delete_cache(){
 		check_admin_referer('speedycache_post_nonce');
 		
-		if(!current_user_can('manage_options')){
+		if(!self::user_can_delete_cache()){
 			wp_die(esc_html__('You do not have a required privilege', 'speedycache'));
 		}
 
@@ -82,7 +88,7 @@ class Admin{
 	static function delete_single(){
 		check_admin_referer('speedycache_post_nonce', 'security');
 		
-		if(!current_user_can('manage_options')){
+		if(!self::user_can_delete_cache()){
 			wp_die(esc_html__('You do not have a required privilege', 'speedycache'));
 		}
 
@@ -98,7 +104,7 @@ class Admin{
 	static function delete_single_url(){
 		check_admin_referer('speedycache_post_nonce', 'security');
 		
-		if(!current_user_can('manage_options')){
+		if(!self::user_can_delete_cache()){
 			wp_die(esc_html__('You do not have a required privilege', 'speedycache'));
 		}
 
@@ -120,6 +126,7 @@ class Admin{
 			'wp-fastest-cache/wpFastestCache.php' => 'WP Fastest Cache',
 			'wp-optimize/wp-optimize.php' => 'WP Optimize',
 			'w3-total-cache/w3-total-cache.php' => 'W3 Total Cache',
+			'flyingpress/flyingpress.php' => 'FlyingPress',
 		];
 
 		$conflicting_plugins = [];
@@ -146,7 +153,7 @@ class Admin{
 	}
 	
 	static function delete_link($actions, $post){
-		if(!current_user_can('manage_options')){
+		if(!self::user_can_delete_cache()){
 			return;
 		}
 
@@ -159,11 +166,11 @@ class Admin{
 	
 	static function admin_bar($admin_bar){
 		global $post;
-		
-		if(!current_user_can('manage_options')){
-			return;
+
+		if(!self::user_can_delete_cache()){
+		   return;
 		}
-		
+
 		$request_url = remove_query_arg('_wp_http_referer');
 
 		$admin_bar->add_menu([
@@ -196,5 +203,18 @@ class Admin{
 				'meta' => ['class' => 'speedycache-adminbar-options']
 			));
 		}
+	}
+	
+	// Checks if the current users role is allowed
+	static function user_can_delete_cache(){
+		$allowed_roles = get_option('speedycache_deletion_roles', []);
+		array_push($allowed_roles, 'administrator'); // admin is default
+
+		$user = wp_get_current_user();
+		if(!array_intersect($allowed_roles, $user->roles)){
+		   return false;
+		}
+
+		return true;
 	}
 }

@@ -2,16 +2,16 @@
 Contributors: softaculous
 Tags: cache, minify, pagespeed, seo, cdn, wordpress cache, website cache, lazy loading, mobile cache, minify css, combine css, minify js, combine js, gzip, browser caching, render blocking js, preload, widget cache, softaculous, speedycache, performance
 Requires at least: 4.7
-Tested up to: 6.7
+Tested up to: 6.8
 Requires PHP: 7.0
-Stable tag: 1.3.2
+Stable tag: 1.3.3
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
 
 == Description ==
 
-SpeedyCache is a WordPress cache plugin that helps you improve performace of your WordPress site by caching, minifying, and compressing your website.
+SpeedyCache is a WordPress cache plugin that helps you improve performance of your WordPress site by caching, minifying, and compressing your website.
 
 You can find our official documentation at [https://speedycache.com/docs](https://speedycache.com/docs). We are also active in our community support forums on wordpress.org if you are one of our free users. Our Premium Support Ticket System is at [https://softaculous.deskuss.com](https://softaculous.deskuss.com)
 
@@ -19,7 +19,7 @@ You can find our official documentation at [https://speedycache.com/docs](https:
 
 Other than caching SpeedyCache can also do the following:-
 1. It can minify and combine CSS/JS giving even better optimization as it reduces the file sizes and reduces the HTTP requests to the server.
-2. Eliminate render-blocking Javascript resources helping your website to load faster.
+2. Eliminate render-blocking JavaScript resources helping your website to load faster.
 3. Lazy load images so that the images can be requested only if they come into the viewport.
 4. GZIP files to reduce the size of the file sent from the server.
 
@@ -63,7 +63,7 @@ Get professional support and more features to make your website load faster with
 * **Preload:** Preload improves website performance by downloading resources in advance, before they are needed.
 * **Critical CSS:** Extracts the CSS used by the page in the visible viewport at the time of load.
 * **Unused CSS:** Removes the unused CSS, keeping the CSS that is being used by the paged, which reduces the size of CSS used on the page.
-* **Object Cache:** It makes the object to persist by using redis, to improve availability of the cache.
+* **Object Cache:** It makes the object to persist by using Redis, to improve availability of the cache.
 * **Bloat Remover:** Options to remove unnecessary features of WordPress or WooCommerce.
 * **Image Dimension:** Adds dimensions to the image tag which does not have width or height, to reduce (CLS)Cumulative Layout Shift.
 * **Lazy Render HTML:** User can lazy render HTML elements which are not in view-port.
@@ -147,6 +147,14 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 == Changelog ==
 
+= 1.3.3 (11th April 2025) =
+* [Feature] Now you can allow other user roles to delete cache.
+* [Feature] Option to exclude page from cache if it has some shortcode.
+* [Bug-Fix Pro] Disable Gutenberg was not working, this has been fixed.
+* [Task] A few warnings have been fixed.
+* [Task] jQuery deprecations have been fixed.
+* [Task] Tested with WordPress 6.8
+
 = 1.3.2 (2nd April 2025) =
 * [Bug-Fix] Gzipped Cache was not getting deleted on post status change, this has been fixed.
 * [Bug-Fix Pro] Self Hosted video was not getting lazy loaded but was making the video tag display as plain text, this has been fixed.
@@ -182,7 +190,7 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 = 1.2.5 (22th October 2024) =
 * [Task] SpeedyCache has been updated to support PHP 7.0 and later, expanding its compatibility from PHP 7.3.
-* [Bug-Fix] There was a bug releated to jQuery which was making it unable to switch tabs which has been fixed.
+* [Bug-Fix] There was a bug related to jQuery which was making it unable to switch tabs which has been fixed.
 
 = 1.2.4 (15th October 2024) =
 * [Feature] Option to make cache lifespan run on a specific time.
@@ -195,7 +203,7 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 
 = 1.2.3 (20th September 2024) =
 * [Bug-Fix] There was issue with query string serving homepage's cache that has been fixed.
-* [Bug-Fix] For a user the SpeedyCache admin requests type were getting overridden, speedycache has been made to handle that.
+* [Bug-Fix] For a user the SpeedyCache admin requests type were getting overridden, SpeedyCache has been made to handle that.
 * [Task] License handling improvements.
 
 = 1.2.2 (3rd September 2024) =
