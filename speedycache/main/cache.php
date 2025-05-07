@@ -338,11 +338,13 @@ class Cache {
 
 				case 'useragent':
 					$is_excluded = self::is_useragent_excluded($rule);
+					break;
 
 				case 'cookie':
 					$is_excluded = self::is_cookie_excluded($rule);
+					break;
 			}
-			
+
 			if(!empty($is_excluded)){
 				return true;
 			}
@@ -427,7 +429,7 @@ class Cache {
 	}
 	
 	static function is_useragent_excluded($rule){
-		return (bool) preg_match('/'.preg_quote($rule['content'], '/').'/i', $_SERVER['HTTP_USER_AGENT']);
+		return preg_match('/'.preg_quote($rule['content'], '/').'/i', $_SERVER['HTTP_USER_AGENT']);
 	}
 	
 	// Adds DNS prefetch

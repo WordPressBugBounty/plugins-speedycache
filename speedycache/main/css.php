@@ -212,10 +212,24 @@ class CSS{
 			$relative_path = $matches[1];
 			$relative_path = trim($relative_path, '/');
 			$base_path = Util::url_to_path($base_url);
-			
-			if(strpos($relative_path, '..') == 0){
+
+			if(strpos($relative_path, '..') === 0){
+				$parameter = '';
+				// Some URL's had query parameters, that were breaking when using realpath
+				if(strpos($relative_path, '?') !== FALSE){
+					$parsed_path = explode('?', $relative_path);
+					$parameter = $parsed_path[1];
+					$relative_path = $parsed_path[0];
+					$parsed_path = null;
+				}
+
 				$absolute_path = realpath(dirname($base_path) . '/' . $relative_path);
 				$absolute_url = Util::path_to_url($absolute_path);
+				
+				// Appending the parameter again
+				if(!empty($parameter)){
+					$absolute_url .= '?'. $parameter;
+				}
 			}
 
 			if(empty($absolute_url)){

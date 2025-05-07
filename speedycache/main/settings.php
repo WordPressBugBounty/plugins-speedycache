@@ -1642,7 +1642,7 @@ class Settings{
 		}
 	}
 	
-	static  function preload_modal_options($field_name, $fields){	
+	static  function preload_modal_options($field_name, $fields){
 		if(empty($fields)){
 			return '';
 		}

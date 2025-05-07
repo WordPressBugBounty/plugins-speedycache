@@ -4,7 +4,7 @@ Tags: cache, minify, pagespeed, seo, cdn, wordpress cache, website cache, lazy l
 Requires at least: 4.7
 Tested up to: 6.8
 Requires PHP: 7.0
-Stable tag: 1.3.3
+Stable tag: 1.3.4
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -146,6 +146,16 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 4. SpeedyCache Exclude page
 
 == Changelog ==
+
+= 1.3.4 (7th May 2025) =
+* [Task] A PHP warning has been fixed.
+* [Bug-Fix] Some characters were loading as ? when the page was cached, this has been fixed.
+* [Bug-Fix] Cookie and Useragent excludes were not working properly that has been fixed.
+* [Bug-Fix] Icon not loading properly when using Minify CSS has been fixed.
+* [Bug-Fix Pro] Critical CSS and Unused CSS has been improved to reduce the load on server caused by the cron.
+* [Bug-Fix Pro] Specualtionrule script has been excluded from delay JS, it was breaking the JS for some sites.
+* [Bug-Fix Pro] Image optimize on upload was not working that has been fixed.
+* [Bug-Fix Pro] Deletion of optimized image when the attachment is deleted was not working and has been fixed.
 
 = 1.3.3 (11th April 2025) =
 * [Feature] Now you can allow other user roles to delete cache.
