@@ -86,6 +86,22 @@
 			speedycache_toggle_settings_link(jQuery(this));
 			speedycache_open_modal(jQuery(this));
 		});
+
+		jQuery('#speedycache_speculative_loading').on('change',function(){
+			if(!jQuery(this).is(':checked')){
+				speedycache_toggle_settings_link(jQuery(this));
+				return;
+			}
+
+			speedycache_toggle_settings_link(jQuery(this));
+			speedycache_open_modal(jQuery(this));
+			
+			let instant_page = jQuery('#speedycache_instant_page');
+			if(instant_page && instant_page.is(':checked')){
+				instant_page.prop('checked', false);
+				alert('Instant page and Speculation loading are similar feature, so you should not use them together');
+			}
+		})
 		
 		jQuery('#speedycache_preload_resources').on('change', function() {
 			if(!jQuery(this).is(':checked')){
@@ -259,6 +275,20 @@
 			
 			custom_input.show();
 		});
+
+		jQuery('#speedycache-import-export').on('change', function(e){
+      let task = jQuery(e.target).val(),
+			import_block = jQuery('.speedycache-import-block'),
+			export_block = jQuery('.speedycache-export-block');
+
+			if(task == 'import'){
+				import_block.show();
+				export_block.hide();
+			} else if(task == 'export'){
+				export_block.show();
+				import_block.hide();
+			}
+		})
 		
 		jQuery('#speedycache-cdn-type').trigger('change');
 		
@@ -271,6 +301,8 @@
 		jQuery('.speedycache-preloading-add').on('click', speedycache_add_preload_resource);
 		jQuery('.speedycache-preloading-table').on('click', '.dashicons-trash', speedycache_delete_preload_resource);
 		jQuery('.speedycache-flush-db').on('click', speedycache_flush_objects);
+		jQuery('.speedycache-import-settings').on('click', speedycache_import_settings);
+		jQuery('.speedycache-export-settings').on('click', speedycache_export_settings);
 		jQuery('#speedycache-license-btn').on('click', speedycache_verify_license);
 	});
 })(jQuery);
@@ -301,9 +333,10 @@ function speedycache_handle_tab(){
 function speedycache_save_settings(){
 	event.preventDefault();
 
-	let jEle = jQuery(event.target);
+	let jEle = jQuery(event.target),
+	has_error = false;
 	
-	jEle.find('span').addClass('speedycache-spinner-active');
+	jEle.find('span.speedycache-spinner').addClass('speedycache-spinner-active');
 	
 	form_data = jEle.closest('form').serializeArray();
 
@@ -316,6 +349,7 @@ function speedycache_save_settings(){
 				return;
 			}
 			
+			has_error = true;
 			if(res.data){
 				alert(res.data);
 			}
@@ -323,7 +357,18 @@ function speedycache_save_settings(){
 			alert("Something went wrong");
 		}
 	}).always(function(){
-		jEle.find('span').removeClass('speedycache-spinner-active');
+		jEle.find('span.speedycache-spinner')?.removeClass('speedycache-spinner-active');
+		
+		// Need to show a tick if the save was success
+		if(!has_error){
+			let check = jEle.find('svg.speedycache-spinner-done');
+      if(check){
+  			check.addClass('speedycache-spinner-done-active');
+  			setTimeout(() => {
+  				check.removeClass('speedycache-spinner-done-active');
+  			}, 2000);
+      }
+		}
 	});
 }
 
@@ -607,7 +652,8 @@ function speedycache_add_preload_resource() {
 	form_data.forEach((field) => {
 		form_val[field.name] = field.value;
 		
-		if(!field.value){
+		let non_required_fields = ['fetch_priority', 'device'];
+		if(!field.value && !non_required_fields.includes(field.name)){
 			error = true;
 		}
 	});
@@ -647,6 +693,7 @@ function speedycache_add_preload_resource() {
 				
 				${form_type != 'pre_connect_list' ? '<td>'+form_val.type+'</td>' : ''} 
 				<td>${form_val.crossorigin ? 'Yes' : 'No'}</td>
+				${form_type != 'pre_connect_list' ? '<td>'+(form_val.fetch_priority ? form_val.fetch_priority : 'Auto')+'</td><td>'+(form_val.device ? form_val.device : 'All')+'</td>' : ''}
 				<td data-key="${res.data}"><span class="dashicons dashicons-trash"></span></td>`;
 			
 			
@@ -684,9 +731,11 @@ function speedycache_add_preload_resource() {
 function speedycache_delete_preload_resource(){
 	let ele = jQuery(event.target),
 	key = ele.closest('td').data('key'),
-	type = ele.closest('table').data('type');
-	
-	
+	type = ele.closest('table').data('type'),
+	tr = ele.closest('tr');
+
+	tr.css('backgroundColor', 'rgba(255,0,0,0.2)');
+
 	jQuery.ajax({
 		'method' : 'POST',
 		'url' : speedycache_ajax.url,
@@ -730,6 +779,91 @@ function speedycache_flush_objects() {
 			alert("Unable to flush Object Cache");
 			
 		}
+  }).always(function(){
+		spinner.removeClass('speedycache-spinner-active');
+	});
+}
+
+function speedycache_import_settings(){
+	event.preventDefault();
+
+	let jEle = jQuery(event.target),
+	spinner = jEle.find('.speedycache-spinner');
+	spinner.addClass('.speedycache-spinner-active');
+	let fileInput = jQuery('#speedycache_import_file')[0];
+
+	if(!fileInput.files.length){
+		alert('Please select a JSON file to import.');
+		return;
+	}
+	
+	if(fileInput.files[0].type && fileInput.files[0].type != 'application/json'){
+		alert('The file you have uploaded is not a JSON file.');
+		return;
+	}
+
+	if(!fileInput.files[0].size){
+		alert('Your settings file is empty.');
+		return;
+	}
+	
+	let expected_file_name_reg = /speedycache-settings-\d{4}-\d{2}-\d{2}.*\.json/;
+	if(fileInput.files[0].name && !expected_file_name_reg.test(fileInput.files[0].name)){
+		alert('The format of the name of the file is not valid.');
+		return;
+	}
+
+	let formData = new FormData();
+	formData.append('security', speedycache_ajax.nonce);
+	formData.append('file', fileInput.files[0]);
+
+	jQuery.ajax({
+		url : speedycache_ajax.url + '?action=speedycache_import_settings',
+		type : 'POST',
+		data : formData,
+		processData : false,
+		contentType : false,
+		success : function(response){
+			if(response.success){
+				alert('Settings imported successfully');
+				location.reload();
+			} else {
+				alert(response.data || 'Something went wrong while importing.');
+			}
+		},
+		error: function(){
+			alert('Ajax error occurred');
+		}
+	}).always(function(){
+		spinner.removeClass('speedycache-spinner-active');
+	})
+}
+
+function speedycache_export_settings(){
+  event.preventDefault();
+
+	let jEle = jQuery(event.target),
+	spinner = jEle.find('.speedycache-spinner');
+	spinner.addClass('speedycache-spinner-active');
+
+	jQuery.ajax({
+		url : speedycache_ajax.url + '?action=speedycache_export_settings',
+		type : 'POST',
+		data : {
+			'security' : speedycache_ajax.nonce
+		},
+		success: function(response){
+			const blob = new Blob([JSON.stringify(response.data, null, 2)], { type: 'application/json' });
+			const link = document.createElement('a');
+			link.href = URL.createObjectURL(blob);
+			link.download = 'speedycache-settings-' + new Date().toISOString().slice(0,10) + '.json';
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+		},
+		error: function(){
+			alert('Export failed. Please try again.');
+		}
 	}).always(function(){
 		spinner.removeClass('speedycache-spinner-active');
 	});
@@ -760,7 +894,7 @@ function speedycache_image_optimization() {
 			}
 		};
 	
-	//Gets Stats	
+	//Gets Stats
 	var get_stats = function(onload = false) {
 		jQuery.ajax({
 			type : 'GET',
@@ -874,7 +1008,7 @@ function speedycache_image_optimization() {
 		if(stats.uncompressed == 0) {
 			inner_content = `
 			<div class="speedycache-already-optm">
-				<i class="fas fa-check-circle"></i>
+				<span class="dashicons dashicons-yes-alt"></span>
 				<span>All images are Optimized</span>
 			</div>
 			<div class="speedycache-optm-close">
@@ -959,7 +1093,7 @@ function speedycache_image_optimization() {
 				//To show when Optimization completes
 				var success_html = `
 				<div class="speedycache-already-optm" style="display:none;">
-					<i class="fas fa-check-circle"></i>
+					<span class="dashicons dashicons-yes-alt"></span>
 					<span>Images optimized Successfully</span>
 				</div>
 				`;

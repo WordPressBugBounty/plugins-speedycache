@@ -25,12 +25,21 @@ class CDN{
 		}
 
 		// Define the patterns to match specific URLs (e.g., images, CSS, JS)
+		$base_dir = defined('SITEPAD') ? 'sitepad-data' : 'wp-content';
+
+		if (defined('SITEPAD')){
+			global $sitepad;
+			$site_inc_url = $sitepad['url'] . '/site-inc';
+		} else {
+			$site_inc_url = home_url('/wp-includes/');
+		}
+
 		$patterns = [
-			'/'. preg_quote(home_url('/wp-content/uploads/'), '/') . '([^"\']+)/i', // Uploads directory
-			'/'. preg_quote(home_url('/wp-includes/'), '/') . '([^"\']+)/i',        // WordPress core assets
-			'/'. preg_quote(home_url('/wp-content/themes/'), '/') . '([^"\']+)/i',  // Theme assets
-			'/'. preg_quote(home_url('/wp-content/plugins/'), '/') . '([^"\']+)/i', // Plugin assets
-			'/'. preg_quote(home_url('/wp-content/cache/'), '/') . '([^"\']+)/i', // Cache files
+			'/' . preg_quote(home_url("/{$base_dir}/uploads/"), '/') . '([^"\']+)/i',
+			'/'.  preg_quote($site_inc_url, '/') . '([^"\']+)/i',
+			'/' . preg_quote(home_url("/{$base_dir}/themes/"), '/') . '([^"\']+)/i',
+			'/' . preg_quote(defined('SP_PLUGIN_URL') ? SP_PLUGIN_URL : home_url('/wp-content/plugins/'), '/') . '([^"\']+)/i',
+			'/' . preg_quote(home_url("/{$base_dir}/cache/"), '/') . '([^"\']+)/i',
 		];
 
 		// Loop through each pattern and replace only URLs with the specified file types
@@ -219,7 +228,7 @@ class CDN{
 		$res_code = wp_remote_retrieve_response_code($res);
 		
 		if($res_code != 204){
-			return esc_html__('Something Went Wrong: Purge was unsuccessful with response code of ') . $res_code;
+			return esc_html__('Something Went Wrong: Purge was unsuccessful with response code of ', 'speedycache') . $res_code;
 		}
 
 		return esc_html__('Success: Bunny CDN purged successfully', 'speedycache');
@@ -292,6 +301,6 @@ class CDN{
 			return esc_html__('Cloudflare cache purged successfully.', 'speedycache');
 		}
 
-		return 'Failed to purge Cloudflare cache. ' . $body['errors'][0]['message'] ?? '';
+		return 'Failed to purge Cloudflare cache. ' . (isset($body['errors'][0]['message']) ? $body['errors'][0]['message'] : '');
 	}
 }

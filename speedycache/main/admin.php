@@ -29,7 +29,7 @@ class Admin{
 			$post_types = ['post', 'page', 'category', 'tag'];
 
 			foreach($post_types as $post_type){
-				add_filter($post_type.'_row_actions', '\SpeedyCache\Admin::delete_link', 10, 2 );
+				add_filter($post_type.'_row_actions', '\SpeedyCache\Admin::delete_link', 10, 2);
 			}
 		}
 	}
@@ -40,8 +40,10 @@ class Admin{
 		$capability = 'activate_plugins';
 
 		//$speedycache->settings['disabled_tabs'] = apply_filters('speedycache_disabled_tabs', []);
+
+		$url = SPEEDYCACHE_URL.'/assets/images/'. (defined('SITEPAD') ? 'grey-icon.svg' : 'icon.svg');
 		
-		$hooknames[] = add_menu_page('SpeedyCache Settings', 'SpeedyCache', $capability, 'speedycache', '\SpeedyCache\Settings::base', SPEEDYCACHE_URL.'/assets/images/icon.svg');
+		$hooknames[] = add_menu_page('SpeedyCache Settings', 'SpeedyCache', $capability, 'speedycache', '\SpeedyCache\Settings::base', $url);
 	
 		foreach($hooknames as $hookname){
 			add_action('load-'.$hookname, '\SpeedyCache\Admin::load_assets');

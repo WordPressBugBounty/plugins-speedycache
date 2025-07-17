@@ -21,6 +21,8 @@ class Ajax{
 		add_action('wp_ajax_speedycache_save_excludes', '\SpeedyCache\Ajax::save_excludes');
 		add_action('wp_ajax_speedycache_delete_exclude_rule', '\SpeedyCache\Ajax::delete_exclude_rule');
 		add_action('wp_ajax_speedycache_save_deletion_role_settings', '\SpeedyCache\Ajax::save_deletion_roles');
+		add_action('wp_ajax_speedycache_import_settings', '\SpeedyCache\Ajax::import_settings');
+		add_action('wp_ajax_speedycache_export_settings', '\SpeedyCache\Ajax::export_settings');
 		
 		if(defined('SPEEDYCACHE_PRO')){
 			add_action('wp_ajax_speedycache_optm_db', '\SpeedyCache\Ajax::optm_db');
@@ -29,9 +31,10 @@ class Ajax{
 			add_action('wp_ajax_speedycache_save_bloat_settings', '\SpeedyCache\Ajax::save_bloat_settings');
 			add_action('wp_ajax_speedycache_preloading_add_settings', '\SpeedyCache\Ajax::add_preload_settings');
 			add_action('wp_ajax_speedycache_preloading_delete_resource', '\SpeedyCache\Ajax::delete_preload_resource');
-
-			// Critical CSS
-			add_action('wp_ajax_speedycache_critical_css', '\SpeedyCache\Ajax::generate_critical_css');
+			if(!defined('SITEPAD')){
+				// Critical CSS
+				add_action('wp_ajax_speedycache_critical_css', '\SpeedyCache\Ajax::generate_critical_css');
+			}
 		}
 	}
 
@@ -103,11 +106,13 @@ class Ajax{
 		$options['minify_css'] = isset($_REQUEST['minify_css']);
 		$options['combine_css'] = isset($_REQUEST['combine_css']);
 
-		$options['unused_css'] = isset($_REQUEST['unused_css']);
-		$options['critical_css'] = isset($_REQUEST['critical_css']);
-		$options['unusedcss_load'] = Util::sanitize_request('unusedcss_load');
-		$options['unused_css_exclude_stylesheets'] = !empty($_REQUEST['unused_css_exclude_stylesheets']) ? explode("\n", sanitize_textarea_field(wp_unslash($_REQUEST['unused_css_exclude_stylesheets']))) : [];
-		$options['unusedcss_include_selector'] = !empty($_REQUEST['unusedcss_include_selector']) ? explode("\n", sanitize_textarea_field(wp_unslash($_REQUEST['unusedcss_include_selector']))) : [];
+		if(!defined('SITEPAD')){
+			$options['unused_css'] = isset($_REQUEST['unused_css']);
+			$options['critical_css'] = isset($_REQUEST['critical_css']);
+			$options['unusedcss_load'] = Util::sanitize_request('unusedcss_load');
+			$options['unused_css_exclude_stylesheets'] = !empty($_REQUEST['unused_css_exclude_stylesheets']) ? explode("\n", sanitize_textarea_field(wp_unslash($_REQUEST['unused_css_exclude_stylesheets']))) : [];
+			$options['unusedcss_include_selector'] = !empty($_REQUEST['unusedcss_include_selector']) ? explode("\n", sanitize_textarea_field(wp_unslash($_REQUEST['unusedcss_include_selector']))) : [];
+		}
 
 		// JS options
 		$options['minify_js'] = isset($_REQUEST['minify_js']);
@@ -145,6 +150,9 @@ class Ajax{
 		$options['critical_images'] = isset($_REQUEST['critical_images']);
 		$options['critical_image_count'] = isset($_REQUEST['critical_images']) ? Util::sanitize_request('critical_image_count') : '';
 		$options['instant_page'] = isset($_REQUEST['instant_page']);
+		$options['speculation_loading'] = isset($_REQUEST['speculation_loading']);
+		$options['speculation_mode'] = Util::sanitize_request('speculation_mode', 0);
+		$options['speculation_eagerness'] = Util::sanitize_request('speculation_eagerness', 0);
 		$options['dns_prefetch'] = isset($_REQUEST['dns_prefetch']);
 		if(!empty($_REQUEST['dns_urls'])){
 			$options['dns_urls'] = explode("\n", sanitize_textarea_field(wp_unslash($_REQUEST['dns_urls'])));
@@ -242,6 +250,11 @@ class Ajax{
 			if(file_exists(WP_CONTENT_DIR . '/object-cache.php')){
 				unlink(WP_CONTENT_DIR . '/object-cache.php');
 			}
+		}
+		
+		// If we are disabling object cache then it should be saved early as there could be issue connecting the redis server.
+		if(empty($options['enable'])){
+			update_option('speedycache_object_cache', $options);
 		}
 		
 		try{
@@ -383,12 +396,19 @@ class Ajax{
 		$settings['resource'] = sanitize_url(wp_unslash($_REQUEST['settings']['resource']));
 		$settings['crossorigin'] = isset($_REQUEST['settings']['crossorigin']);
 		$settings['type'] = sanitize_text_field(wp_unslash($_REQUEST['settings']['type']));
-
-		$index = count($speedycache->options[$type]);
+		if(!empty($_REQUEST['settings']['fetch_priority'])){
+			$settings['fetch_priority'] = sanitize_text_field(wp_unslash($_REQUEST['settings']['fetch_priority']));
+		}
 		
+		if(!empty($_REQUEST['settings']['device'])){
+			$settings['device'] = sanitize_text_field(wp_unslash($_REQUEST['settings']['device']));
+		}
+
 		if(empty($speedycache->options[$type])){
-			$speedycache->options[$type][$index] = $settings;
+			$speedycache->options[$type] = [];
+			$speedycache->options[$type][] = $settings;
 			update_option('speedycache_options', $speedycache->options);
+			$index = key(array_slice($speedycache->options[$type], -1, 1, true)); // Getting the index we just added
 			wp_send_json_success($index);
 		}
 		
@@ -397,9 +417,10 @@ class Ajax{
 				wp_send_json_error(__('This resource has already been added before', 'speedycache'));
 			}
 		}
-		
-		$speedycache->options[$type][$index] = $settings;
+
+		$speedycache->options[$type][] = $settings;
 		update_option('speedycache_options', $speedycache->options);
+		$index = key(array_slice($speedycache->options[$type], -1, 1, true)); // Getting the index we just added
 
 		wp_send_json_success($index);
 
@@ -508,7 +529,7 @@ class Ajax{
 		$type = Util::sanitize_request('type');
 		$prefix = Util::sanitize_request('prefix');
 		
-		$single_prefixes = ['homepage', 'category', 'tag', 'post', 'page', 'archive', 'attachment', 'googleanalytics', 'woocommerce_items_in_cart', 'post_id'];
+		$single_prefixes = ['homepage', 'category', 'tag', 'post', 'page', 'archive', 'attachment', 'woocommerce_items_in_cart', 'post_id'];
 		
 		if(empty($_REQUEST['content']) && !in_array($prefix, $single_prefixes)){
 			wp_send_json_error(__('You need to fill the content field', 'speedycache'));
@@ -529,6 +550,122 @@ class Ajax{
 		Util::set_config_file(); // Updates the config file
 
 		wp_send_json_success();
+	}
+
+	static function validate_and_sanitize_import_data($data) {
+		if(is_array($data)){
+			$sanitized = [];
+			foreach($data as $key => $value){
+				$sanitized_key = is_string($key) ? sanitize_key($key) : $key;
+				$sanitized[$sanitized_key] = self::validate_and_sanitize_import_data($value);
+			}
+			return $sanitized;
+		} elseif (is_string($data)){
+			if(filter_var($data, FILTER_VALIDATE_URL)){
+				return sanitize_url(wp_unslash($data));
+			}
+
+			return sanitize_text_field(wp_unslash($data));
+		} elseif(is_bool($data) || is_null($data) || is_int($data) || is_float($data)){
+			return $data;
+		}
+
+		return '';
+	}
+
+	static function import_settings(){
+
+		check_ajax_referer('speedycache_ajax_nonce', 'security');
+
+		if(!current_user_can('manage_options')){
+			wp_send_json_error(__('You do not have required permissions.', 'speedycache'));
+		}
+
+		if(!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK){
+			wp_send_json_error(__('Failed to receive uploaded file.', 'speedycache'));
+		}
+		
+		$filename = sanitize_file_name($_FILES['file']['name']);
+		
+		if(!preg_match('/\.json$/', $filename)){
+			wp_send_json_error(__('The file you uploaded is not a JSON file.', 'speedycache'));
+		}
+
+		if(!preg_match('/speedycache-settings-\d{4}-\d{2}-\d{2}.*\.json/', $filename)){
+			wp_send_json_error(__('File name is not of expected format.', 'speedycache'));
+		}
+		
+		$imported_file = $_FILES['file']['tmp_name'];
+		
+		if(!file_exists($imported_file) || !is_readable($imported_file) || !is_uploaded_file($imported_file)){
+			wp_send_json_error(__('Uploaded file is not readable.', 'speedycache'));
+		}
+
+		$file_contents = file_get_contents($imported_file);
+		$decoded_data = json_decode($file_contents, true);
+
+		if(empty($decoded_data) || !is_array($decoded_data)){
+			wp_send_json_error(__('Invalid JSON file.', 'speedycache'));
+		}
+
+		$current_oc = get_option('speedycache_object_cache');
+		$imported_oc = $decoded_data['speedycache_object_cache'] ? $decoded_data['speedycache_object_cache'] : false;
+
+		$current_enabled = (is_array($current_oc) && !empty($current_oc['enable']));
+		$import_enabled  = (is_array($imported_oc) && !empty($imported_oc['enable']));
+
+		if($current_enabled && $import_enabled){
+			$imported_oc['hashed_prefix'] = $current_oc['hashed_prefix'];
+		} else {
+			$imported_oc['hashed_prefix'] = null;
+		}
+
+		$decoded_data['speedycache_object_cache'] = $imported_oc;
+
+		$valid_keys = array(
+			'speedycache_options',
+			'speedycache_cdn',
+			'speedycache_img',
+			'speedycache_object_cache',
+			'speedycache_exclude',
+			'speedycache_bloat',
+		);
+
+		foreach($valid_keys as $key){
+			if (isset($decoded_data[$key]) && $decoded_data[$key] !== false) {
+				update_option($key, self::validate_and_sanitize_import_data($decoded_data[$key]));
+			}
+			else {
+				delete_option($key);
+			}
+		}
+
+		wp_send_json_success();
+	}
+
+	static function export_settings(){
+
+		check_ajax_referer('speedycache_ajax_nonce', 'security');
+
+		if(!current_user_can('manage_options')){
+			wp_send_json_error(__('You do not have required permissions.', 'speedycache'));
+		}
+
+		$object_cache = get_option('speedycache_object_cache');
+		if(is_array($object_cache)){
+			$object_cache['hashed_prefix'] = null;
+		}
+
+		$export_data = array(
+			'speedycache_options' => get_option('speedycache_options'),
+			'speedycache_cdn' => get_option('speedycache_cdn'),
+			'speedycache_img' => get_option('speedycache_img'),
+			'speedycache_object_cache' => $object_cache,
+			'speedycache_exclude' => get_option('speedycache_exclude'),
+			'speedycache_bloat' => get_option('speedycache_bloat'),
+		);
+
+		wp_send_json_success($export_data);
 	}
 	
 	static function save_deletion_roles(){

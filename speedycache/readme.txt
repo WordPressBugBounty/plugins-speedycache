@@ -4,7 +4,7 @@ Tags: cache, minify, pagespeed, seo, cdn, wordpress cache, website cache, lazy l
 Requires at least: 4.7
 Tested up to: 6.8
 Requires PHP: 7.0
-Stable tag: 1.3.4
+Stable tag: 1.3.5
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -146,6 +146,22 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 4. SpeedyCache Exclude page
 
 == Changelog ==
+
+= 1.3.5 (17 July 2025) =
+* [Feature] Import and export of SpeedyCache settings.
+* [Feature] You can now edit Speculation loading mode and eagerness.
+* [Improvement Pro] Preload Resources now has an option to set device and fetch priority.
+* [Improvement] Minor improvements to the user experience.
+* [Task Pro] Auto Optimization now runs with a reduced scheduling gap of 30 seconds, and a limit of 10 images per page has been introduced to reduce load.
+* [Bug-Fix Pro] An issue with reverting optimized images has been fixed.
+* [Bug-Fix Pro] The 'Remove Google Fonts' feature was not working as expected. This has now been fixed.
+* [Bug-Fix Pro] Previously, if the Redis server became unavailable, disabling Object Cache could lead to errors. This issue has been resolved.
+* [Bug-Fix Pro] Some icons in image optimization tag were not loading, this has been fixed.
+* [Bug-Fix] There was an issue deletion of term ancestors that has been fixed.
+* [Bug-Fix] Previously, when Minify CSS was enabled, relative CSS URLs starting with /wp-content would break. This issue has now been fixed.
+* [Bug-Fix] There was issue with Speculation rule was getting deferred, this has been fixed.
+* [Bug-Fix] WooCommerce wc-cart-checkout-vendors-frontend.js script was breaking when minified, that has been fixed.
+* [Bug-Fix] Exact exclude was not working this has been fixed.
 
 = 1.3.4 (7th May 2025) =
 * [Task] A PHP warning has been fixed.

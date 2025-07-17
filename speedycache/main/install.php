@@ -67,6 +67,18 @@ class Install{
 
 	// Adds WP_CACHE constant in wp-config.php
 	static function add_constant(){
+		
+		if(defined('SITEPAD')){
+			$cache_config_file = WP_CONTENT_DIR . '/enable-advanced-cache.php';
+
+			if ( ! file_exists($cache_config_file) ) {
+				$content = "<?php\n// If this file exists, advanced caching will be enabled\n";
+				file_put_contents($cache_config_file, $content);
+			}
+			
+			return;
+		}
+		
 		$wp_config_file = ABSPATH . '/wp-config.php';
 
 		if(!file_exists($wp_config_file) || !is_writable($wp_config_file)){
@@ -92,6 +104,16 @@ class Install{
 
 	// Removes WP_CACHE Constant.
 	static function remove_constant(){
+		
+		if(defined('SITEPAD')){
+			$file_to_delete = WP_CONTENT_DIR . '/enable-advanced-cache.php';
+
+			if ( file_exists($file_to_delete) && is_writable($file_to_delete) ) {
+				unlink($file_to_delete);
+			}
+			return;
+		}
+		
 		$wp_config_file = ABSPATH . '/wp-config.php';
 
 		if(!file_exists($wp_config_file) || !is_writable($wp_config_file)){

@@ -6,12 +6,17 @@ if(!defined('ABSPATH')){
 	die('HACKING ATTEMPT!');
 }
 
-//echo get_sitemap_url('index');
 
 class Settings{
 
 	static function base(){
 		global $speedycache;
+
+		if(!file_exists(SPEEDYCACHE_CACHE_DIR) || !is_writable(WP_CONTENT_DIR)){
+			echo '<div class="notice notice-error">
+				<p><strong>Error:</strong> '.esc_html__('SpeedyCache was not able to create the cache directory, there might be a permission issue with the '.(defined('SITEPAD') ? 'sitepad-data' : 'wp-content').' directory.', 'speedycache').'</p>
+			</div>';
+		}
 		
 		echo '<div id="speedycache-admin">
 			<div id="speedycache-navigation">
@@ -26,14 +31,22 @@ class Settings{
 					<li><a href="#excludes"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/excludes.svg"/>Excludes</a></li>
 					<li><a href="#preload"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/preload.svg"/>Preloading</a></li>
 					<li><a href="#media"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/media.svg"/>Media</a></li>
-					<li><a href="#cdn"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/cdn.svg"/>CDN</a></li>
-					<li><a href="#object"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/object.svg"/>Object Cache</a></li>
-					<li><a href="#image"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/image.svg"/>Image Optimization</a></li>
-					<li><a href="#bloat"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/broom.svg"/>Bloat</a></li>
-					<li><a href="#db"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/db.svg"/>Database</a></li>
+					<li><a href="#cdn"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/cdn.svg"/>CDN</a></li>';
+					
+					if(!defined('SITEPAD')){
+						echo '<li><a href="#object"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/object.svg"/>Object Cache</a></li>';
+					}
+					
+					echo' <li><a href="#image"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/image.svg"/>Image Optimization</a></li>';
+					
+					if(!defined('SITEPAD')){
+						echo '<li><a href="#bloat"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/broom.svg"/>Bloat</a></li>';
+					}
+					
+					echo' <li><a href="#db"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/db.svg"/>Database</a></li>
 					<li><a href="#settings"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/settings.svg"/>Settings</a></li>';
 
-					if(defined('SPEEDYCACHE_PRO')){
+					if(!defined('SITEPAD') && defined('SPEEDYCACHE_PRO')){
 						echo '<li><a href="#license"><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/license.svg"/> License</a></li>';
 					}
 
@@ -94,26 +107,41 @@ class Settings{
 				echo '</div>
 
 				<div class="speedycache-tab" id="speedycache-settings">';
-					self::settings_tab('Settings');
+					self::settings_tab();
 				echo '</div>';
 				
+				if(!defined('SITEPAD')) {
 					do_action('speedycache_license_tmpl');
-			echo '</div>
-			<div class="speedycache-sidebar">
-				<div class="speedycache-need-help">
-					<h3>Support</h3>
-					<p>'.esc_html__('If you are facing any issue contact us, our team will help you', 'speedycache').'</p>
-					<div>
-					<a href="https://speedycache.com/docs/" class="speedycache-button speedycache-btn-black speedycache-100" target="_blank">Check the Docs</a>
-					<a href="https://softaculous.deskuss.com/open.php?topicId=19" class="speedycache-button speedycache-btn-transparent speedycache-100" target="_blank">Contact Support</a>
+				}
+	
+			echo '</div>';
+			
+			if(!defined('SITEPAD')) {
+				echo '<div class="speedycache-sidebar">
+					<div class="speedycache-need-help">
+					<p>Quick Access</p>
+					<div class="speedycache-quick-links">
+						<div class="speedycache-quick-access-item">
+							<span class="dashicons dashicons-format-status"></span>
+							<a href="https://softaculous.deskuss.com/open.php?topicId=19" target="_blank">Support</a>
+						</div>
+						<div class="speedycache-quick-access-item">
+							<span class="dashicons dashicons-media-document"></span>
+							<a href="https://speedycache.com/docs/" target="_blank">Documentation</a>
+						</div>
+						<div class="speedycache-quick-access-item">
+							<span class="dashicons dashicons-feedback"></span>
+							<a href="https://softaculous.deskuss.com/open.php?topicId=19" target="_blank">Feedback</a>
+						</div>
+						<div class="speedycache-quick-access-item">
+							<span class="dashicons dashicons-star-filled"></span><a href="https://wordpress.org/support/plugin/speedycache/reviews/?rate=5#new-post" target="_blank">Rate Us</a>
+						</div>
 					</div>
 				</div>
-				
-				<div class="speedycache-rate-us">
-					
-				</div>
-			</div>
-		</div>';
+				</div>';
+			}
+		echo '</div>';
+		
 	}
 	
 	static function dashboard_tab(){
@@ -181,17 +209,24 @@ class Settings{
 						</div>
 					</div>
 				</div>
-				<div class="speedycache-dashboard-info">
-				<div class="speedycache-licence-brief speedycache-is-block">
-					<h4>License</h4>
-					<span>Version: '.esc_html(SPEEDYCACHE_VERSION).'</span>
-					<span>Status: '.(!defined('SPEEDYCACHE_PRO') ? 'Free' : (!empty($speedycache->license) && defined('SPEEDYCACHE_PRO') ? 'Pro' : 'License not Linked')).'</span>
-					<span>Expires on: '.(!defined('SPEEDYCACHE_PRO') ? 'Never' : (!empty($speedycache->license) && !empty($license_expires) ?  esc_html($license_expires) : '')).'</span>
-				</div>
+				<div class="speedycache-dashboard-info">';
+				if(!defined('SITEPAD')){
+					echo'
+					<div class="speedycache-licence-brief speedycache-is-block">
+						<h4>License</h4>
+						<span>Version: '.esc_html(SPEEDYCACHE_VERSION).'</span>
+						<span>Status: '.(!defined('SPEEDYCACHE_PRO') ? 'Free' : (!empty($speedycache->license) && defined('SPEEDYCACHE_PRO') ? 'Pro' : 'License not Linked')).'</span>
+						<span>Expires on: '.(!defined('SPEEDYCACHE_PRO') ? 'Never' : (!empty($speedycache->license) && !empty($license_expires) ?  esc_html($license_expires) : '')).'</span>
+					</div>';
+				}
+				echo'
 				<div class="speedycache-is-block">
 					<h4>Cache Info</h4>
-					<span>File Cache: '.(!empty($speedycache->options['status']) ? esc_html__('Enabled') : esc_html__('Disabled')).'</span>
-					<span>Object Cache: '.(!empty($speedycache->object['enable']) ? esc_html__('Enabled') : esc_html__('Disabled')).'</span>
+					<span>File Cache: '.(!empty($speedycache->options['status']) ? esc_html__('Enabled', 'speedycache') : esc_html__('Disabled', 'speedycache')).'</span>';
+					if(!defined('SITEPAD')){
+						echo'<span>Object Cache: '.(!empty($speedycache->object['enable']) ? esc_html__('Enabled', 'speedycache') : esc_html__('Disabled', 'speedycache')).'</span>';
+					}
+					echo'
 					<span>CDN: '.(!empty($speedycache->cdn) && !empty($speedycache->cdn['cdn_type']) ? esc_html(ucfirst($speedycache->cdn['cdn_type'])) : 'OFF').'</span>
 				</div>
 				</div>
@@ -516,120 +551,124 @@ class Settings{
 		</div>';
 		
 		// Critical CSS Option
-		if(defined('SPEEDYCACHE_PRO') && !empty($speedycache->license) && !empty($speedycache->license['active'])){
-			echo '<div class="speedycache-option-wrap">
-				<label for="speedycache_critical_css" class="speedycache-custom-checkbox" style="margin-top:0;">
-					<input type="checkbox" id="speedycache_critical_css" name="critical_css" '.(!empty($speedycache->options['critical_css']) ? ' checked' : '').'/>
-					<div class="speedycache-input-slider"></div>
-				</label>
-				<div class="speedycache-option-info">
-					<span class="speedycache-option-name">'.esc_html__('Critical CSS', 'speedycache');
-					
-					if(!empty($speedycache->options['critical_css'])){
-						echo ' - 
-						<span class="speedycache-action-link" action-name="speedycache_critical_css">'.esc_html__('Create Now', 'speedycache').'</span>
-						&nbsp;&nbsp;|&nbsp;&nbsp;
-						<span class="speedycache-modal-settings-link" setting-id="speedycache_critical_css">'.esc_html__('Logs', 'speedycache').'</span>';
-					}
-					echo '</span><span class="speedycache-option-desc">'.esc_html__('It extracts the necessary CSS of the viewport on load to improve load speed.', 'speedycache').'</span>
-				</div>
-			</div>';
-			
-			echo wp_kses(\SpeedyCache\CriticalCss::status_modal(), array_merge(wp_kses_allowed_html('post'), [
-				'div' => [
-					'modal-id' => true,
-					'class' => true,
-					'title' => true,
-					'style' => true,
-				]
-			]));
-		} else { 
-			if(empty($speedycache->license) || empty($speedycache->license['active'])){
-				$need_key = true;
+		if(!defined('SITEPAD')){
+			if(defined('SPEEDYCACHE_PRO') && !empty($speedycache->license) && !empty($speedycache->license['active'])){
+				echo '<div class="speedycache-option-wrap">
+					<label for="speedycache_critical_css" class="speedycache-custom-checkbox" style="margin-top:0;">
+						<input type="checkbox" id="speedycache_critical_css" name="critical_css" '.(!empty($speedycache->options['critical_css']) ? ' checked' : '').'/>
+						<div class="speedycache-input-slider"></div>
+					</label>
+					<div class="speedycache-option-info">
+						<span class="speedycache-option-name">'.esc_html__('Critical CSS', 'speedycache');
+						
+						if(!empty($speedycache->options['critical_css'])){
+							echo ' - 
+							<span class="speedycache-action-link" action-name="speedycache_critical_css">'.esc_html__('Create Now', 'speedycache').'</span>
+							&nbsp;&nbsp;|&nbsp;&nbsp;
+							<span class="speedycache-modal-settings-link" setting-id="speedycache_critical_css">'.esc_html__('Logs', 'speedycache').'</span>';
+						}
+						echo '</span><span class="speedycache-option-desc">'.esc_html__('It extracts the necessary CSS of the viewport on load to improve load speed.', 'speedycache').'</span>
+					</div>
+				</div>';
+				
+				echo wp_kses(\SpeedyCache\CriticalCss::status_modal(), array_merge(wp_kses_allowed_html('post'), [
+					'div' => [
+						'modal-id' => true,
+						'class' => true,
+						'title' => true,
+						'style' => true,
+					]
+				]));
+			} else { 
+				if(empty($speedycache->license) || empty($speedycache->license['active'])){
+					$need_key = true;
+				}
+				
+				echo '<div class="speedycache-option-wrap speedycache-disabled">
+					<label class="speedycache-custom-checkbox">
+						<input type="checkbox" disabled/>
+						<div class="speedycache-input-slider"></div>
+					</label>
+					<div class="speedycache-option-info">
+						<span class="speedycache-option-name">'.esc_html__('Critical CSS', 'speedycache').' <span class="speedycache-premium-tag">'.(!empty($need_key) ? 'Link License Key' : 'Premium').'</span></span>
+						<span class="speedycache-option-desc">'.esc_html__('It extracts the necessary CSS of the viewport on load to improve load speed.', 'speedycache').'</span>
+					</div>
+				</div>';
 			}
-			
-			echo '<div class="speedycache-option-wrap speedycache-disabled">
-				<label class="speedycache-custom-checkbox">
-					<input type="checkbox" disabled/>
-					<div class="speedycache-input-slider"></div>
-				</label>
-				<div class="speedycache-option-info">
-					<span class="speedycache-option-name">'.esc_html__('Critical CSS', 'speedycache').' <span class="speedycache-premium-tag">'.(!empty($need_key) ? 'Link License Key' : 'Premium').'</span></span>
-					<span class="speedycache-option-desc">'.esc_html__('It extracts the necessary CSS of the viewport on load to improve load speed.', 'speedycache').'</span>
-				</div>
-			</div>';
 		}
 		
-			// Unused CSS
-		if(defined('SPEEDYCACHE_PRO') && !empty($speedycache->license) && !empty($speedycache->license['active'])){
-			echo '<div class="speedycache-option-wrap">
-				<label for="speedycache_unused_css" class="speedycache-custom-checkbox" style="margin-top:0;">
-					<input type="checkbox" id="speedycache_unused_css" name="unused_css" '.(!empty($speedycache->options['unused_css']) ? ' checked' : '').'/>
-					<div class="speedycache-input-slider"></div>
-				</label>
-				<div class="speedycache-option-info">
-					<span class="speedycache-option-name"><span>'.esc_html__('Unused CSS', 'speedycache').'</span><a href="https://speedycache.com/docs/file-optimization/how-to-remove-unused-css/" target="_blank"><span class="dashicons dashicons-info" style="font-size:14px"></span></a>
-					<span class="speedycache-modal-settings-link" setting-id="speedycache_unused_css" style="display:'.(!empty($speedycache->options['unused_css']) ? 'inline-block' : 'none').';">- Settings</span>
-					</span><span class="speedycache-option-desc">'.esc_html__('It removes the unused CSS.', 'speedycache').'</span>
-				</div>
-			</div>
-
-			<div modal-id="speedycache_unused_css" class="speedycache-modal">
-				<div class="speedycache-modal-wrap">
-					<div class="speedycache-modal-header">
-						<div>'.esc_html__('Unused CSS Settings', 'speedycache').'</div>
-						<div title="Close Modal" class="speedycache-close-modal">
-							<span class="dashicons dashicons-no"></span>
-						</div>
+		// Unused CSS
+		if(!defined('SITEPAD')){
+			if(defined('SPEEDYCACHE_PRO') && !empty($speedycache->license) && !empty($speedycache->license['active'])){
+				echo '<div class="speedycache-option-wrap">
+					<label for="speedycache_unused_css" class="speedycache-custom-checkbox" style="margin-top:0;">
+						<input type="checkbox" id="speedycache_unused_css" name="unused_css" '.(!empty($speedycache->options['unused_css']) ? ' checked' : '').'/>
+						<div class="speedycache-input-slider"></div>
+					</label>
+					<div class="speedycache-option-info">
+						<span class="speedycache-option-name" title="Unused CSS"><span>'.esc_html__('Unused CSS', 'speedycache').'</span><a href="https://speedycache.com/docs/file-optimization/how-to-remove-unused-css/" target="_blank"><span class="dashicons dashicons-info" style="font-size:14px"></span></a>
+						<span class="speedycache-modal-settings-link" setting-id="speedycache_unused_css" style="display:'.(!empty($speedycache->options['unused_css']) ? 'inline-block' : 'none').';">- Settings</span>
+						</span><span class="speedycache-option-desc">'.esc_html__('It removes the unused CSS.', 'speedycache').'</span>
 					</div>
-					<div class="speedycache-modal-content speedycache-info-modal">
-						<p>'.esc_html__('Extracts the CSS being used on the page.', 'speedycache').'</p>
-						<div>
-							<label>
-								<span style="font-weight:500; margin:20px 0 3px 0; display:block;">'.esc_html__('Load Unused CSS', 'speedycache').'</span>
-								<span class="speedycache-model-label-description" style="margin-bottom:5px;">'.esc_html__('Select the way you want the Unused CSS to load.', 'speedycache').'</span>
-							</label>
-							<input type="radio" id="speedycache_unusedcss_async" name="unusedcss_load" value="async" '.(empty($speedycache->options['unusedcss_load']) || (!empty($speedycache->options['unusedcss_load']) && $speedycache->options['unusedcss_load'] == 'async') ? 'checked' : '').'/>
-							<input type="radio" id="speedycache_unusedcss_interaction" name="unusedcss_load" value="interaction" '.(!empty($speedycache->options['unusedcss_load']) && $speedycache->options['unusedcss_load'] == 'interaction' ? 'checked' : '').'/>
-							<input type="radio" id="speedycache_unusedcss_remove" name="unusedcss_load" value="remove" '.(!empty($speedycache->options['unusedcss_load']) && $speedycache->options['unusedcss_load'] == 'remove' ? 'checked' : '').'/>
-							<div class="speedycache-radio-input">
-								<label for="speedycache_unusedcss_async">'.esc_html__('Asynchronously', 'speedycache').'</label>
-								<label for="speedycache_unusedcss_interaction">'.esc_html__('On User Interaction', 'speedycache').'</label>
-								<label for="speedycache_unusedcss_remove">'.esc_html__('Remove', 'speedycache').'</label>
+				</div>
+
+				<div modal-id="speedycache_unused_css" class="speedycache-modal">
+					<div class="speedycache-modal-wrap">
+						<div class="speedycache-modal-header">
+							<div>'.esc_html__('Unused CSS Settings', 'speedycache').'</div>
+							<div title="Close Modal" class="speedycache-close-modal">
+								<span class="dashicons dashicons-no"></span>
 							</div>
 						</div>
-						<div class="speedycache-unusedcss-excludes">
-							<label for="speedycache_unused_css_exclude_stylesheets" style="width:100%;">
-								<span style="font-weight:500; margin:20px 0 3px 0; display:block;">'.esc_html__('Exclude Stylesheets', 'speedycache').'</span>
-								<span class="speedycache-model-label-description">'.esc_html__('Enter the URL, name or the stylesheet to be excluded from removing unused CSS.', 'speedycache').'</span>
-								<textarea name="unused_css_exclude_stylesheets" id="speedycache_unused_css_exclude_stylesheets" rows="4" placeholder="Enter URL, CSS file name one per line">'.(!empty($speedycache->options['unused_css_exclude_stylesheets']) ? esc_html(implode("\n", $speedycache->options['unused_css_exclude_stylesheets'])) : '').'</textarea>
-							</label>
-							<br><br>
-							<label for="speedycache_unusedcss_include_selector" style="width:100%;">
-								<span style="font-weight:500; margin:20px 0 3px 0; dispaly:block;">'.esc_html__('Include Selectors', 'speedycache').'</span>
-								<span class="speedycache-model-label-description">'.esc_html__('Enter Selectors you want to be included in used CSS', 'speedycache').'</span>
-								<textarea name="unusedcss_include_selector" id="speedycache_unusedcss_include_selector" rows="4" placeholder="Enter selector one per line">'.(!empty($speedycache->options['unusedcss_include_selector']) ? esc_html(implode("\n", $speedycache->options['unusedcss_include_selector'])) : '').'</textarea>
-							</label>
-						</div>
-						<div class="speedycache-modal-footer">
-							<button type="button" action="close">
-								<span>'.esc_html__('Submit', 'speedycache').'</span>
-							</button>
+						<div class="speedycache-modal-content speedycache-info-modal">
+							<p>'.esc_html__('Extracts the CSS being used on the page.', 'speedycache').'</p>
+							<div>
+								<label>
+									<span style="font-weight:500; margin:20px 0 3px 0; display:block;">'.esc_html__('Load Unused CSS', 'speedycache').'</span>
+									<span class="speedycache-model-label-description" style="margin-bottom:5px;">'.esc_html__('Select the way you want the Unused CSS to load.', 'speedycache').'</span>
+								</label>
+								<input type="radio" id="speedycache_unusedcss_async" name="unusedcss_load" value="async" '.(empty($speedycache->options['unusedcss_load']) || (!empty($speedycache->options['unusedcss_load']) && $speedycache->options['unusedcss_load'] == 'async') ? 'checked' : '').'/>
+								<input type="radio" id="speedycache_unusedcss_interaction" name="unusedcss_load" value="interaction" '.(!empty($speedycache->options['unusedcss_load']) && $speedycache->options['unusedcss_load'] == 'interaction' ? 'checked' : '').'/>
+								<input type="radio" id="speedycache_unusedcss_remove" name="unusedcss_load" value="remove" '.(!empty($speedycache->options['unusedcss_load']) && $speedycache->options['unusedcss_load'] == 'remove' ? 'checked' : '').'/>
+								<div class="speedycache-radio-input">
+									<label for="speedycache_unusedcss_async">'.esc_html__('Asynchronously', 'speedycache').'</label>
+									<label for="speedycache_unusedcss_interaction">'.esc_html__('On User Interaction', 'speedycache').'</label>
+									<label for="speedycache_unusedcss_remove">'.esc_html__('Remove', 'speedycache').'</label>
+								</div>
+							</div>
+							<div class="speedycache-unusedcss-excludes">
+								<label for="speedycache_unused_css_exclude_stylesheets" style="width:100%;">
+									<span style="font-weight:500; margin:20px 0 3px 0; display:block;">'.esc_html__('Exclude Stylesheets', 'speedycache').'</span>
+									<span class="speedycache-model-label-description">'.esc_html__('Enter the URL, name or the stylesheet to be excluded from removing unused CSS.', 'speedycache').'</span>
+									<textarea name="unused_css_exclude_stylesheets" id="speedycache_unused_css_exclude_stylesheets" rows="4" placeholder="Enter URL, CSS file name one per line">'.(!empty($speedycache->options['unused_css_exclude_stylesheets']) ? esc_html(implode("\n", $speedycache->options['unused_css_exclude_stylesheets'])) : '').'</textarea>
+								</label>
+								<br><br>
+								<label for="speedycache_unusedcss_include_selector" style="width:100%;">
+									<span style="font-weight:500; margin:20px 0 3px 0; dispaly:block;">'.esc_html__('Include Selectors', 'speedycache').'</span>
+									<span class="speedycache-model-label-description">'.esc_html__('Enter Selectors you want to be included in used CSS', 'speedycache').'</span>
+									<textarea name="unusedcss_include_selector" id="speedycache_unusedcss_include_selector" rows="4" placeholder="Enter selector one per line">'.(!empty($speedycache->options['unusedcss_include_selector']) ? esc_html(implode("\n", $speedycache->options['unusedcss_include_selector'])) : '').'</textarea>
+								</label>
+							</div>
+							<div class="speedycache-modal-footer">
+								<button type="button" action="close">
+									<span>'.esc_html__('Submit', 'speedycache').'</span>
+								</button>
+							</div>
 						</div>
 					</div>
-				</div>
-			</div>';
-		} else {
-			echo '<div class="speedycache-option-wrap speedycache-disabled">
-				<label class="speedycache-custom-checkbox">
-					<input type="checkbox" disabled/>
-					<div class="speedycache-input-slider"></div>
-				</label>
-				<div class="speedycache-option-info">
-					<span class="speedycache-option-name">'.esc_html__('Unused CSS', 'speedycache').'<span class="speedycache-premium-tag">'.(!empty($need_key) ? 'Link License Key' : 'Premium').'</span></span>
-					<span class="speedycache-option-desc">'.esc_html__('It removes the unused CSS from the page.', 'speedycache').'</span>
-				</div>
-			</div>';
+				</div>';
+			} else {
+				echo '<div class="speedycache-option-wrap speedycache-disabled">
+					<label class="speedycache-custom-checkbox">
+						<input type="checkbox" disabled/>
+						<div class="speedycache-input-slider"></div>
+					</label>
+					<div class="speedycache-option-info">
+						<span class="speedycache-option-name">'.esc_html__('Unused CSS', 'speedycache').'<span class="speedycache-premium-tag">'.(!empty($need_key) ? 'Link License Key' : 'Premium').'</span></span>
+						<span class="speedycache-option-desc">'.esc_html__('It removes the unused CSS from the page.', 'speedycache').'</span>
+					</div>
+				</div>';
+			}
 		}
 		
 		if(defined('SPEEDYCACHE_PRO')){
@@ -973,40 +1012,96 @@ class Settings{
 			</div>';
 		}
 		
-		echo '<div class="speedycache-option-wrap">
-			<label for="speedycache_dns_prefetch" class="speedycache-custom-checkbox">
-				<input type="checkbox" id="speedycache_dns_prefetch" name="dns_prefetch" '.(!empty($speedycache->options['dns_prefetch']) ? 'checked' : '').'/>
-				<div class="speedycache-input-slider"></div>
-			</label>
-			<div class="speedycache-option-info">
-				<span class="speedycache-option-name">'.esc_html__('DNS Prefetch', 'speedycache').' <span class="speedycache-modal-settings-link" setting-id="speedycache_dns_prefetch" style="display:'.(!empty($speedycache->options['dns_prefetch']) ? 'inline-block' : 'none').';">- Settings</span></span>
-				<span class="speedycache-option-desc">'.esc_html__('DNS prefetching can make external files load faster.', 'speedycache').'</span>
+		if ( !defined('SITEPAD') && (version_compare( get_bloginfo( 'version' ), '6.8', '>=' )) ) {
+			echo '<div class="speedycache-option-wrap">
+				<label for="speedycache_speculative_loading" class="speedycache-custom-checkbox">
+					<input type="checkbox" id="speedycache_speculative_loading" name="speculation_loading" '.(!empty($speedycache->options['speculation_loading']) ? 'checked' : '').'/>
+					<div class="speedycache-input-slider"></div>
+				</label>
+				<div class="speedycache-option-info">
+					<span class="speedycache-option-name">'.esc_html__('Edit Speculative Loading', 'speedycache').' <span class="speedycache-modal-settings-link" setting-id="speedycache_speculative_loading" style="display:'.(!empty($speedycache->options['speculation_loading']) ? 'inline-block' : 'none').';">- Settings</span></span>
+					<span class="speedycache-option-desc">'.esc_html__('Change how aggresive you want preloading/prefetching to happen.','speedycache').'</span>
+				</div>
 			</div>
-		</div>
-		<div modal-id="speedycache_dns_prefetch" class="speedycache-modal">
-			<div class="speedycache-modal-wrap">
-				<div class="speedycache-modal-header">
-						<div>'.esc_html__('Prefetch DNS Requests', 'speedycache').'</div>
+			<div modal-id="speedycache_speculative_loading" class="speedycache-modal">
+				<div class="speedycache-modal-wrap">
+					<div class="speedycache-modal-header">
+						<div>'.esc_html__('Speculation Settings', 'speedycache').'</div>
 						<div title="Close Modal" class="speedycache-close-modal">
 							<span class="dashicons dashicons-no"></span>
 						</div>
+					</div>
+					<div class="speedycache-modal-content">
+						<p style="color:#666;margin-top:0 !important;"></p>
+
+						<div class="speedycache-form-input">
+							<label style="width:100%;">
+								<span style="font-weight:500; margin-bottom:5px">'.esc_html__('Select the Speculation Mode', 'speedycache').'</span>
+								<select name="speculation_mode" value="'.(!empty($speedycache->options['speculation_mode']) ? esc_attr($speedycache->options['speculation_mode']) : '').'">
+									<option value="auto" '.(isset($speedycache->options['speculation_mode']) ? selected($speedycache->options['speculation_mode'], 'auto', false) : '').'>'.esc_html__('Auto', 'speedycache').'</option>
+									<option value="prefetch" '.(isset($speedycache->options['speculation_mode']) ? selected($speedycache->options['speculation_mode'], 'prefetch', false) : '').'>'.esc_html__('Prefetch', 'speedycache').'</option>
+									<option value="prerender" '.(isset($speedycache->options['speculation_mode']) ? selected($speedycache->options['speculation_mode'], 'prerender', false) : '').'>'.esc_html__('Prerender', 'speedycache').'</option>
+									<option value="disabled" '.(isset($speedycache->options['speculation_mode']) ? selected($speedycache->options['speculation_mode'], 'disabled', false) : '').'>'.esc_html__('Disabled', 'speedycache').'</option>
+								</select>
+							</label>
+						</div>
+						<div class="speedycache-form-input">
+							<label style="width:100%;">
+								<span style="font-weight:500; margin-bottom:5px">'.esc_html__('Select Eagerness', 'speedycache').'</span>
+								<select name="speculation_eagerness" value="'.(!empty($speedycache->options['speculation_eagerness']) ? esc_attr($speedycache->options['speculation_eagerness']) : '').'">
+									<option value="auto" '.(isset($speedycache->options['speculation_eagerness']) ? selected($speedycache->options['speculation_eagerness'], 'auto', false) : '').'>'.esc_html__('Auto', 'speedycache').'</option>
+									<option value="eager" '.(isset($speedycache->options['speculation_eagerness']) ? selected($speedycache->options['speculation_eagerness'], 'eager', false) : '').'>'.esc_html__('Eager', 'speedycache').'</option>
+									<option value="moderate" '.(isset($speedycache->options['speculation_eagerness']) ? selected($speedycache->options['speculation_eagerness'], 'moderate', false) : '').'>'.esc_html__('Moderate', 'speedycache').'</option>
+									<option value="conservative" '.(isset($speedycache->options['speculation_eagerness']) ? selected($speedycache->options['speculation_eagerness'], 'conservative', false) : '').'>'.esc_html__('Conservative', 'speedycache').'</option>
+								</select>
+							</label>
+						</div>
+					</div>
+					<div class="speedycache-modal-footer">
+						<button type="button" action="close">
+							<span>'.esc_html__('Submit', 'speedycache').'</span>
+						</button>
+					</div>
 				</div>
-				<div class="speedycache-modal-content speedycache-info-modal">
-					<h3>'.esc_html__('How DNS Prefetch can help?', 'speedycache').'</h3>		
-					<p>'.esc_html__('DNS prefetch can improve page load performance by resolving domain names in advance, so that the browser can start loading resources from those domains as soon as possible.', 'speedycache').'</p>
-					
-					<label><strong>'.esc_html__('URLs to prefetch', 'speedycache').'</strong>
-					<span style="display:block;">'.esc_html__('Specify external hosts to be prefetched (no http:, one per line)', 'speedycache').'</span>
-					<textarea name="dns_urls" style="width:100%" rows="4" placeholder="//example.com">'.(!empty($speedycache->options['dns_urls']) ? esc_html(implode("\n", $speedycache->options['dns_urls'])) : '').'</textarea>
-					</label>
-				</div>
-				<div class="speedycache-modal-footer">
-					<button type="button" action="close">
-						<span>'.esc_html__('Submit', 'speedycache').'</span>
-					</button>
+			</div>';
+		}
+				
+		if(!defined('SITEPAD')){
+			echo '<div class="speedycache-option-wrap">
+				<label for="speedycache_dns_prefetch" class="speedycache-custom-checkbox">
+					<input type="checkbox" id="speedycache_dns_prefetch" name="dns_prefetch" '.(!empty($speedycache->options['dns_prefetch']) ? 'checked' : '').'/>
+					<div class="speedycache-input-slider"></div>
+				</label>
+				<div class="speedycache-option-info">
+					<span class="speedycache-option-name">'.esc_html__('DNS Prefetch', 'speedycache').' <span class="speedycache-modal-settings-link" setting-id="speedycache_dns_prefetch" style="display:'.(!empty($speedycache->options['dns_prefetch']) ? 'inline-block' : 'none').';">- Settings</span></span>
+					<span class="speedycache-option-desc">'.esc_html__('DNS prefetching can make external files load faster.', 'speedycache').'</span>
 				</div>
 			</div>
-		</div>';
+			<div modal-id="speedycache_dns_prefetch" class="speedycache-modal">
+				<div class="speedycache-modal-wrap">
+					<div class="speedycache-modal-header">
+							<div>'.esc_html__('Prefetch DNS Requests', 'speedycache').'</div>
+							<div title="Close Modal" class="speedycache-close-modal">
+								<span class="dashicons dashicons-no"></span>
+							</div>
+					</div>
+					<div class="speedycache-modal-content speedycache-info-modal">
+						<h3>'.esc_html__('How DNS Prefetch can help?', 'speedycache').'</h3>		
+						<p>'.esc_html__('DNS prefetch can improve page load performance by resolving domain names in advance, so that the browser can start loading resources from those domains as soon as possible.', 'speedycache').'</p>
+						
+						<label><strong>'.esc_html__('URLs to prefetch', 'speedycache').'</strong>
+						<span style="display:block;">'.esc_html__('Specify external hosts to be prefetched (no http:, one per line)', 'speedycache').'</span>
+						<textarea name="dns_urls" style="width:100%" rows="4" placeholder="//example.com">'.(!empty($speedycache->options['dns_urls']) ? esc_html(implode("\n", $speedycache->options['dns_urls'])) : '').'</textarea>
+						</label>
+					</div>
+					<div class="speedycache-modal-footer">
+						<button type="button" action="close">
+							<span>'.esc_html__('Submit', 'speedycache').'</span>
+						</button>
+					</div>
+				</div>
+			</div>';
+		}
 
 		if(defined('SPEEDYCACHE_PRO')){
 			echo '<div class="speedycache-option-wrap">
@@ -1033,28 +1128,30 @@ class Settings{
 
 		}
 
-		if(defined('SPEEDYCACHE_PRO')){
-			echo '<div class="speedycache-option-wrap">
-				<label for="speedycache_pre_connect" class="speedycache-custom-checkbox">
-					<input type="checkbox" id="speedycache_pre_connect" name="pre_connect" '. (!empty($speedycache->options['pre_connect']) ? 'checked' : '') .'/>
+		if(!defined('SITEPAD')){
+			if(defined('SPEEDYCACHE_PRO')){
+				echo '<div class="speedycache-option-wrap">
+					<label for="speedycache_pre_connect" class="speedycache-custom-checkbox">
+						<input type="checkbox" id="speedycache_pre_connect" name="pre_connect" '. (!empty($speedycache->options['pre_connect']) ? 'checked' : '') .'/>
+						<div class="speedycache-input-slider"></div>
+					</label>
+					<div class="speedycache-option-info">
+						<span class="speedycache-option-name">'. esc_html__('PreConnect', 'speedycache').' <span class="speedycache-modal-settings-link" setting-id="speedycache_pre_connect" style="display:'. (!empty($speedycache->options['pre_connect']) ? 'inline-block' : 'none').';">- Settings</span></span>
+						<span class="speedycache-option-desc">'.esc_html__('Establish early connections to speed up page load.', 'speedycache').'</span>
+					</div>
+				</div>';
+			} else {
+				echo '<div class="speedycache-option-wrap speedycache-disabled">
+				<label class="speedycache-custom-checkbox">
+					<input type="checkbox" disabled/>
 					<div class="speedycache-input-slider"></div>
 				</label>
 				<div class="speedycache-option-info">
-					<span class="speedycache-option-name">'. esc_html__('PreConnect', 'speedycache').' <span class="speedycache-modal-settings-link" setting-id="speedycache_pre_connect" style="display:'. (!empty($speedycache->options['pre_connect']) ? 'inline-block' : 'none').';">- Settings</span></span>
-					<span class="speedycache-option-desc">'.esc_html__('Establish early connections to speed up page load.', 'speedycache').'</span>
+					<span class="speedycache-option-name">'. esc_html__('Preconnect', 'speedycache') .'<span class="speedycache-premium-tag">'.esc_html__('Premium', 'speedycache').'</span></span>
+					<span class="speedycache-option-desc">'. esc_html__('Establish early connections to speed up page load.', 'speedycache').'</span>
 				</div>
 			</div>';
-		} else {
-			echo '<div class="speedycache-option-wrap speedycache-disabled">
-			<label class="speedycache-custom-checkbox">
-				<input type="checkbox" disabled/>
-				<div class="speedycache-input-slider"></div>
-			</label>
-			<div class="speedycache-option-info">
-				<span class="speedycache-option-name">'. esc_html__('Preconnect', 'speedycache') .'<span class="speedycache-premium-tag">'.esc_html__('Premium', 'speedycache').'</span></span>
-				<span class="speedycache-option-desc">'. esc_html__('Establish early connections to speed up page load.', 'speedycache').'</span>
-			</div>
-		</div>';
+			}
 		}
 
 		self::save_btn();
@@ -1072,105 +1169,111 @@ class Settings{
 					</div>
 					<div class="speedycache-modal-content speedycache-info-modal">
 						<form class="speedycache-pseudo-form" data-type="preload_resource_list">'.
-						wp_kses(self::preload_modal_options('preload_resource', ['type' => true, 'crossorigin' => true]), [
+						wp_kses(self::preload_modal_options('preload_resource', ['type' => true, 'crossorigin' => true, 'priority' => true,  'device' => true]), [
 							'input' => ['type' => true, 'value' => true, 'style' => true, 'name' => true, 'placeholder' => true],
 							'option' => ['value' => true],
 							'select' => ['name' => true, 'required' => true],
-							'label' => ['for' => true],
-							'div' => ['class' => true],
-							'span' => true,
+							'label' => ['for' => true, 'style' => true],
+							'div' => ['class' => true, 'style' => true],
+							'span' => ['class' => true, 'title' => true, 'spdf-hover-tooltip' => true, 'spdf-tooltip-position' => true],
 							]).'
 						<div style="display:flex; justify-content:center;">
 							<button type="submit" class="speedycache-button speedycache-btn-black speedycache-preloading-add">Add<span class="speedycache-spinner"></span></button>
 						</div>
 						</form>';
-						
-						if(!empty($speedycache->options['preload_resource_list']) && count($speedycache->options['preload_resource_list']) > 7){
-							echo '<p><strong>Note:</strong> Preloading too many resources can actually slow down your website, so it\'s important to only preload the resources that are absolutely necessary for the initial load. These might include fonts, image, CSS or JS files.</p>';
-						}
+					
+						echo '<p><strong>Note:</strong> Preloading too many resources can actually slow down your website, so it\'s important to only preload the resources that are absolutely necessary for the initial load. These might include fonts, image, CSS or JS files.</p>';
 
-						echo '<table class="speedycache-table speedycache-preloading-table" data-type="preload_resource_list">
+						echo '<div style="width:100%; overflow-x:scroll;"><table class="speedycache-table speedycache-preloading-table" data-type="preload_resource_list">
 							<thead>
 								<tr>
 									<th class="speedycache-table-hitem" scope="col" width="70%">'.esc_html__('Resource', 'speedycache').'</th>
 									<th class="speedycache-table-hitem" scope="col" width="15%">'. esc_html__('Type', 'speedycache').'</th>
 									<th class="speedycache-table-hitem" scope="col" width="10%"><abbr title="Crossorigin">'. esc_html__('CS', 'speedycache').'</abbr></th>
+									<th class="speedycache-table-hitem" scope="col" width="10%">'. esc_html__('Device', 'speedycache').'</th>
+									<th class="speedycache-table-hitem" scope="col" width="10%">'. esc_html__('Fetch Priority', 'speedycache').'</th>
 									<th class="speedycache-table-hitem" scope="col" width="5%"></th>
 								</tr>
 							</thead>
 							<tbody>';
 							
 							if(empty($speedycache->options['preload_resource_list']) || !is_array($speedycache->options['preload_resource_list'])){
-								echo '<tr><td colspan="4" align="center" class="speedycache-preloading-empty">No Resource Preload added yet</td></tr>';
+								echo '<tr><td colspan="6" align="center" class="speedycache-preloading-empty">No Resource Preload added yet</td></tr>';
 							} else {
 								foreach($speedycache->options['preload_resource_list'] as $pkey => $preload_resource){
 									echo '<tr>
 										<td>'.esc_url($preload_resource['resource']).'</td>
 										<td>'.esc_html($preload_resource['type']).'</td>
 										<td>'.(!empty($preload_resource['crossorigin']) ? 'Yes' : 'No').'</td>
-										<td data-key="'.esc_html($pkey).'"><span class="dashicons dashicons-trash"></span></td>
+										<td>'.(!empty($preload_resource['device']) ? esc_html($preload_resource['device']) : 'All').'</td>
+										<td>'.(!empty($preload_resource['fetch_priority']) ? esc_html(ucfirst($preload_resource['fetch_priority'])) : 'Auto').'</td>
+										<td data-key="'.esc_attr($pkey).'"><span class="dashicons dashicons-trash"></span></td>
 									</tr>';
 								}
 							}
 							
 							echo '</tbody>
 						</table>
-					</div>
-				</div>
-			</div>
-
-			<div modal-id="speedycache_pre_connect" class="speedycache-modal">
-				<div class="speedycache-modal-wrap">
-					<div class="speedycache-modal-header">
-							<div>'. esc_html__('Preconnect', 'speedycache').'</div>
-							<div title="Close Modal" class="speedycache-close-modal">
-								<span class="dashicons dashicons-no"></span>
-							</div>
-					</div>
-					<div class="speedycache-modal-content speedycache-info-modal">
-						<form class="speedycache-pseudo-form" data-type="pre_connect_list">								
-						'.wp_kses(self::preload_modal_options('pre_connect', ['crossorigin' => true]), [
-							'input' => ['type' => true, 'value' => true, 'style' => true, 'name' => true, 'placeholder' => true],
-							'option' => ['value' => true],
-							'select' => ['name' => true, 'required' => true],
-							'label' => ['for' => true],
-							'div' => ['class' => true],
-							'span' => true,
-							]).'
-						<div style="display:flex; justify-content:center;">
-							<button tabindex="" type="submit" class="speedycache-button speedycache-btn-black speedycache-preloading-add">Add<span class="speedycache-spinner"></span></button>
 						</div>
-						</form>';
-						if(!empty($speedycache->options['pre_connect_list']) && count($speedycache->options['pre_connect_list']) > 6){
-							echo '<p><strong>Note:</strong> A good rule of thumb is to limit the number of preconnects to 6-8. However, the exact number will vary depending on the specific website and the resources that are being loaded.</p>';
-						}
-
-						echo '<table class="speedycache-table speedycache-preloading-table" data-type="pre_connect_list">
-							<thead>
-								<tr>
-									<th class="speedycache-table-hitem" scope="col" width="80%">'.esc_html__('Resource', 'speedycache').'</th>
-									<th class="speedycache-table-hitem" scope="col" width="15%">'. esc_html__('Crossorigin', 'speedycache').'</th>
-									<th class="speedycache-table-hitem" scope="col" width="5%"></th>
-								</tr>
-							</thead>
-							<tbody>';
-							
-							if(empty($speedycache->options['pre_connect_list']) || !is_array($speedycache->options['pre_connect_list'])){
-								echo '<tr><td colspan="4" align="center" class="speedycache-preloading-empty">'.esc_html__('No PreConnect added yet', 'speedycache').'</td></tr>';
-							} else {
-								foreach($speedycache->options['pre_connect_list'] as $pkey => $pre_connect){
-									echo '<tr>
-										<td>'.esc_html($pre_connect['resource']).'</td>
-										<td>'.(!empty($pre_connect['crossorigin']) ? 'Yes' : 'No').'</td>
-										<td data-key="'.esc_html($pkey).'"><span class="dashicons dashicons-trash"></span></td>
-									</tr>';
-								}
-							}
-							echo '</tbody>
-						</table>
 					</div>
 				</div>
 			</div>';
+			
+			if(!defined('SITEPAD')){
+				echo'
+				<div modal-id="speedycache_pre_connect" class="speedycache-modal">
+					<div class="speedycache-modal-wrap">
+						<div class="speedycache-modal-header">
+								<div>'. esc_html__('Preconnect', 'speedycache').'</div>
+								<div title="Close Modal" class="speedycache-close-modal">
+									<span class="dashicons dashicons-no"></span>
+								</div>
+						</div>
+						<div class="speedycache-modal-content speedycache-info-modal">
+							<form class="speedycache-pseudo-form" data-type="pre_connect_list">								
+							'.wp_kses(self::preload_modal_options('pre_connect', ['crossorigin' => true]), [
+								'input' => ['type' => true, 'value' => true, 'style' => true, 'name' => true, 'placeholder' => true],
+								'option' => ['value' => true],
+								'select' => ['name' => true, 'required' => true],
+								'label' => ['for' => true, 'style' => true],
+								'div' => ['class' => true, 'style' => true],
+								'span' => ['aria-label' => true, 'data-microtip-position' => true, 'role' => true],
+								]).'
+							<div style="display:flex; justify-content:center;">
+								<button tabindex="" type="submit" class="speedycache-button speedycache-btn-black speedycache-preloading-add">Add<span class="speedycache-spinner"></span><span class="dashicons dashicons-yes speedycache-spinner-done"></span></button>
+							</div>
+							</form>';
+							if(!empty($speedycache->options['pre_connect_list']) && count($speedycache->options['pre_connect_list']) > 6){
+								echo '<p><strong>Note:</strong> A good rule of thumb is to limit the number of preconnects to 6-8. However, the exact number will vary depending on the specific website and the resources that are being loaded.</p>';
+							}
+
+							echo '<table class="speedycache-table speedycache-preloading-table" data-type="pre_connect_list">
+								<thead>
+									<tr>
+										<th class="speedycache-table-hitem" scope="col" width="80%">'.esc_html__('Resource', 'speedycache').'</th>
+										<th class="speedycache-table-hitem" scope="col" width="15%">'. esc_html__('Crossorigin', 'speedycache').'</th>
+										<th class="speedycache-table-hitem" scope="col" width="5%"></th>
+									</tr>
+								</thead>
+								<tbody>';
+								
+								if(empty($speedycache->options['pre_connect_list']) || !is_array($speedycache->options['pre_connect_list'])){
+									echo '<tr><td colspan="4" align="center" class="speedycache-preloading-empty">'.esc_html__('No PreConnect added yet', 'speedycache').'</td></tr>';
+								} else {
+									foreach($speedycache->options['pre_connect_list'] as $pkey => $pre_connect){
+										echo '<tr>
+											<td>'.esc_html($pre_connect['resource']).'</td>
+											<td>'.(!empty($pre_connect['crossorigin']) ? 'Yes' : 'No').'</td>
+											<td data-key="'.esc_html($pkey).'"><span class="dashicons dashicons-trash"></span></td>
+										</tr>';
+									}
+								}
+								echo '</tbody>
+							</table>
+						</div>
+					</div>
+				</div>';
+			}
 		}
 	}
 	
@@ -1309,7 +1412,7 @@ class Settings{
 								foreach($exclude['content'] as $exclude){
 									$post = get_post($exclude);
 									
-									if(empty($post) || is_wp_error($post)){
+									if(empty($post)){
 										continue;
 									}
 
@@ -1375,9 +1478,11 @@ class Settings{
 								<option value="attachment" data-partof="page">Attachments</option>
 								<option value="startwith" data-partof="page">Starts With</option>
 								<option value="contain" data-partof="page,useragent,cookie,css,js">Contains</option>
-								<option value="exact" data-partof="page">Is Equal To</option>
-								<option value="googleanalytics" data-partof="page">has Google Analytics Parameters</option>
-								<option value="woocommerce_items_in_cart" data-partof="cookie">has Woocommerce Items in Cart</option>
+								<option value="exact" data-partof="page">URI Is Equal To</option>';
+								if (!defined('SITEPAD')){
+									echo '<option value="woocommerce_items_in_cart" data-partof="cookie">has Woocommerce Items in Cart</option>';
+								}
+								echo'
 							</select>
 						</div>
 						<div class="speedycache-input-wrap" style="display:none;">
@@ -1404,17 +1509,20 @@ class Settings{
 		<form method="POST">';
 		wp_nonce_field('speedycache_ajax_nonce');
 		
-		echo '<input type="hidden" name="action" value="speedycache_save_media_settings"/>
-		<div class="speedycache-option-wrap">
-			<label for="speedycache_gravatar_cache" class="speedycache-custom-checkbox">
-				<input type="checkbox" id="speedycache_gravatar_cache" name="gravatar_cache" '.(!empty($speedycache->options['gravatar_cache']) ? 'checked' : '').'/>
-				<div class="speedycache-input-slider"></div>
-			</label>
-			<div class="speedycache-option-info">
-				<span class="speedycache-option-name">'.esc_html__('Gravatar Cache', 'speedycache').'</span>
-				<span class="speedycache-option-desc">'.esc_html__('Locally host Gravatar', 'speedycache').'</span>
-			</div>
-		</div>';
+		echo '<input type="hidden" name="action" value="speedycache_save_media_settings"/>';
+		if(!defined('SITEPAD')){
+			echo'
+			<div class="speedycache-option-wrap">
+				<label for="speedycache_gravatar_cache" class="speedycache-custom-checkbox">
+					<input type="checkbox" id="speedycache_gravatar_cache" name="gravatar_cache" '.(!empty($speedycache->options['gravatar_cache']) ? 'checked' : '').'/>
+					<div class="speedycache-input-slider"></div>
+				</label>
+				<div class="speedycache-option-info">
+					<span class="speedycache-option-name">'.esc_html__('Gravatar Cache', 'speedycache').'</span>
+					<span class="speedycache-option-desc">'.esc_html__('Locally host Gravatar', 'speedycache').'</span>
+				</div>
+			</div>';
+		}
 		
 		if(defined('SPEEDYCACHE_PRO')){
 			echo '<div class="speedycache-option-wrap">
@@ -1640,6 +1748,36 @@ class Settings{
 			echo '</div>
 			<div class="speedycache-btn-spl-wrapper"><button class="speedycache-button speedycache-btn-black" style="margin-top:10px;">Save<span class="speedycache-spinner"></span></button></div></form></div>';
 		}
+
+		echo '<div class="speedycache-option-info" style="margin-top:20px;">
+		<label class="speedycache-option-name">'.esc_html__('Import / Export Settings', 'speedycache').'</label>
+		<span class="speedycache-option-desc" style="margin-bottom:10px;">'.esc_html__('Imports SpeedyCache Settings from another site or Exports your current SpeedyCache Settings as a JSON file', 'speedycache').'</span>
+		</div>
+		<div>
+			<select id="speedycache-import-export" name="img-exp">
+				<option value="import">Import</option>
+				<option value="export">Export</option>
+			</select>
+		</div>';
+
+		echo '<!-- Import Section -->
+		<form method="POST" enctype="multipart/form-data">
+		<input type="hidden" name="action" value="speedycache_import_settings"/>
+		<div class="speedycache-option-info speedycache-import-block" style="display:block;">
+			<span class="speedycache-option-desc">'.esc_html__('Select a JSON file containing SpeedyCache Settings. This will overwrite your current SpeedyCache Settings', 'speedycache').'</span>
+			<input type="file" name="speedycache_import_file" id="speedycache_import_file" accept=".json" required />
+			<button class="speedycache-button speedycache-btn-black speedycache-import-settings" style="margin-top:10px;">Import Settings<span class="speedycache-spinner"></span></button>
+		</div>
+		</form>';
+
+		echo '<!-- Export Section -->
+		<form method="POST" enctype="multipart/form-data">
+		<input type="hidden" name="action" value="speedycache_export_settings"/>
+		<div class="speedycache-option-info speedycache-export-block" style="display:none;">
+			<span class="speedycache-option-desc">'.esc_html__('Click the button below to download the current SpeedyCache settings as a JSON file', 'speedycache').'</span>
+			<button class="speedycache-button speedycache-btn-black speedycache-export-settings" style="margin-top:10px;">Download Export File<span class="speedycache-spinner"></span></button>
+		</div>
+		</form>';
 	}
 	
 	static  function preload_modal_options($field_name, $fields){
@@ -1653,11 +1791,16 @@ class Settings{
 				break;
 
 			default:
-				$placeholder = site_url() . '/wp-content/uploads/image.jpg';
+				$placeholder = site_url() . '/' . (defined('SITEPAD') ? 'sitepad-data' : 'wp-content') . '/uploads/image.jpg';
 		}
 
-		$html = '<div class="speedycache-preloading-options"><input type="text" name="resource" style="width:100%;" placeholder="'.esc_html($placeholder).'" required/>
-		';
+		$html = '<div class="speedycache-preloading-options">
+		<div class="speedycache-stacked-label" style="width:100%;">
+			<label style="width:100%;">
+				<span>Resource URL <span spdf-hover-tooltip="Required field" spdf-tooltip-position="bottom">*</span></span>
+				<input type="text" name="resource" style="width:100%;" placeholder="'.esc_html($placeholder).'" required/>
+			</label>
+		</div>';
 		
 		$html .= '<div class="speedycache-preload-checkboxes">';
 		if(isset($fields['parent_selector'])){
@@ -1671,24 +1814,38 @@ class Settings{
 		$html .= '</div>';
 		
 		if(isset($fields['type'])){
-			$html .= '<label><span>Resource Type</span><select name="type" required>
+			$html .= '<div class="speedycache-stacked-label"><label><span>Resource Type <span spdf-hover-tooltip="Required field" spdf-tooltip-position="top">*</span></span><select name="type" required>
 				<option value="">Select Type</option>
 				<option value="image">Image</option>
 				<option value="font">Font</option>
 				<option value="script">Script</option>
 				<option value="style">Style</option>
-				<option value="audio">Audio</option>
+				<option value="audio">Audio</option>"
 				<option value="document">Document</option>
 				<option value="video">Video</option>
-			</select></label>';
+			</select></label></div>';
 		}
 		
 		if(isset($fields['priority'])){
-			$html .= '<label><span>Select Priority</span><select name="priority" required>
-				<option value="">Select Priority</option>
+			$html .= '<div class="speedycache-stacked-label"><label>
+			<span>Fetch Priority</span>
+			<select name="fetch_priority">
+				<option value="" selected>Auto</option>
 				<option value="high">High</option>
 				<option value="low">Low</option>
-			</select></label>';
+			</select></label>
+			</div>';
+		}
+		
+		if(isset($fields['device'])){
+			$html .= '<div class="speedycache-stacked-label"><label>
+			<span>Device <span class="dashicons dashicons-editor-help" spdf-hover-tooltip="For this to work, you will need to enable Mobile Override and Mobile Cache options, this is not a required field" spdf-tooltip-position="top"></span></span>
+			<select name="device">
+				<option value="" selected>All</option>
+				<option value="desktop">Desktop</option>
+				<option value="mobile">Mobile</option>
+			</select></label>
+			</div>';
 		}
 		
 		$html .= '</div>';
@@ -1705,7 +1862,7 @@ class Settings{
 	}
 	
 	static function save_btn(){
-		echo '<div class="speedycache-save-settings-wrapper"><button class="speedycache-button speedycache-btn-black">'.esc_html__('Save Settings', 'speedycache').'<span class="speedycache-spinner"></span></button></div>';
+		echo '<div class="speedycache-save-settings-wrapper"><button class="speedycache-button speedycache-btn-black">'.esc_html__('Save Settings', 'speedycache').'<span class="speedycache-spinner"></span><svg class="speedycache-spinner-done" xmlns="http://www.w3.org/2000/svg" height="15px" viewBox="0 -960 960 960" width="15px" fill="#FFF"><path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z"/></svg></button></div>';
 	}
 }
 

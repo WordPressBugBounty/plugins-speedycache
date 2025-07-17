@@ -208,6 +208,7 @@ class CSS{
 	
 	static function fix_relative_path($content, $base_url){
 		
+		// We need base url as the relative url file will be in the same folder as file at the base url or will be relative to path of the base url
 		$content = preg_replace_callback('/url\(\s*["\']?(?!http|https|\/\/)([^"\')]+)["\']?\s*\)/i', function($matches) use ($base_url) {
 			$relative_path = $matches[1];
 			$relative_path = trim($relative_path, '/');
@@ -230,6 +231,8 @@ class CSS{
 				if(!empty($parameter)){
 					$absolute_url .= '?'. $parameter;
 				}
+			} else if(strpos($relative_path, 'wp-content') === 0){
+				$absolute_url = site_url() . '/'. $relative_path;
 			}
 
 			if(empty($absolute_url)){

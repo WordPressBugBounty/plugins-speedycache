@@ -479,13 +479,23 @@ class Delete{
 		$deletable_links = [];
 		foreach($terms as $term){
 			$link = get_term_link($term->term_id);
+			
+			if(is_wp_error($link) || empty($link)){
+				continue;
+			}
 
 			$deletable_links[] = $link;
 
 			$ancestors = get_ancestors($term->term_id, $term->taxonomy);
 			if(!empty($ancestors)){
 				foreach($ancestors as $ancestor){
-					$deletable_links[] = get_term_link($ancestor);
+					$ancestor_link = get_term_link($ancestor);
+
+					if(is_wp_error($ancestor_link) || empty($ancestor_link)){
+						continue;
+					}
+
+					$deletable_links[] = $ancestor_link;
 				}
 			}
 		}

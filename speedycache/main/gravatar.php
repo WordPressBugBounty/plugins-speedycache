@@ -83,7 +83,7 @@ class Gravatar{
 				$user = get_user_by('id', (int) $id_or_email->user_id);
 			}
 
-			if((empty($user) || is_wp_error($user)) && !empty($id_or_email->comment_author_email)){
+			if(empty($user) && !empty($id_or_email->comment_author_email)){
 				$id_or_email = $id_or_email->comment_author_email;
 			}
 

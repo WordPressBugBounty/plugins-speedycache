@@ -72,16 +72,25 @@ class Util{
 	}
 	
 	static function url_to_path($url){
-		$url = preg_replace('/\?.*/', '', $url); // Remooving any query string
+		$url = preg_replace('/\?.*/', '', $url); // Removing any query string
 		$dir_slug = str_replace(site_url(), '', $url);
-		$file_path = ABSPATH . trim($dir_slug, '/');
-
-		return $file_path;
+		if(defined('SITEPAD')){
+			global $sitepad;
+			$file_path = $sitepad['path'] . '/' .trim($dir_slug, '/');
+		} else {
+			$file_path = ABSPATH . trim($dir_slug, '/');
+		}
+		return wp_normalize_path($file_path);
 	}
 	
 	static function path_to_url($path){
 		$path = wp_normalize_path($path);
-		$abs_path = wp_normalize_path(ABSPATH);
+		if(defined('SITEPAD')){
+			global $sitepad;
+			$abs_path = wp_normalize_path($sitepad['path']);
+		} else {
+			$abs_path = wp_normalize_path(ABSPATH);
+		}
 		$path = str_replace($abs_path, '', $path);
 		$url = site_url() . '/' . $path;
 

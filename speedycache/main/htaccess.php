@@ -10,16 +10,21 @@ class Htaccess {
 
 	static function init(){
 
-		if(!empty($_SEVRER['SERVER_SOFTWARE'])){
-			$server_name = sanitize_text_field(wp_unslash($_SEVRER['SERVER_SOFTWARE']));
+		if(!empty($_SERVER['SERVER_SOFTWARE'])){
+			$server_name = sanitize_text_field(wp_unslash($_SERVER['SERVER_SOFTWARE']));
 
 			if(!empty($server_name) && (preg_match('/nginx/i', $server_name) || preg_match('/iis/i', $server_name))){
 				return;
 			}
 		}
 
-		$htaccess_file = ABSPATH . '/.htaccess';
-
+		if(defined('SITEPAD')){
+			global $sitepad;
+			$htaccess_file = $sitepad['path'] . '/.htaccess';
+		}else{
+			$htaccess_file = ABSPATH . '/.htaccess';
+		}
+		
 		if(!file_exists($htaccess_file)){
 			return false;
 		}
@@ -52,12 +57,18 @@ class Htaccess {
 	
 	static function serving_rules(&$htaccess_rules){
 		global $speedycache;
+		$base_cache_path = defined('SITEPAD') ? 'sitepad-data' : 'wp-content';
+		$platform_excludes = defined('SITEPAD') ?
+		'RewriteCond %{REQUEST_URI} !^/(site-admin|login|wp-register|wp-comments-post|cron|sp-json)/ [NC]' :
+		'RewriteCond %{REQUEST_URI} !^/(wp-(?:admin|login|register|comments-post|cron|json))/ [NC]';
 
 		$htaccess_rules .= '# BEGIN speedycache
 <IfModule mod_rewrite.c>
-RewriteEngine On
-RewriteBase /';
-		
+RewriteEngine On';
+		if(!defined('SITEPAD')){
+			$htaccess_rules .= "\n".'RewriteBase /';
+		}
+
 		if(!empty($speedycache->options['mobile']) && !empty($speedycache->options['mobile_theme'])){
 			$htaccess_rules .= '
 	RewriteCond %{REQUEST_METHOD} GET
@@ -66,9 +77,9 @@ RewriteBase /';
 	RewriteCond %{QUERY_STRING} =""
 	'.self::cookie_excludes().'
 	RewriteCond %{REQUEST_URI} !(\/){2}$
-	RewriteCond %{REQUEST_URI} !^/(wp-(?:admin|login|register|comments-post|cron|json))/ [NC]
-	RewriteCond %{DOCUMENT_ROOT}/wp-content/cache/speedycache/%{HTTP_HOST}/mobile-cache%{REQUEST_URI}/index.html -f
-	RewriteRule ^(.*) /wp-content/cache/speedycache/%{HTTP_HOST}/mobile-cache%{REQUEST_URI}/index.html [L]'."\n";
+	'.$platform_excludes.'
+	RewriteCond %{DOCUMENT_ROOT}/'.$base_cache_path.'/cache/speedycache/%{HTTP_HOST}/mobile-cache%{REQUEST_URI}/index.html -f
+	RewriteRule ^(.*) /'.$base_cache_path.'/cache/speedycache/%{HTTP_HOST}/mobile-cache%{REQUEST_URI}/index.html [L]'."\n";
 		}
 
 $htaccess_rules .= '
@@ -84,9 +95,9 @@ $htaccess_rules .= '
 
 	$htaccess_rules .= '
 	RewriteCond %{REQUEST_URI} !(\/){2}$
-	RewriteCond %{REQUEST_URI} !^/(wp-(?:admin|login|register|comments-post|cron|json))/ [NC]
-	RewriteCond %{DOCUMENT_ROOT}/wp-content/cache/speedycache/%{HTTP_HOST}/all%{REQUEST_URI}/index.html -f
-	RewriteRule ^(.*) /wp-content/cache/speedycache/%{HTTP_HOST}/all%{REQUEST_URI}/index.html [L]
+	'.$platform_excludes.'
+	RewriteCond %{DOCUMENT_ROOT}/'.$base_cache_path.'/cache/speedycache/%{HTTP_HOST}/all%{REQUEST_URI}/index.html -f
+	RewriteRule ^(.*) /'.$base_cache_path.'/cache/speedycache/%{HTTP_HOST}/all%{REQUEST_URI}/index.html [L]
 </IfModule>
 # END speedycache' . PHP_EOL;
 	}
@@ -220,10 +231,11 @@ FileETag None
 
 		$cookies[] = 'comment_author_';
 		$cookies[] = 'wordpress_logged_in_';
-		if(is_plugin_active('woo-currency/wcu.php')){
-			$cookies[] = 'wcu_current_currency';
+		if(!defined('SITEPAD')){
+			if(is_plugin_active('woo-currency/wcu.php')){
+				$cookies[] = 'wcu_current_currency';
+			}
 		}
-
 		$cookies_to_exclude = implode('|', $cookies);
 		$cookies_to_exclude = preg_replace("/\s/", "\s", $cookies_to_exclude);
 

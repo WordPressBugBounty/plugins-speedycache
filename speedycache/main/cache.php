@@ -21,8 +21,10 @@ class Cache {
 			define('SPEEDYCACHE_SERVER_HOST', Util::sanitize_server('HTTP_HOST'));
 		}
 
-		if(!empty($speedycache->options['dns_prefetch']) && !empty($speedycache->options['dns_urls'])){
-			add_filter('wp_resource_hints', '\SpeedyCache\Cache::dns_prefetch_hint', 10, 2);
+		if(!defined('SITEPAD')){
+			if(!empty($speedycache->options['dns_prefetch']) && !empty($speedycache->options['dns_urls'])){
+				add_filter('wp_resource_hints', '\SpeedyCache\Cache::dns_prefetch_hint', 10, 2);
+			}
 		}
 		
 		// Filter for Gravatar cache. We are updating the URL of the gravatar here so the local hosted Gravatar URL will be cached.
@@ -46,8 +48,10 @@ class Cache {
 		
 		// Adds preconnect
 		if(class_exists('\SpeedyCache\Enhanced')){
-			if(!empty($speedycache->options['pre_connect']) && !empty($speedycache->options['pre_connect_list'])){
-				add_filter('wp_resource_hints', '\SpeedyCache\Enhanced::pre_connect_hint', 10, 2);
+			if(!defined('SITEPAD')){
+				if(!empty($speedycache->options['pre_connect']) && !empty($speedycache->options['pre_connect_list'])){
+					add_filter('wp_resource_hints', '\SpeedyCache\Enhanced::pre_connect_hint', 10, 2);
+				}
 			}
 		
 			// Adds Preload link tag to the head
@@ -158,7 +162,15 @@ class Cache {
 		
 		if(preg_match('/\./', $_SERVER['REQUEST_URI'])) return false;
 		
-		if(preg_match('/(wp-(?:admin|login|register|comments-post|cron|json))/', $_SERVER['REQUEST_URI'])) return false;
+		if (defined('SITEPAD')) {
+			if (preg_match('/(site-admin|login|wp-register|wp-comments-post|cron|sp-json)/', $_SERVER['REQUEST_URI'])) {
+				return false;
+			}
+		} else {
+			if (preg_match('/(wp-(?:admin|login|register|comments-post|cron|json))/', $_SERVER['REQUEST_URI'])) {
+				return false;
+			}
+		}
 		
 		if(preg_match('/html.*\s(amp|⚡)/', substr(self::$content, 0, 300))) return false;
 		
@@ -253,7 +265,7 @@ class Cache {
 		if(class_exists('\SpeedyCache\Enhanced') && !empty($speedycache->options['critical_images'])){
 			self::$content = \SpeedyCache\Enhanced::preload_critical_images(self::$content);
 		}
-		
+
 		// Delay JS
 		if(!empty($speedycache->options['delay_js']) && class_exists('\SpeedyCache\ProOptimizations')){
 			\SpeedyCache\ProOptimizations::delay_js(self::$content);
@@ -279,7 +291,8 @@ class Cache {
 			!empty($_SERVER['REQUEST_URI']) && 
 			!empty($_SERVER['HTTP_USER_AGENT']) && 
 			class_exists('\SpeedyCache\ProOptimizations') && 
-			speedycache_optserver('HTTP_USER_AGENT') !== 'SpeedyCacheCCSS'
+			speedycache_optserver('HTTP_USER_AGENT') !== 'SpeedyCacheCCSS' && 
+			!(defined('SITEPAD'))
 		){
 			$post_meta = get_post_meta(get_the_ID(), 'speedycache_post_meta', true);
 			
@@ -408,11 +421,15 @@ class Cache {
 		}
 		
 		if($rule['prefix'] === 'startwith' && !empty($rule['content'])){
-			return (bool) preg_match('/^'.preg_quote($rule['content']).'/', trim($_SERVER['REQUEST_URI'], '/'));
+			return (bool) preg_match('/^'.preg_quote($rule['content'], '/').'/', trim($_SERVER['REQUEST_URI'], '/'));
 		}
 		
 		if($rule['prefix'] === 'contain' && !empty($rule['content'])){
-			return (bool) preg_match('/'.preg_quote($rule['content']).'/', trim($_SERVER['REQUEST_URI'], '/'));
+			return (bool) preg_match('/'.preg_quote($rule['content'], '/').'/', trim($_SERVER['REQUEST_URI'], '/'));
+		}
+		
+		if($rule['prefix'] === 'exact' && !empty($rule['content'])){
+			return trim($rule['content'], '/') === trim($_SERVER['REQUEST_URI'], '/');
 		}
 		
 		return false;

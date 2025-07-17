@@ -3,10 +3,12 @@
 Plugin Name: SpeedyCache
 Plugin URI: https://speedycache.com
 Description: SpeedyCache is a plugin that helps you reduce the load time of your website by means of caching, minification, and compression of your website.
-Version: 1.3.4
+Version: 1.3.5
 Author: Softaculous Team
 Author URI: https://speedycache.com/
 Text Domain: speedycache
+License: GPLv3 or later
+License URI: https://www.gnu.org/licenses/gpl-3.0.html
 */
 
 // We need the ABSPATH
@@ -17,7 +19,7 @@ if(!function_exists('add_action')){
 	exit;
 }
 
-$_tmp_plugins = get_option('active_plugins');
+$_tmp_plugins = get_option('active_plugins', []);
 
 // Is the premium plugin loaded ?
 if(!defined('SITEPAD') && in_array('speedycache-pro/speedycache-pro.php', $_tmp_plugins) ){
@@ -49,13 +51,13 @@ if(defined('SPEEDYCACHE_VERSION')) {
 	return;
 }
 
-define('SPEEDYCACHE_VERSION', '1.3.4');
+define('SPEEDYCACHE_VERSION', '1.3.5');
 define('SPEEDYCACHE_DIR', dirname(__FILE__));
 define('SPEEDYCACHE_FILE', __FILE__);
 define('SPEEDYCACHE_BASE', plugin_basename(SPEEDYCACHE_FILE));
 define('SPEEDYCACHE_URL', plugins_url('', __FILE__));
 define('SPEEDYCACHE_BASE_NAME', basename(SPEEDYCACHE_DIR));
-define('SPEEDYCACHE_WP_CONTENT_DIR', defined('WP_CONTENT_FOLDERNAME') ? WP_CONTENT_FOLDERNAME : 'wp-content');
+define('SPEEDYCACHE_WP_CONTENT_DIR', defined('SITEPAD') ? 'sitepad-data' : (defined('WP_CONTENT_FOLDERNAME') ? WP_CONTENT_FOLDERNAME : 'wp-content'));
 define('SPEEDYCACHE_CACHE_DIR', WP_CONTENT_DIR . '/cache/speedycache');
 define('SPEEDYCACHE_WP_CONTENT_URL', content_url());
 define('SPEEDYCACHE_CONFIG_DIR', WP_CONTENT_DIR . '/speedycache-config');
@@ -120,7 +122,7 @@ function speedycache_load_plugin(){
 		return;
 	}
 	
-	// This file is just to handle deprications.
+	// This file is just to handle deprecation.
 	include_once __DIR__ . '/functions.php';
 
 	$speedycache->options = get_option('speedycache_options', []);
@@ -163,6 +165,9 @@ function speedycache_load_plugin(){
 	add_action('transition_comment_status', '\SpeedyCache\Delete::on_comment_status', 10, 3);
 	add_action('admin_bar_menu', '\SpeedyCache\Admin::admin_bar', PHP_INT_MAX);
 	add_action('woocommerce_order_status_changed', '\SpeedyCache\Delete::order');
+	if(!empty($speedycache->options['speculation_loading'])){
+		add_filter('wp_speculation_rules_configuration', 'speedycache_speculation_rules_config');
+	}
 	
 	if(class_exists('\SpeedyCache\Bloat') && !empty($speedycache->bloat)){
 		\SpeedyCache\Bloat::actions();

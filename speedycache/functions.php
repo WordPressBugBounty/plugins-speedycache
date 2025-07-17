@@ -66,3 +66,33 @@ function speedycache_cache_path($loc = ''){
 function speedycache_is_plugin_active($plugin){
 	return in_array($plugin, (array) get_option('active_plugins', array()), true);
 }
+
+// Speculation Rules
+function speedycache_speculation_rules_config($config){
+	if(null === $config){
+		return null;
+	}
+
+	global $speedycache;
+
+	$mode = isset($speedycache->options['speculation_mode']) ? $speedycache->options['speculation_mode'] : 'auto';
+	$eagerness = isset($speedycache->options['speculation_eagerness']) ? $speedycache->options['speculation_eagerness'] : 'auto';
+
+	// Disbaling Speculation Loading
+	if($mode == 'disabled'){
+		return null;
+	}
+
+	if(!in_array($mode, ['prefetch', 'prerender', 'auto'], true)){
+		$mode = 'auto';
+	}
+
+	if(!in_array($eagerness, ['eager', 'moderate', 'conservative', 'auto'], true)){
+		$eagerness = 'auto';
+	}
+
+	return array(
+		'mode' => $mode,
+		'eagerness' => $eagerness,
+	);
+}
