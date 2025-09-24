@@ -4,7 +4,7 @@ Tags: cache, minify, pagespeed, seo, cdn, wordpress cache, website cache, lazy l
 Requires at least: 4.7
 Tested up to: 6.8
 Requires PHP: 7.0
-Stable tag: 1.3.5
+Stable tag: 1.3.6
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -146,6 +146,11 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 4. SpeedyCache Exclude page
 
 == Changelog ==
+
+= 1.3.6 (24th September 2025) =
+* [Improvement Pro] Improved the handling of Object cache config.
+* [Improvement] On some websites, the SpeedyCache settings page was taking longer to load this has been improved.
+* [Bug-Fix Pro] There was an issue with Local Google fonts feature, which was causing generation of PHP Notices, that has been fixed.
 
 = 1.3.5 (17 July 2025) =
 * [Feature] Import and export of SpeedyCache settings.

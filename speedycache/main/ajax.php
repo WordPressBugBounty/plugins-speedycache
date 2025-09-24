@@ -23,7 +23,13 @@ class Ajax{
 		add_action('wp_ajax_speedycache_save_deletion_role_settings', '\SpeedyCache\Ajax::save_deletion_roles');
 		add_action('wp_ajax_speedycache_import_settings', '\SpeedyCache\Ajax::import_settings');
 		add_action('wp_ajax_speedycache_export_settings', '\SpeedyCache\Ajax::export_settings');
-		
+		add_action('wp_ajax_speedycache_close_update_notice', '\SpeedyCache\Ajax::close_update_notice');
+
+		// This is just to make sure, close of update notice works.
+		if(isset($_GET['action']) && 'speedycache_close_update_notice' === sanitize_text_field(wp_unslash($_GET['action']))){
+			add_filter('softaculous_plugin_update_notice', '\SpeedyCache\Admin::update_notice_filter');
+		}
+
 		if(defined('SPEEDYCACHE_PRO')){
 			add_action('wp_ajax_speedycache_optm_db', '\SpeedyCache\Ajax::optm_db');
 			add_action('wp_ajax_speedycache_flush_objects', '\SpeedyCache\Ajax::flush_objs');
@@ -239,11 +245,6 @@ class Ajax{
 	
 		$speedycache->object = $options;
 		
-		if(!file_put_contents(\SpeedyCache\ObjectCache::$conf_file, json_encode($speedycache->object))){
-			wp_send_json_error(__('Unable to modify Object Cache Conf file, the issue might be related to permission on your server.', 'speedycache'));
-			return;
-		}
-		
 		if(!empty($speedycache->object['enable'])){
 			\SpeedyCache\ObjectCache::update_file();
 		} else {
@@ -258,9 +259,17 @@ class Ajax{
 		}
 		
 		try{
-			\SpeedyCache\ObjectCache::boot();
+			\SpeedyCache\ObjectCache::boot($speedycache->object);
 		} catch(\Exception $e) {
+			$speedycache->object['enable'] = false;
+			file_put_contents(\SpeedyCache\ObjectCache::$conf_file, '<?php exit(); '."\n".json_encode($speedycache->object));
 			wp_send_json_error($e->getMessage());
+			return;
+		}
+		
+		// Updating the 
+		if(!file_put_contents(\SpeedyCache\ObjectCache::$conf_file, '<?php exit(); '."\n".json_encode($speedycache->object))){
+			wp_send_json_error(__('Unable to modify Object Cache Conf file, the issue might be related to permission on your server.', 'speedycache'));
 			return;
 		}
 
@@ -789,5 +798,32 @@ class Ajax{
 		\SpeedyCache\CriticalCss::schedule('speedycache_generate_ccss', $urls);
 		
 		wp_send_json_success(array('message' => 'The URLs have been queued to generate Critical CSS'));
+	}
+	
+	static function close_update_notice(){
+
+		if(!wp_verify_nonce($_GET['security'], 'speedycache_promo_nonce')){
+			wp_send_json_error('Security Check failed!');
+		}
+
+		if(!current_user_can('manage_options')){
+			wp_send_json_error('You don\'t have privilege to close this notice!');
+		}
+
+		$plugin_update_notice = get_option('softaculous_plugin_update_notice', []);
+		$available_update_list = get_site_transient('update_plugins');
+		$to_update_plugins = apply_filters('softaculous_plugin_update_notice', []);
+
+		if(empty($available_update_list) || empty($available_update_list->response)){
+			return;
+		}
+
+		foreach($to_update_plugins as $plugin_path => $plugin_name){
+			if(isset($available_update_list->response[$plugin_path])){
+				$plugin_update_notice[$plugin_path] = $available_update_list->response[$plugin_path]->new_version;
+			}
+		}
+
+		update_option('softaculous_plugin_update_notice', $plugin_update_notice);
 	}
 }

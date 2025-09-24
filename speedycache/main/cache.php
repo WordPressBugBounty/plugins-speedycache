@@ -56,7 +56,7 @@ class Cache {
 		
 			// Adds Preload link tag to the head
 			if(!empty($speedycache->options['preload_resources'])){
-				add_action('wp_head', '\SpeedyCache\Enhanced::preload_resource', 1);
+				add_action('wp_head', '\SpeedyCache\Enhanced::preload_resource', 0);
 			}
 		}
 

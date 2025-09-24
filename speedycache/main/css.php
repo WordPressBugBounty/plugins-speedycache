@@ -214,7 +214,7 @@ class CSS{
 			$relative_path = trim($relative_path, '/');
 			$base_path = Util::url_to_path($base_url);
 
-			if(strpos($relative_path, '..') === 0){
+			if(strpos($relative_path, '..') === 0 || strpos($relative_path, './') === 0){
 				$parameter = '';
 				// Some URL's had query parameters, that were breaking when using realpath
 				if(strpos($relative_path, '?') !== FALSE){

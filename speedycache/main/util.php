@@ -142,6 +142,7 @@ class Util{
 		if(!file_exists(WP_CONTENT_DIR .'/speedycache-config/')){
 			if(mkdir(WP_CONTENT_DIR .'/speedycache-config/', 0755, true)){
 				touch(WP_CONTENT_DIR .'/speedycache-config/index.html');
+				file_put_contents(WP_CONTENT_DIR .'/speedycache-config/.htaccess', 'deny from all');
 			}
 		}
 

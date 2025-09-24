@@ -19,6 +19,10 @@ class Admin{
 			add_action('admin_notices', '\SpeedyCache\Admin::combitibility_notice');
 			add_action('admin_menu', '\SpeedyCache\Admin::list_menu');
 			do_action('speedycache_pro_admin_hooks'); // adds hooks for the pro-version.
+			
+			if(!defined('SITEPAD')){
+				self::notices();
+			}
 		}
 		
 		if(self::user_can_delete_cache()){
@@ -218,5 +222,30 @@ class Admin{
 		}
 
 		return true;
+	}
+
+	static function update_notice_filter($plugins = []){
+		$plugins['speedycache/speedycache.php'] = 'SpeedyCache';
+		return $plugins;
+	}
+	
+	static function notices(){
+		// === Plugin Update Notice === //
+		$plugin_update_notice = get_option('softaculous_plugin_update_notice', []);
+		$available_update_list = get_site_transient('update_plugins'); 
+		$plugin_path_slug = 'speedycache/speedycache.php';
+
+		if(
+			!empty($available_update_list) &&
+			is_object($available_update_list) && 
+			!empty($available_update_list->response) &&
+			!empty($available_update_list->response[$plugin_path_slug]) && 
+			(empty($plugin_update_notice) || empty($plugin_update_notice[$plugin_path_slug]) || (!empty($plugin_update_notice[$plugin_path_slug]) &&
+			version_compare($plugin_update_notice[$plugin_path_slug], $available_update_list->response[$plugin_path_slug]->new_version, '<')))
+		){
+			add_action('admin_notices', '\SpeedyCache\Promo::update_notice');
+			add_filter('softaculous_plugin_update_notice', '\SpeedyCache\Admin::update_notice_filter');
+		}
+		// === Plugin Update Notice === //
 	}
 }

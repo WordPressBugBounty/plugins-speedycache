@@ -3,10 +3,6 @@
 		speedycache_handle_tab();
 		
 		window.addEventListener('hashchange', speedycache_handle_tab);
-		
-		if(speedycache_ajax.premium){
-			speedycache_image_optimization();
-		}
 
 		jQuery('.speedycache-save-settings-wrapper button, .speedycache-btn-spl-wrapper button').on('click', speedycache_save_settings);
 		jQuery('#speedycache-analyze').on('click', speedycache_analyze_speed);
@@ -36,7 +32,7 @@
 			speedycache_toggle_settings_link(jQuery(this));
 			speedycache_open_modal(jQuery(this));
 		});
-		
+
 		jQuery('#speedycache_purge_varnish').on('change', function() {
 			if(!jQuery(this).is(':checked')){
 				speedycache_toggle_settings_link(jQuery(this));
@@ -323,6 +319,18 @@ function speedycache_handle_tab(){
 	}
 	
 	let tab = jQuery('#speedycache-'+hash);
+	
+	// Loading the stats for DB tab
+	if(hash == 'db' && typeof speedycache_pro_get_db_optm === 'function'){
+		speedycache_pro_get_db_optm();
+	}
+	
+	// Loading the stats for image optm tab
+	if(hash == 'image' && !speedycache_ajax.load_img){
+		speedycache_ajax.load_img = true;
+		speedycache_image_optimization();
+	}
+
 	tab.siblings().hide();
 	tab.css('display', 'flex');
 	nav.find('.speedycache-nav-selected').removeClass('speedycache-nav-selected');
@@ -903,8 +911,13 @@ function speedycache_image_optimization() {
 			data : {
 				'security' : speedycache_ajax.nonce
 			},
+			beforeSend: function(){
+				jQuery('.speedycache-img-stat-update-status').show();	
+			},
 			success : function(res){
 				stats = res;
+
+				jQuery('.speedycache-img-stat-update-status').hide();
 
 				//For pagination
 				var $total_page = jQuery('.speedycache-total-pages'),
@@ -958,9 +971,9 @@ function speedycache_image_optimization() {
 			}
 		});
 	}
-	
+
 	//Updates Image Optimization Stats on load
-	get_stats(true);
+	get_stats();
 	
 	jQuery('.speedycache-img-opt-settings input').on('change', function() {
 		
