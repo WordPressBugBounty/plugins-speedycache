@@ -2,6 +2,12 @@
 	--speedycache-color: #3d5afe;
 	--speedycache-txcolor: #0f172a; 
 	--speedycache-red: #dc3545;
+	--speedycache-promo-primary: #6366f1;
+	--speedycache-promo-primary-dark: #4f46e5;
+	--speedycache-promo-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+	--speedycache-promo-bg-surface: #ffffff;
+	--speedycache-promo-text-main: #1f2937;
+	--speedycache-promo-text-muted: #6b7280;
 }
 
 #speedycache-admin{
@@ -1198,6 +1204,147 @@ margin:5px 5px 5px 0;
 display:inline-flex;
 flex-direction:column;
 gap:2px;
+}
+
+.speedycache-promo-modern-card {
+margin-top:20px;
+background: var(--speedycache-promo-bg-surface);
+border-radius: 8px;
+padding: 24px;
+/* Modern 'floating' shadow */
+box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025); 
+border: 1px solid rgba(0,0,0,0.05);
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+max-width: 100%;
+box-sizing: border-box;
+position: relative;
+overflow: hidden;
+}
+
+/* Subtle radial sheen in background */
+.speedycache-promo-modern-card::before {
+content: '';
+position: absolute;
+top: -50px;
+right: -50px;
+width: 150px;
+height: 150px;
+background: var(--speedycache-promo-gradient);
+opacity: 0.1;
+filter: blur(40px);
+border-radius: 50%;
+pointer-events: none;
+}
+
+.speedycache-promo-header-group {
+display: flex;
+align-items: center;
+justify-content: space-between;
+margin-bottom: 8px;
+}
+
+.speedycache-promo-title {
+font-size: 18px;
+font-weight: 700;
+color: var(--speedycache-promo-text-main);
+margin: 0;
+letter-spacing: -0.025em;
+}
+
+.speedycache-promo-badge-pro {
+background: var(--speedycache-promo-gradient);
+color: #fff;
+font-size: 10px;
+font-weight: 800;
+text-transform: uppercase;
+padding: 4px 8px;
+border-radius: 20px;
+letter-spacing: 0.05em;
+line-height: 1;
+}
+
+.speedycache-promo-desc {
+font-size: 13px;
+color: var(--speedycache-promo-text-muted);
+margin: 0 0 20px 0;
+line-height: 1.5;
+}
+
+.speedycache-promo-feature-list {
+list-style: none;
+padding: 0;
+margin: 0 0 24px 0;
+}
+
+.speedycache-promo-feature-item {
+display: flex;
+align-items: center;
+margin-bottom: 12px;
+font-size: 14px;
+color: var(--speedycache-promo-text-main);
+font-weight: 500;
+}
+
+/* Custom Gradient Checkmark */
+.speedycache-promo-check-circle {
+width: 20px;
+height: 20px;
+border-radius: 50%;
+background: rgba(99, 102, 241, 0.1); /* Low opacity brand color */
+display: flex;
+align-items: center;
+justify-content: center;
+margin-right: 12px;
+flex-shrink: 0;
+}
+
+.speedycache-promo-check-icon {
+width: 10px;
+height: 6px;
+border-left: 2px solid var(--speedycache-promo-primary);
+border-bottom: 2px solid var(--speedycache-promo-primary);
+transform: rotate(-45deg);
+margin-top: -2px;
+}
+
+.speedycache-promo-btn-main {
+display: flex;
+justify-content: center;
+align-items: center;
+width: 100%;
+padding: 12px;
+background: var(--speedycache-promo-gradient);
+color: #ffffff;
+text-decoration: none;
+border-radius: 8px;
+font-weight: 600;
+font-size: 14px;
+transition: all 0.2s ease;
+box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.3);
+border: none;
+cursor: pointer;
+}
+
+.speedycache-promo-btn-main:hover {
+transform: translateY(-1px);
+box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4);
+color: #ffffff;
+}
+
+.speedycache-promo-btn-main:active {
+transform: translateY(0);
+}
+
+.speedycache-promo-btn-text {
+margin-right: 6px;
+}
+
+/* Simple arrow animation on hover */
+.speedycache-promo-arrow {
+transition: transform 0.2s ease;
+}
+.speedycache-promo-btn-main:hover .speedycache-promo-arrow {
+transform: translateX(3px);
 }
 
 /* TOOL TIP */

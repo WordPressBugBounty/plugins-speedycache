@@ -268,6 +268,23 @@ class Util{
 		return $schedules;
 	}
 	
+	static function custom_cron($schedules){
+
+		// Every 14 days (Fortnight)
+		$schedules['speedycache_fortnight'] = [
+			'interval' => 14 * DAY_IN_SECONDS,
+			'display' => __('Once Every Fortnight', 'speedycache'),
+		];
+
+		// Monthly (approx 30 days)
+		$schedules['speedycache_monthly'] = [
+			'interval' => 30 * DAY_IN_SECONDS,
+			'display' => __('Once Monthly', 'speedycache'),
+		];
+		
+		return $schedules;
+	}
+	
 	// Deletes binaries
 	static function delete_cwebp(){
 		

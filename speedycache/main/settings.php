@@ -137,8 +137,13 @@ class Settings{
 							<span class="dashicons dashicons-star-filled"></span><a href="https://wordpress.org/support/plugin/speedycache/reviews/?rate=5#new-post" target="_blank">Rate Us</a>
 						</div>
 					</div>
-				</div>
 				</div>';
+				
+				if(!defined('SPEEDYCACHE_PRO')){
+					self::pro_upsell();
+				}
+				
+				echo '</div>';
 			}
 		echo '</div>';
 		
@@ -1863,6 +1868,43 @@ class Settings{
 	
 	static function save_btn(){
 		echo '<div class="speedycache-save-settings-wrapper"><button class="speedycache-button speedycache-btn-black">'.esc_html__('Save Settings', 'speedycache').'<span class="speedycache-spinner"></span><svg class="speedycache-spinner-done" xmlns="http://www.w3.org/2000/svg" height="15px" viewBox="0 -960 960 960" width="15px" fill="#FFF"><path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z"/></svg></button></div>';
+	}
+	
+	static function pro_upsell(){
+
+		$features = [
+			'Delay JS Execution',
+			'Defer JS Loading',
+			'Lazy Load Iframes',
+			'Database Cleanup',
+			'Critical CSS',
+			'and More...',
+		];
+
+		echo '<div class="speedycache-promo-modern-card">
+			<div class="speedycache-promo-header-group">
+			<h3 class="speedycache-promo-title">SpeedyCache</h3>
+			<span class="speedycache-promo-badge-pro">Pro</span>
+			</div>
+
+			<p class="speedycache-promo-desc">'.esc_html__('Unlock advanced performance features.', 'speedycache').'</p>
+
+			<ul class="speedycache-promo-feature-list">';
+			foreach($features as $feature){
+				echo '<li class="speedycache-promo-feature-item">
+					<div class="speedycache-promo-check-circle">
+						<div class="speedycache-promo-check-icon"></div>
+					</div>
+					'.esc_html($feature).'
+				</li>';
+			}
+			echo '</ul>
+
+			<a href="https://speedycache.com/pricing/?utm_source=plugin_settings" class="speedycache-promo-btn-main" target="_blank">
+				<span class="speedycache-promo-btn-text">'.esc_html__('Upgrade to Pro', 'speedycache').'</span>
+				<span class="speedycache-promo-arrow">&rarr;</span>
+			</a>
+		</div>';
 	}
 }
 

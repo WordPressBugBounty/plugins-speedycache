@@ -303,4 +303,18 @@ class CDN{
 
 		return 'Failed to purge Cloudflare cache. ' . (isset($body['errors'][0]['message']) ? $body['errors'][0]['message'] : '');
 	}
+
+	// Users can add a custom CDN URL in Head Tag
+	static function cdn_preconnect(){
+		global $speedycache;
+
+		if(empty($speedycache->options['status']) || empty($speedycache->cdn['enabled']) || empty($speedycache->cdn['cdn_url'])){
+			return;
+		}
+		
+		if($speedycache->cdn['cdn_type'] == 'other' || $speedycache->cdn['cdn_type'] == 'bunny'){
+			echo '<link rel="preconnect" href="'. esc_url($speedycache->cdn['cdn_url']) .'" crossorigin="anonymous">';
+		}
+	}
+	
 }

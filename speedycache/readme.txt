@@ -2,9 +2,9 @@
 Contributors: softaculous
 Tags: cache, minify, pagespeed, seo, cdn, wordpress cache, website cache, lazy loading, mobile cache, minify css, combine css, minify js, combine js, gzip, browser caching, render blocking js, preload, widget cache, softaculous, speedycache, performance
 Requires at least: 4.7
-Tested up to: 6.8
+Tested up to: 6.9
 Requires PHP: 7.0
-Stable tag: 1.3.6
+Stable tag: 1.3.7
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -146,6 +146,12 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 4. SpeedyCache Exclude page
 
 == Changelog ==
+
+= 1.3.7 (18th December 2025) =
+* [Feature Pro] Auto optimization for database added.
+* [Improvement] Other and Bunny CDN will add it's URL as preconnect when enabled.
+* [Bug Fix Pro] There was an issue with flushing of DB in Object cache that has been fixed.
+* [Task] Tested with WordPress 6.9
 
 = 1.3.6 (24th September 2025) =
 * [Improvement Pro] Improved the handling of Object cache config.

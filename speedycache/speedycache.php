@@ -3,7 +3,7 @@
 Plugin Name: SpeedyCache
 Plugin URI: https://speedycache.com
 Description: SpeedyCache is a plugin that helps you reduce the load time of your website by means of caching, minification, and compression of your website.
-Version: 1.3.6
+Version: 1.3.7
 Author: Softaculous Team
 Author URI: https://speedycache.com/
 Text Domain: speedycache
@@ -51,7 +51,7 @@ if(defined('SPEEDYCACHE_VERSION')) {
 	return;
 }
 
-define('SPEEDYCACHE_VERSION', '1.3.6');
+define('SPEEDYCACHE_VERSION', '1.3.7');
 define('SPEEDYCACHE_DIR', dirname(__FILE__));
 define('SPEEDYCACHE_FILE', __FILE__);
 define('SPEEDYCACHE_BASE', plugin_basename(SPEEDYCACHE_FILE));
@@ -145,6 +145,8 @@ function speedycache_load_plugin(){
 			touch(SPEEDYCACHE_CONFIG_DIR .'/index.html');
 		}
 	}
+	
+	add_action('cron_schedules', '\SpeedyCache\Util::custom_cron');
 
 	if(wp_doing_ajax() && !empty($_REQUEST['action']) && strpos($_REQUEST['action'], 'speedycache') === 0){
 		\SpeedyCache\Ajax::hooks();
@@ -165,6 +167,11 @@ function speedycache_load_plugin(){
 	add_action('transition_comment_status', '\SpeedyCache\Delete::on_comment_status', 10, 3);
 	add_action('admin_bar_menu', '\SpeedyCache\Admin::admin_bar', PHP_INT_MAX);
 	add_action('woocommerce_order_status_changed', '\SpeedyCache\Delete::order');
+
+	if(!empty($speedycache->options['status']) && !empty($speedycache->cdn['enabled']) && !empty($speedycache->cdn['cdn_url'])){
+		add_action('wp_head','\SpeedyCache\CDN::cdn_preconnect', 5);
+	}
+
 	if(!empty($speedycache->options['speculation_loading'])){
 		add_filter('wp_speculation_rules_configuration', 'speedycache_speculation_rules_config');
 	}
