@@ -47,7 +47,11 @@ class Admin{
 
 		$url = SPEEDYCACHE_URL.'/assets/images/'. (defined('SITEPAD') ? 'grey-icon.svg' : 'icon.svg');
 		
-		$hooknames[] = add_menu_page('SpeedyCache Settings', 'SpeedyCache', $capability, 'speedycache', '\SpeedyCache\Settings::base', $url);
+		if(defined('SITEPAD')){
+			$hooknames[] = add_submenu_page('smtp-mail.php', 'SpeedyCache Settings', 'Site Cache', $capability, 'speedycache', '\SpeedyCache\Settings::base', $url);
+		}else{
+			$hooknames[] = add_menu_page('SpeedyCache Settings', 'SpeedyCache', $capability, 'speedycache', '\SpeedyCache\Settings::base', $url);
+		}
 	
 		foreach($hooknames as $hookname){
 			add_action('load-'.$hookname, '\SpeedyCache\Admin::load_assets');
@@ -100,6 +104,8 @@ class Admin{
 
 		$post_id = Util::sanitize_get('post_id');
 		\SpeedyCache\Delete::cache($post_id);
+		
+		do_action('speedycache_update_stats', '');
 
 		$redirect_to = esc_url_raw(wp_unslash($_REQUEST['referer']));
 
@@ -116,6 +122,8 @@ class Admin{
 
 		$url = esc_url_raw(wp_unslash($_REQUEST['referer']));
 		\SpeedyCache\Delete::url($url);
+		
+		do_action('speedycache_update_stats', '');
 
 		wp_safe_redirect($url);
 		die();

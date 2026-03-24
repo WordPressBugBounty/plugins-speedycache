@@ -4,7 +4,7 @@ Tags: cache, minify, pagespeed, seo, cdn, wordpress cache, website cache, lazy l
 Requires at least: 4.7
 Tested up to: 6.9
 Requires PHP: 7.0
-Stable tag: 1.3.7
+Stable tag: 1.3.8
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -146,6 +146,16 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 4. SpeedyCache Exclude page
 
 == Changelog ==
+
+= 1.3.8 (24rd March 2026) =
+* [Improvement] SpeedyCache now honors DONOTCACHEPAGE constant.
+* [Bug-Fix Pro] wp_cache_flush_runtime was flushing Redis cache as well, this has been fixed to flush only the PHP object cache.
+* [Bug-Fix Pro] Images converted to webp using "Modern Image Formats" plugin were shown in the list of images to be optimized in SpeedyCache Image optimization, this has been fixed.
+* [Bug-Fix Pro] When doing Optimize all in image optimization, for some errors the response was being returned as null this has been fixed.
+* [Bug-Fix] Cache lifespan was not deleting the directories, this has been fixed.
+* [Bug-Fix] Password protected pages were getting cached once a correct password was entered, this has been fixed.
+* [Bug-Fix] Combine JS was adding self closing script tag, this has been fixed.
+* [Task] Calculation of memory used by File based cache was calculated on every settings page load. This has been changed to caching the file size in options table, for faster retrieval.
 
 = 1.3.7 (18th December 2025) =
 * [Feature Pro] Auto optimization for database added.

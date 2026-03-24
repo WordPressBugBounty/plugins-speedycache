@@ -73,6 +73,11 @@ class CSS{
 
 				$minified = self::fix_relative_path($minified, $url);
 				file_put_contents($minified_path, $minified);
+				
+				// Updating the stat data
+				if(defined('SPEEDYCACHE_PRO')){
+					$speedycache->asset_stats += strlen($minified);
+				}
 			}
 
 			$minified_url = Util::path_to_url($minified_path);
@@ -91,6 +96,8 @@ class CSS{
 	}
 	
 	static function combine(&$content){
+		global $speedycache;
+
 		if(empty($content)){
 			return;
 		}
@@ -165,8 +172,14 @@ class CSS{
 		}
 
 		$combined_path = $asset_path.$file_name;
+		
+		// Updating the stats
+		if(!file_exists($combined_path) && defined('SPEEDYCACHE_PRO')){
+			$speedycache->asset_stats += strlen($combined_css);
+		}
 
 		file_put_contents($combined_path, $combined_css);
+
 		$final_url = Util::path_to_url($combined_path);
 
 		// Injecting the Combined CSS

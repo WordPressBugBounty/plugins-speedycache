@@ -19,8 +19,6 @@ class Delete{
 		self::all_cache();
 		self::purge_varnish();
 		\SpeedyCache\CDN::purge();
-		delete_option('speedycache_html_size');
-		delete_option('speedycache_assets_size');
 
 		if(empty($actions)){
 			return;
@@ -81,9 +79,6 @@ class Delete{
 		if(!empty($speedycache->options['preload'])){
 			\SpeedyCache\Preload::url($link);
 		}
-
-		delete_option('speedycache_html_size');
-		delete_option('speedycache_assets_size');
 	}
 
 	/**
@@ -137,6 +132,8 @@ class Delete{
 				continue;
 			}
 
+			do_action('speedycache_cache_pre_unlink', $cache_path);
+
 			unlink($cache_path);
 		}
 	}
@@ -157,6 +154,8 @@ class Delete{
 			\SpeedyCache\Logs::log('delete');
 			\SpeedyCache\Logs::action();
 		}
+		
+		delete_option('speedycache_html_size');
 	}
 
 	// Delete minified and Critical css content.
@@ -173,6 +172,8 @@ class Delete{
 			\SpeedyCache\Logs::log('delete');
 			\SpeedyCache\Logs::action();
 		}
+		
+		delete_option('speedycache_assets_size');
 	}
 
 	// Delete local fonts
@@ -220,12 +221,15 @@ class Delete{
 		$files = array_diff(scandir($dir), ['..', '.']);
 
 		foreach($files as $file){
-			if(is_dir($dir.'/'.$file)){
-				self::rmdir($dir.'/'.$file);
+			$file_path = $dir.'/'.$file;
+			if(is_dir($file_path)){
+				self::rmdir($file_path);
 				continue;
 			}
 
-			unlink($dir.'/'.$file);
+			do_action('speedycache_cache_pre_unlink', $file_path);
+
+			unlink($file_path);
 		}
 
 		rmdir($dir);
@@ -329,10 +333,6 @@ class Delete{
 			}
 		}
 		
-		// We will delete it even if the cache does not gets deleted
-		delete_option('speedycache_html_size');
-		delete_option('speedycache_assets_size');
-		
 		if(class_exists('\SpeedyCache\Logs')){
 			\SpeedyCache\Logs::log('delete');
 			\SpeedyCache\Logs::action();
@@ -351,6 +351,9 @@ class Delete{
 		if(empty($files)){
 			return;
 		}
+		
+		// Need to make sure the folder has been emptied
+		$cache_deleted = false;
 
 		foreach($files as $file){
 			$file_path = $path . '/'. $file;
@@ -364,8 +367,19 @@ class Delete{
 			// We could delete all the cache for lifespan above 10 hrs, but for larger sites deleting 
 			// everything colud be a overhead.
 			if((self::$cache_lifespan >= 10 * HOUR_IN_SECONDS) || ((filemtime($file_path) + self::$cache_lifespan) < time())){
-				unlink($file_path);
+				do_action('speedycache_cache_pre_unlink', $file_path);
+
+				if(unlink($file_path)){
+					$cache_deleted = true;
+				} else {
+					$cache_deleted = false; 
+				}
 			}
+		}
+		
+		// Delete the folder as well, else it will continue to consume inode for cache not even there.
+		if($cache_deleted && file_exists($path) && is_dir($path)){
+			@rmdir($path);
 		}
 	}
 
@@ -422,6 +436,8 @@ class Delete{
 
 		// This is used to delete post which may have the current post as the related post / product in them
 		self::adjacent_posts_urls();
+
+		do_action('speedycache_update_stats', '');
 	}
 
 	// Deletes cache of the page where a comments status got change.
@@ -439,6 +455,8 @@ class Delete{
 		}
 
 		self::cache($comment->comment_parent);
+
+		do_action('speedycache_update_stats', '');
 		
 	}
 
@@ -575,5 +593,7 @@ class Delete{
 
 		$shop_page_id = wc_get_page_id('shop');
 		self::cache($shop_page_id);
+
+		do_action('speedycache_update_stats', '');
 	}
 }

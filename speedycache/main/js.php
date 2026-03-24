@@ -77,8 +77,13 @@ class JS{
 			}
 
 			$minified_path = $asset_path.$file_name;
+			
+			if(!file_exists($minified_path) && defined('SPEEDYCACHE_PRO')){
+				$speedycache->asset_stats += strlen($js); // Updating the stats
+			}
 
 			file_put_contents($minified_path, $js);
+			
 
 			$minified_url = Util::path_to_url($minified_path);
 			$content = str_replace($tag['url'], $minified_url, $content);
@@ -122,7 +127,7 @@ class JS{
 				if(empty($tag['url'])){
 					continue;
 				}
-				
+
 				// We wont combine modules.
 				if(!empty($tag[1]) && strpos($tag[1], 'module')){
 					continue;
@@ -131,12 +136,12 @@ class JS{
 				$url = $tag['url'];
 
 				if(self::is_excluded($url)) continue;
-				
+
 				// We wont process any js that is not present on this WordPress install
 				if(strpos($url, $site_host) === FALSE){
 					continue;
 				}
-				
+
 				$file_path = Util::url_to_path($url);
 
 				if(!file_exists($file_path) || !is_readable($file_path)){
@@ -144,12 +149,12 @@ class JS{
 				}
 
 				$combined_js = file_get_contents($file_path) . "\n" . $combined_js;
-				
+
 				// Removing the JS which has already been combined, as we will add the combined file at the top after title.
 				if(!empty($prev_tag)){
 					$content = str_replace($prev_tag, '', $content);
 				}
-				
+
 				// We remove the previous tag, in current iteration, so at last we have a tag to replace wirh the combined script.
 				$prev_tag = $tag[0];
 			}
@@ -177,17 +182,21 @@ class JS{
 			}
 
 			$combined_path = $asset_path.$file_name;
+			
+			if(!file_exists($combined_path) && defined('SPEEDYCACHE_PRO')){
+				$speedycache->asset_stats += strlen($combined_js); // Updating the stats
+			}
 
 			file_put_contents($combined_path, $combined_js);
 			$final_url = Util::path_to_url($combined_path);
 
 			// Injecting the Combined JS
 			if(!empty($prev_tag)){
-				$content = str_replace($prev_tag, '<script src="'.esc_url($final_url).'" />', $content);
+				$content = str_replace($prev_tag, '<script src="'.esc_url($final_url).'" ></script>', $content);
 				return;
-			}
+			}			
 
-			$content = str_replace('</title>', "</title>\n".'<script src="'.esc_url($final_url).'"/>', $content);
+			$content = str_replace('</title>', "</title>\n".'<script src="'.esc_url($final_url).'"></script>', $content);
 		
 		}
 	}

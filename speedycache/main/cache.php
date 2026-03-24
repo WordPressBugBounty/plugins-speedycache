@@ -72,6 +72,7 @@ class Cache {
 		global $speedycache;
 
 		$cache_path = self::cache_path();
+		$cache_path = wp_normalize_path($cache_path);
 
 		if(!file_exists($cache_path)){
 			mkdir($cache_path, 0755, true);
@@ -85,16 +86,16 @@ class Cache {
 		}
 		
 		$cache_path = wp_normalize_path($cache_path);
+		$comment = 'Cache by SpeedyCache https://speedycache.com at '.time().' -->';
 
-		file_put_contents($cache_path, self::$content . "\n<!-- ".esc_html($mobile)."Cache by SpeedyCache https://speedycache.com -->");
+		file_put_contents($cache_path, self::$content . "\n<!-- ".esc_html($mobile).$comment);
 
 		if(function_exists('gzencode') && !empty($speedycache->options['gzip'])){
-			$gzidded_content = gzencode(self::$content . "\n<!-- ".esc_html($mobile)."Cache by SpeedyCache https://speedycache.com -->");
+			$gzidded_content = gzencode(self::$content . "\n<!-- ".esc_html($mobile).$comment);
 			file_put_contents($cache_path . '.gz', $gzidded_content);
 		}
 
-		delete_option('speedycache_html_size');
-		delete_option('speedycache_assets_size');
+		do_action('speedycache_update_stats', $cache_path);
 	}
 	
 	static function cache_file_name(){		
@@ -177,13 +178,16 @@ class Cache {
 		if(wp_is_mobile() && !empty($speedycache->options['mobile']) && empty($speedycache->options['mobile_theme'])) return false;
 
 		if(is_admin()) return false;
+		
+		// Since: 1.3.8
+		if(defined('DONOTCACHEPAGE') && DONOTCACHEPAGE) return false;
 
 		// Since: 1.2.8 we will only cache the page if user is not logged-in.
 		if(is_user_logged_in()) return false;
 		
 		if(!preg_match( '/<\s*\/\s*html\s*>/i', self::$content)) return false;
 
-		if(is_singular() && post_password_required()) return false;
+		if(is_singular() && self::is_password_protected()) return false;
 		
 		if(function_exists('is_404') && is_404()) return false;
 
@@ -496,4 +500,28 @@ class Cache {
 
 		return \has_shortcode($post->post_content, $shortcode);
 	}
+	
+	/* 
+	 * Earlier we were using post_password_required which returns false if the user has placed correct password
+	 * making the password protected page, visible to all if once correct user opened the page.
+	 *
+	 * Since 1.3.8
+	 *
+	 * @return bool
+	 */
+	static function is_password_protected(){
+		global $post;
+		
+		if(empty($post)){
+			return false;
+		}
+		
+		if(!empty($post->post_password)){
+			return true;
+		}
+		
+		return false;
+	}
 }
+
+
