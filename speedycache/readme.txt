@@ -2,9 +2,9 @@
 Contributors: softaculous
 Tags: cache, minify, pagespeed, seo, cdn, wordpress cache, website cache, lazy loading, mobile cache, minify css, combine css, minify js, combine js, gzip, browser caching, render blocking js, preload, widget cache, softaculous, speedycache, performance
 Requires at least: 4.7
-Tested up to: 6.9
+Tested up to: 7.0
 Requires PHP: 7.0
-Stable tag: 1.3.8
+Stable tag: 1.3.9
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -146,6 +146,10 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 4. SpeedyCache Exclude page
 
 == Changelog ==
+
+= 1.3.9 (31st March 2026) =
+* [Security Fix] There was a minor issue related to Combine CSS that has been fixed, was reported by Chiao-Lin Yu (Steven Meow) - Trend Micro
+* [Task] Tested with WordPress 7.0
 
 = 1.3.8 (24rd March 2026) =
 * [Improvement] SpeedyCache now honors DONOTCACHEPAGE constant.

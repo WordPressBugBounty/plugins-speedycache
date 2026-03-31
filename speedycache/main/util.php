@@ -71,16 +71,40 @@ class Util{
 		return $score_color_map[90];
 	}
 	
-	static function url_to_path($url){
+	static function url_to_path($url, $expected_extension = ''){
+		if(empty($url)){
+			return '';
+		}
+
+		$url = str_replace("\0", '', $url); // Removing null bytes
 		$url = preg_replace('/\?.*/', '', $url); // Removing any query string
 		$dir_slug = str_replace(site_url(), '', $url);
+
 		if(defined('SITEPAD')){
 			global $sitepad;
-			$file_path = $sitepad['path'] . '/' .trim($dir_slug, '/');
+			$abspath = trailingslashit($sitepad['path']);
 		} else {
-			$file_path = ABSPATH . trim($dir_slug, '/');
+			$abspath = trailingslashit(ABSPATH);
 		}
-		return wp_normalize_path($file_path);
+
+		$file_path = realpath($abspath .trim($dir_slug, '/'));
+		if(empty($file_path)){
+			return '';
+		}
+
+		$file_path = wp_normalize_path($file_path);
+
+		// Making sure the path is not out of the WordPress install
+		if(strpos($file_path, wp_normalize_path($abspath)) !== 0){
+			return '';
+		}
+
+		// Checking if the file has expected file extension
+		if(!empty($expected_extension) && pathinfo($file_path, PATHINFO_EXTENSION) !== $expected_extension){
+			return '';
+		}
+
+		return $file_path;
 	}
 	
 	static function path_to_url($path){

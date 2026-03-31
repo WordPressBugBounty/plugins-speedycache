@@ -55,7 +55,7 @@ class JS{
 				continue;
 			}
 
-			$file_path = Util::url_to_path($url);
+			$file_path = Util::url_to_path($url, 'js');
 
 			if(!file_exists($file_path)){
 				continue;
@@ -142,7 +142,7 @@ class JS{
 					continue;
 				}
 
-				$file_path = Util::url_to_path($url);
+				$file_path = Util::url_to_path($url, 'js');
 
 				if(!file_exists($file_path) || !is_readable($file_path)){
 					continue;
