@@ -37,10 +37,9 @@ class Ajax{
 			add_action('wp_ajax_speedycache_save_bloat_settings', '\SpeedyCache\Ajax::save_bloat_settings');
 			add_action('wp_ajax_speedycache_preloading_add_settings', '\SpeedyCache\Ajax::add_preload_settings');
 			add_action('wp_ajax_speedycache_preloading_delete_resource', '\SpeedyCache\Ajax::delete_preload_resource');
-			if(!defined('SITEPAD')){
-				// Critical CSS
-				add_action('wp_ajax_speedycache_critical_css', '\SpeedyCache\Ajax::generate_critical_css');
-			}
+
+			// Critical CSS
+			add_action('wp_ajax_speedycache_critical_css', '\SpeedyCache\Ajax::generate_critical_css');
 		}
 	}
 
@@ -82,6 +81,7 @@ class Ajax{
 		$options['purge_exact_time'] = Util::sanitize_request('purge_exact_time', 0);
 		$options['auto_purge_fonts'] = isset($_REQUEST['auto_purge_fonts']);
 		$options['auto_purge_gravatar'] = isset($_REQUEST['auto_purge_gravatar']);
+		$options['disable_webp'] = isset($_REQUEST['disable_webp']);
 
 		wp_clear_scheduled_hook('speedycache_purge_cache');
 		wp_clear_scheduled_hook('speedycache_preload');
@@ -112,7 +112,7 @@ class Ajax{
 		$options['minify_css'] = isset($_REQUEST['minify_css']);
 		$options['combine_css'] = isset($_REQUEST['combine_css']);
 
-		if(!defined('SITEPAD')){
+		if(defined('SPEEDYCACHE_PRO')){
 			$options['unused_css'] = isset($_REQUEST['unused_css']);
 			$options['critical_css'] = isset($_REQUEST['critical_css']);
 			$options['unusedcss_load'] = Util::sanitize_request('unusedcss_load');
@@ -298,6 +298,7 @@ class Ajax{
 		$options['enabled'] = isset($_REQUEST['enable_cdn']);
 		$options['cdn_type'] = Util::sanitize_request('cdn_type');
 		$options['cdn_key'] = sanitize_text_field(wp_unslash($_REQUEST['cdn_key']));
+		$options['enabled_cloudflare'] = isset($_REQUEST['enabled_cloudflare']);
 		$options['cdn_url'] = sanitize_url(wp_unslash($_REQUEST['cdn_url']));
 		$options['excludekeywords'] = !empty($_REQUEST['excludekeywords']) ? explode("\n", sanitize_textarea_field(wp_unslash($_REQUEST['excludekeywords']))) : [];
 		$options['file_types'] = !empty($_REQUEST['file_types']) ? explode("\n", sanitize_textarea_field(wp_unslash($_REQUEST['file_types']))) : [];
@@ -331,7 +332,15 @@ class Ajax{
 		}
 
 		update_option('speedycache_cdn', $options);
+		
+		
 		$speedycache->cdn = $options;
+		
+		do_action('speedycache_after_cdn_save');
+		
+		if(!empty($speedycache->cdn['error'])){
+			wp_send_json_error(esc_html($speedycache->cdn['error']));
+		}
 
 		wp_send_json_success();
 	}
@@ -411,6 +420,15 @@ class Ajax{
 		
 		if(!empty($_REQUEST['settings']['device'])){
 			$settings['device'] = sanitize_text_field(wp_unslash($_REQUEST['settings']['device']));
+		}
+		
+		$pages_string = $_REQUEST['settings']['preload_resource_pages'];
+		$pages = [];
+		if(!empty($pages_string)){
+			$pages = map_deep(explode("\n", $pages_string), 'trim');
+			if(!empty($pages) && is_array($pages)){
+				$settings['pages'] = map_deep(wp_unslash($pages), 'sanitize_url');
+			}
 		}
 
 		if(empty($speedycache->options[$type])){

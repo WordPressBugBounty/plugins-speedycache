@@ -115,9 +115,15 @@ class Delete{
 			// Cache path for Mobile cache
 			if(!empty($speedycache->options['mobile_theme'])){
 				$mobile_path = glob(Util::cache_path('mobile-cache') . $file);
+				$mobile_gz_path = glob(Util::cache_path('mobile-cache') . $file .'.gz');
+				
+				$mobile_paths = array_merge(
+					is_array($mobile_path) ? $mobile_path : [], 
+					is_array($mobile_gz_path) ? $mobile_gz_path : []
+				);
 
-				if(!empty($mobile_path)){
-					$cache_paths = array_merge($cache_paths, $mobile_path);
+				if(!empty($mobile_paths)){
+					$cache_paths = array_merge($cache_paths, $mobile_paths);
 				}
 			}
 		}

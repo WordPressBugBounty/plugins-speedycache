@@ -295,8 +295,7 @@ class Cache {
 			!empty($_SERVER['REQUEST_URI']) && 
 			!empty($_SERVER['HTTP_USER_AGENT']) && 
 			class_exists('\SpeedyCache\ProOptimizations') && 
-			speedycache_optserver('HTTP_USER_AGENT') !== 'SpeedyCacheCCSS' && 
-			!(defined('SITEPAD'))
+			speedycache_optserver('HTTP_USER_AGENT') !== 'SpeedyCacheCCSS'
 		){
 			$post_meta = get_post_meta(get_the_ID(), 'speedycache_post_meta', true);
 			

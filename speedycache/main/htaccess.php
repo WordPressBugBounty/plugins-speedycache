@@ -43,13 +43,30 @@ class Htaccess {
 		self::serving_rules($htaccess_rules);
 
 		// TODO: Need to add modified time here.
+
+		// remember where the first SpeedyCache block lives so we don't drag user rules above it
+		$marker_offset = null;
+		foreach(['LBCspeedycache', 'WEBPspeedycache', 'Gzipspeedycache', 'SpeedyCacheheaders', 'speedycache'] as $marker){
+			if(preg_match("/#\s?BEGIN\s?" . preg_quote($marker, '/') . "/s", $htaccess_content, $matches, PREG_OFFSET_CAPTURE)){
+				$marker_offset = $marker_offset === null ? $matches[0][1] : min($marker_offset, $matches[0][1]);
+			}
+		}
+
 		// Cleaning stuff
 		$htaccess_content = preg_replace("/#\s?BEGIN\s?LBCspeedycache.*?#\s?END\s?LBCspeedycache/s", '', $htaccess_content);
 		$htaccess_content = preg_replace("/#\s?BEGIN\s?WEBPspeedycache.*?#\s?END\s?WEBPspeedycache/s", '', $htaccess_content);
 		$htaccess_content = preg_replace("/#\s?BEGIN\s?Gzipspeedycache.*?#\s?END\s?Gzipspeedycache/s", '', $htaccess_content);
 		$htaccess_content = preg_replace("/#\s?BEGIN\s?SpeedyCacheheaders.*?#\s?END\s?SpeedyCacheheaders/s", '', $htaccess_content);
 		$htaccess_content = preg_replace("/#\s?BEGIN\s?speedycache.*?#\s?END\s?speedycache/s", '', $htaccess_content);
-		$htaccess_content = $htaccess_rules ."\n" . trim($htaccess_content);
+		$htaccess_content = trim($htaccess_content);
+
+		if($marker_offset === null || $marker_offset === 0){
+			$htaccess_content = $htaccess_rules . "\n" . $htaccess_content;
+		}else{
+			$before = substr($htaccess_content, 0, $marker_offset); // The content before our rules
+			$after  = substr($htaccess_content, $marker_offset); // The content after our rules
+			$htaccess_content = rtrim($before) . "\n\n" . $htaccess_rules . "\n" . ltrim($after); // rebuilding the full htaccess rules
+		}
 
 		file_put_contents($htaccess_file, $htaccess_content);
 
@@ -144,6 +161,12 @@ $htaccess_rules .= '
 	}
 
 	static function webp(&$htaccess_rules){
+		global $speedycache;
+		
+		if(!empty($speedycache->options['disable_webp'])){
+			return;
+		}
+
 		$htaccess_rules .= '# BEGIN WEBPspeedycache
 <IfModule mod_rewrite.c>
 	RewriteEngine On

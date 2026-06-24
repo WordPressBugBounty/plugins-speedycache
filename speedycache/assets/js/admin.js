@@ -370,12 +370,12 @@ function speedycache_save_settings(){
 		// Need to show a tick if the save was success
 		if(!has_error){
 			let check = jEle.find('svg.speedycache-spinner-done');
-      if(check){
-  			check.addClass('speedycache-spinner-done-active');
-  			setTimeout(() => {
-  				check.removeClass('speedycache-spinner-done-active');
-  			}, 2000);
-      }
+			if(check){
+				check.addClass('speedycache-spinner-done-active');
+				setTimeout(() => {
+					check.removeClass('speedycache-spinner-done-active');
+				}, 2000);
+			}
 		}
 	});
 }
@@ -660,7 +660,7 @@ function speedycache_add_preload_resource() {
 	form_data.forEach((field) => {
 		form_val[field.name] = field.value;
 		
-		let non_required_fields = ['fetch_priority', 'device'];
+		let non_required_fields = ['fetch_priority', 'device', 'preload_resource_pages'];
 		if(!field.value && !non_required_fields.includes(field.name)){
 			error = true;
 		}

@@ -82,7 +82,11 @@ class Util{
 
 		if(defined('SITEPAD')){
 			global $sitepad;
-			$abspath = trailingslashit($sitepad['path']);
+			if(strpos($dir_slug, 'site-data/plugins/') !== false){
+				$abspath = trailingslashit($sitepad['editor_path']);
+			}else{
+				$abspath = trailingslashit($sitepad['path']);
+			}
 		} else {
 			$abspath = trailingslashit(ABSPATH);
 		}
@@ -111,12 +115,16 @@ class Util{
 		$path = wp_normalize_path($path);
 		if(defined('SITEPAD')){
 			global $sitepad;
-			$abs_path = wp_normalize_path($sitepad['path']);
+			if(strpos($path, 'site-data/plugins/') !== false){
+				$abs_path = wp_normalize_path($sitepad['editor_path']);
+			}else{
+				$abs_path = wp_normalize_path($sitepad['path']);
+			}
 		} else {
 			$abs_path = wp_normalize_path(ABSPATH);
 		}
 		$path = str_replace($abs_path, '', $path);
-		$url = site_url() . '/' . $path;
+		$url = site_url() . '/' . ltrim($path, '/');
 
 		return $url;
 	}

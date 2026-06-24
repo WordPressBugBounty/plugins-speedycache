@@ -232,7 +232,7 @@ class Settings{
 						echo'<span>Object Cache: '.(!empty($speedycache->object['enable']) ? esc_html__('Enabled', 'speedycache') : esc_html__('Disabled', 'speedycache')).'</span>';
 					}
 					echo'
-					<span>CDN: '.(!empty($speedycache->cdn) && !empty($speedycache->cdn['cdn_type']) ? esc_html(ucfirst($speedycache->cdn['cdn_type'])) : 'OFF').'</span>
+					<span>CDN: '.(!empty($speedycache->cdn) && !empty($speedycache->cdn['enabled']) && !empty($speedycache->cdn['cdn_type']) ? esc_html(ucfirst($speedycache->cdn['cdn_type'])) : 'OFF').'</span>
 				</div>
 				</div>
 			</div>';
@@ -473,6 +473,18 @@ class Settings{
 			</div>
 		</div>
 
+		<!--Remove htaccess rules for the webp (WEBPspeedycache)-->
+		<div class="speedycache-option-wrap">
+			<label for="speedycache_disable_webp" class="speedycache-custom-checkbox">
+				<input type="checkbox" id="speedycache_disable_webp" name="disable_webp" '.(!empty($speedycache->options['disable_webp']) ? ' checked' : '').'/>
+				<div class="speedycache-input-slider"></div>
+			</label>
+			<div class="speedycache-option-info">
+				<span class="speedycache-option-name">'.esc_html__('Disable webp', 'speedycache').'</span>
+				<span class="speedycache-option-desc">'.esc_html__('Removes webp (WEBPspeedycache) rules from htaccess file.', 'speedycache').'</span>
+			</div>
+		</div>
+
 		<h3>'.esc_html__('Cache Lifespan', 'speedycache').'</h3>
 		<p>'.esc_html__('This defines the time after which the cache will be automatically deleted. Set to 0 to disable automatic cache deletion.', 'speedycache').'</p>
 		<input type="number" min="0" name="purge_interval" value="'.(isset($speedycache->options['purge_interval']) ? esc_html($speedycache->options['purge_interval']) : 24).'"/>
@@ -556,124 +568,120 @@ class Settings{
 		</div>';
 		
 		// Critical CSS Option
-		if(!defined('SITEPAD')){
-			if(defined('SPEEDYCACHE_PRO') && !empty($speedycache->license) && !empty($speedycache->license['active'])){
-				echo '<div class="speedycache-option-wrap">
-					<label for="speedycache_critical_css" class="speedycache-custom-checkbox" style="margin-top:0;">
-						<input type="checkbox" id="speedycache_critical_css" name="critical_css" '.(!empty($speedycache->options['critical_css']) ? ' checked' : '').'/>
-						<div class="speedycache-input-slider"></div>
-					</label>
-					<div class="speedycache-option-info">
-						<span class="speedycache-option-name">'.esc_html__('Critical CSS', 'speedycache');
-						
-						if(!empty($speedycache->options['critical_css'])){
-							echo ' - 
-							<span class="speedycache-action-link" action-name="speedycache_critical_css">'.esc_html__('Create Now', 'speedycache').'</span>
-							&nbsp;&nbsp;|&nbsp;&nbsp;
-							<span class="speedycache-modal-settings-link" setting-id="speedycache_critical_css">'.esc_html__('Logs', 'speedycache').'</span>';
-						}
-						echo '</span><span class="speedycache-option-desc">'.esc_html__('It extracts the necessary CSS of the viewport on load to improve load speed.', 'speedycache').'</span>
-					</div>
-				</div>';
-				
-				echo wp_kses(\SpeedyCache\CriticalCss::status_modal(), array_merge(wp_kses_allowed_html('post'), [
-					'div' => [
-						'modal-id' => true,
-						'class' => true,
-						'title' => true,
-						'style' => true,
-					]
-				]));
-			} else { 
-				if(empty($speedycache->license) || empty($speedycache->license['active'])){
-					$need_key = true;
-				}
-				
-				echo '<div class="speedycache-option-wrap speedycache-disabled">
-					<label class="speedycache-custom-checkbox">
-						<input type="checkbox" disabled/>
-						<div class="speedycache-input-slider"></div>
-					</label>
-					<div class="speedycache-option-info">
-						<span class="speedycache-option-name">'.esc_html__('Critical CSS', 'speedycache').' <span class="speedycache-premium-tag">'.(!empty($need_key) ? 'Link License Key' : 'Premium').'</span></span>
-						<span class="speedycache-option-desc">'.esc_html__('It extracts the necessary CSS of the viewport on load to improve load speed.', 'speedycache').'</span>
-					</div>
-				</div>';
+		if(defined('SPEEDYCACHE_PRO') && !empty($speedycache->license) && !empty($speedycache->license['active'])){
+			echo '<div class="speedycache-option-wrap">
+				<label for="speedycache_critical_css" class="speedycache-custom-checkbox" style="margin-top:0;">
+					<input type="checkbox" id="speedycache_critical_css" name="critical_css" '.(!empty($speedycache->options['critical_css']) ? ' checked' : '').'/>
+					<div class="speedycache-input-slider"></div>
+				</label>
+				<div class="speedycache-option-info">
+					<span class="speedycache-option-name">'.esc_html__('Critical CSS', 'speedycache');
+					
+					if(!empty($speedycache->options['critical_css'])){
+						echo ' - 
+						<span class="speedycache-action-link" action-name="speedycache_critical_css">'.esc_html__('Create Now', 'speedycache').'</span>
+						&nbsp;&nbsp;|&nbsp;&nbsp;
+						<span class="speedycache-modal-settings-link" setting-id="speedycache_critical_css">'.esc_html__('Logs', 'speedycache').'</span>';
+					}
+					echo '</span><span class="speedycache-option-desc">'.esc_html__('It extracts the necessary CSS of the viewport on load to improve load speed.', 'speedycache').'</span>
+				</div>
+			</div>';
+			
+			echo wp_kses(\SpeedyCache\CriticalCss::status_modal(), array_merge(wp_kses_allowed_html('post'), [
+				'div' => [
+					'modal-id' => true,
+					'class' => true,
+					'title' => true,
+					'style' => true,
+				]
+			]));
+		} else { 
+			if(empty($speedycache->license) || empty($speedycache->license['active'])){
+				$need_key = true;
 			}
+			
+			echo '<div class="speedycache-option-wrap speedycache-disabled">
+				<label class="speedycache-custom-checkbox">
+					<input type="checkbox" disabled/>
+					<div class="speedycache-input-slider"></div>
+				</label>
+				<div class="speedycache-option-info">
+					<span class="speedycache-option-name">'.esc_html__('Critical CSS', 'speedycache').' <span class="speedycache-premium-tag">'.(!empty($need_key) ? 'Link License Key' : 'Premium').'</span></span>
+					<span class="speedycache-option-desc">'.esc_html__('It extracts the necessary CSS of the viewport on load to improve load speed.', 'speedycache').'</span>
+				</div>
+			</div>';
 		}
 		
 		// Unused CSS
-		if(!defined('SITEPAD')){
-			if(defined('SPEEDYCACHE_PRO') && !empty($speedycache->license) && !empty($speedycache->license['active'])){
-				echo '<div class="speedycache-option-wrap">
-					<label for="speedycache_unused_css" class="speedycache-custom-checkbox" style="margin-top:0;">
-						<input type="checkbox" id="speedycache_unused_css" name="unused_css" '.(!empty($speedycache->options['unused_css']) ? ' checked' : '').'/>
-						<div class="speedycache-input-slider"></div>
-					</label>
-					<div class="speedycache-option-info">
-						<span class="speedycache-option-name" title="Unused CSS"><span>'.esc_html__('Unused CSS', 'speedycache').'</span><a href="https://speedycache.com/docs/file-optimization/how-to-remove-unused-css/" target="_blank"><span class="dashicons dashicons-info" style="font-size:14px"></span></a>
-						<span class="speedycache-modal-settings-link" setting-id="speedycache_unused_css" style="display:'.(!empty($speedycache->options['unused_css']) ? 'inline-block' : 'none').';">- Settings</span>
-						</span><span class="speedycache-option-desc">'.esc_html__('It removes the unused CSS.', 'speedycache').'</span>
+		if(defined('SPEEDYCACHE_PRO') && !empty($speedycache->license) && !empty($speedycache->license['active'])){
+			echo '<div class="speedycache-option-wrap">
+				<label for="speedycache_unused_css" class="speedycache-custom-checkbox" style="margin-top:0;">
+					<input type="checkbox" id="speedycache_unused_css" name="unused_css" '.(!empty($speedycache->options['unused_css']) ? ' checked' : '').'/>
+					<div class="speedycache-input-slider"></div>
+				</label>
+				<div class="speedycache-option-info">
+					<span class="speedycache-option-name" title="Unused CSS"><span>'.esc_html__('Unused CSS', 'speedycache').'</span><a href="https://speedycache.com/docs/file-optimization/how-to-remove-unused-css/" target="_blank"><span class="dashicons dashicons-info" style="font-size:14px"></span></a>
+					<span class="speedycache-modal-settings-link" setting-id="speedycache_unused_css" style="display:'.(!empty($speedycache->options['unused_css']) ? 'inline-block' : 'none').';">- Settings</span>
+					</span><span class="speedycache-option-desc">'.esc_html__('It removes the unused CSS.', 'speedycache').'</span>
+				</div>
+			</div>
+
+			<div modal-id="speedycache_unused_css" class="speedycache-modal">
+				<div class="speedycache-modal-wrap">
+					<div class="speedycache-modal-header">
+						<div>'.esc_html__('Unused CSS Settings', 'speedycache').'</div>
+						<div title="Close Modal" class="speedycache-close-modal">
+							<span class="dashicons dashicons-no"></span>
+						</div>
+					</div>
+					<div class="speedycache-modal-content speedycache-info-modal">
+						<p>'.esc_html__('Extracts the CSS being used on the page.', 'speedycache').'</p>
+						<div>
+							<label>
+								<span style="font-weight:500; margin:20px 0 3px 0; display:block;">'.esc_html__('Load Unused CSS', 'speedycache').'</span>
+								<span class="speedycache-model-label-description" style="margin-bottom:5px;">'.esc_html__('Select the way you want the Unused CSS to load.', 'speedycache').'</span>
+							</label>
+							<input type="radio" id="speedycache_unusedcss_async" name="unusedcss_load" value="async" '.(empty($speedycache->options['unusedcss_load']) || (!empty($speedycache->options['unusedcss_load']) && $speedycache->options['unusedcss_load'] == 'async') ? 'checked' : '').'/>
+							<input type="radio" id="speedycache_unusedcss_interaction" name="unusedcss_load" value="interaction" '.(!empty($speedycache->options['unusedcss_load']) && $speedycache->options['unusedcss_load'] == 'interaction' ? 'checked' : '').'/>
+							<input type="radio" id="speedycache_unusedcss_remove" name="unusedcss_load" value="remove" '.(!empty($speedycache->options['unusedcss_load']) && $speedycache->options['unusedcss_load'] == 'remove' ? 'checked' : '').'/>
+							<div class="speedycache-radio-input">
+								<label for="speedycache_unusedcss_async">'.esc_html__('Asynchronously', 'speedycache').'</label>
+								<label for="speedycache_unusedcss_interaction">'.esc_html__('On User Interaction', 'speedycache').'</label>
+								<label for="speedycache_unusedcss_remove">'.esc_html__('Remove', 'speedycache').'</label>
+							</div>
+						</div>
+						<div class="speedycache-unusedcss-excludes">
+							<label for="speedycache_unused_css_exclude_stylesheets" style="width:100%;">
+								<span style="font-weight:500; margin:20px 0 3px 0; display:block;">'.esc_html__('Exclude Stylesheets', 'speedycache').'</span>
+								<span class="speedycache-model-label-description">'.esc_html__('Enter the URL, name or the stylesheet to be excluded from removing unused CSS.', 'speedycache').'</span>
+								<textarea name="unused_css_exclude_stylesheets" id="speedycache_unused_css_exclude_stylesheets" rows="4" placeholder="Enter URL, CSS file name one per line">'.(!empty($speedycache->options['unused_css_exclude_stylesheets']) ? esc_html(implode("\n", $speedycache->options['unused_css_exclude_stylesheets'])) : '').'</textarea>
+							</label>
+							<br><br>
+							<label for="speedycache_unusedcss_include_selector" style="width:100%;">
+								<span style="font-weight:500; margin:20px 0 3px 0; dispaly:block;">'.esc_html__('Include Selectors', 'speedycache').'</span>
+								<span class="speedycache-model-label-description">'.esc_html__('Enter Selectors you want to be included in used CSS', 'speedycache').'</span>
+								<textarea name="unusedcss_include_selector" id="speedycache_unusedcss_include_selector" rows="4" placeholder="Enter selector one per line">'.(!empty($speedycache->options['unusedcss_include_selector']) ? esc_html(implode("\n", $speedycache->options['unusedcss_include_selector'])) : '').'</textarea>
+							</label>
+						</div>
+						<div class="speedycache-modal-footer">
+							<button type="button" action="close">
+								<span>'.esc_html__('Submit', 'speedycache').'</span>
+							</button>
+						</div>
 					</div>
 				</div>
-
-				<div modal-id="speedycache_unused_css" class="speedycache-modal">
-					<div class="speedycache-modal-wrap">
-						<div class="speedycache-modal-header">
-							<div>'.esc_html__('Unused CSS Settings', 'speedycache').'</div>
-							<div title="Close Modal" class="speedycache-close-modal">
-								<span class="dashicons dashicons-no"></span>
-							</div>
-						</div>
-						<div class="speedycache-modal-content speedycache-info-modal">
-							<p>'.esc_html__('Extracts the CSS being used on the page.', 'speedycache').'</p>
-							<div>
-								<label>
-									<span style="font-weight:500; margin:20px 0 3px 0; display:block;">'.esc_html__('Load Unused CSS', 'speedycache').'</span>
-									<span class="speedycache-model-label-description" style="margin-bottom:5px;">'.esc_html__('Select the way you want the Unused CSS to load.', 'speedycache').'</span>
-								</label>
-								<input type="radio" id="speedycache_unusedcss_async" name="unusedcss_load" value="async" '.(empty($speedycache->options['unusedcss_load']) || (!empty($speedycache->options['unusedcss_load']) && $speedycache->options['unusedcss_load'] == 'async') ? 'checked' : '').'/>
-								<input type="radio" id="speedycache_unusedcss_interaction" name="unusedcss_load" value="interaction" '.(!empty($speedycache->options['unusedcss_load']) && $speedycache->options['unusedcss_load'] == 'interaction' ? 'checked' : '').'/>
-								<input type="radio" id="speedycache_unusedcss_remove" name="unusedcss_load" value="remove" '.(!empty($speedycache->options['unusedcss_load']) && $speedycache->options['unusedcss_load'] == 'remove' ? 'checked' : '').'/>
-								<div class="speedycache-radio-input">
-									<label for="speedycache_unusedcss_async">'.esc_html__('Asynchronously', 'speedycache').'</label>
-									<label for="speedycache_unusedcss_interaction">'.esc_html__('On User Interaction', 'speedycache').'</label>
-									<label for="speedycache_unusedcss_remove">'.esc_html__('Remove', 'speedycache').'</label>
-								</div>
-							</div>
-							<div class="speedycache-unusedcss-excludes">
-								<label for="speedycache_unused_css_exclude_stylesheets" style="width:100%;">
-									<span style="font-weight:500; margin:20px 0 3px 0; display:block;">'.esc_html__('Exclude Stylesheets', 'speedycache').'</span>
-									<span class="speedycache-model-label-description">'.esc_html__('Enter the URL, name or the stylesheet to be excluded from removing unused CSS.', 'speedycache').'</span>
-									<textarea name="unused_css_exclude_stylesheets" id="speedycache_unused_css_exclude_stylesheets" rows="4" placeholder="Enter URL, CSS file name one per line">'.(!empty($speedycache->options['unused_css_exclude_stylesheets']) ? esc_html(implode("\n", $speedycache->options['unused_css_exclude_stylesheets'])) : '').'</textarea>
-								</label>
-								<br><br>
-								<label for="speedycache_unusedcss_include_selector" style="width:100%;">
-									<span style="font-weight:500; margin:20px 0 3px 0; dispaly:block;">'.esc_html__('Include Selectors', 'speedycache').'</span>
-									<span class="speedycache-model-label-description">'.esc_html__('Enter Selectors you want to be included in used CSS', 'speedycache').'</span>
-									<textarea name="unusedcss_include_selector" id="speedycache_unusedcss_include_selector" rows="4" placeholder="Enter selector one per line">'.(!empty($speedycache->options['unusedcss_include_selector']) ? esc_html(implode("\n", $speedycache->options['unusedcss_include_selector'])) : '').'</textarea>
-								</label>
-							</div>
-							<div class="speedycache-modal-footer">
-								<button type="button" action="close">
-									<span>'.esc_html__('Submit', 'speedycache').'</span>
-								</button>
-							</div>
-						</div>
-					</div>
-				</div>';
-			} else {
-				echo '<div class="speedycache-option-wrap speedycache-disabled">
-					<label class="speedycache-custom-checkbox">
-						<input type="checkbox" disabled/>
-						<div class="speedycache-input-slider"></div>
-					</label>
-					<div class="speedycache-option-info">
-						<span class="speedycache-option-name">'.esc_html__('Unused CSS', 'speedycache').'<span class="speedycache-premium-tag">'.(!empty($need_key) ? 'Link License Key' : 'Premium').'</span></span>
-						<span class="speedycache-option-desc">'.esc_html__('It removes the unused CSS from the page.', 'speedycache').'</span>
-					</div>
-				</div>';
-			}
+			</div>';
+		} else {
+			echo '<div class="speedycache-option-wrap speedycache-disabled">
+				<label class="speedycache-custom-checkbox">
+					<input type="checkbox" disabled/>
+					<div class="speedycache-input-slider"></div>
+				</label>
+				<div class="speedycache-option-info">
+					<span class="speedycache-option-name">'.esc_html__('Unused CSS', 'speedycache').'<span class="speedycache-premium-tag">'.(!empty($need_key) ? 'Link License Key' : 'Premium').'</span></span>
+					<span class="speedycache-option-desc">'.esc_html__('It removes the unused CSS from the page.', 'speedycache').'</span>
+				</div>
+			</div>';
 		}
 		
 		if(defined('SPEEDYCACHE_PRO')){
@@ -1174,13 +1182,14 @@ class Settings{
 					</div>
 					<div class="speedycache-modal-content speedycache-info-modal">
 						<form class="speedycache-pseudo-form" data-type="preload_resource_list">'.
-						wp_kses(self::preload_modal_options('preload_resource', ['type' => true, 'crossorigin' => true, 'priority' => true,  'device' => true]), [
+						wp_kses(self::preload_modal_options('preload_resource', ['type' => true, 'crossorigin' => true, 'priority' => true,  'device' => true, 'pages' => true]), [
 							'input' => ['type' => true, 'value' => true, 'style' => true, 'name' => true, 'placeholder' => true],
 							'option' => ['value' => true],
 							'select' => ['name' => true, 'required' => true],
 							'label' => ['for' => true, 'style' => true],
 							'div' => ['class' => true, 'style' => true],
 							'span' => ['class' => true, 'title' => true, 'spdf-hover-tooltip' => true, 'spdf-tooltip-position' => true],
+							'textarea' => ['name' => true, 'rows' => true, 'cols' => true, 'resize' => true, 'placeholder' => true],
 							]).'
 						<div style="display:flex; justify-content:center;">
 							<button type="submit" class="speedycache-button speedycache-btn-black speedycache-preloading-add">Add<span class="speedycache-spinner"></span></button>
@@ -1331,8 +1340,23 @@ class Settings{
 			</div>
 			<div>
 				<input type="text" name="cdn_key" style="width:50%;" id="speedycache-cdn-key" value="'.(!empty($speedycache->cdn['cdn_key']) ? esc_html($speedycache->cdn['cdn_key']) : '').'"/>
-			</div>
-		</div>
+			</div>';
+			
+			// Currently not tested with Sitepad so we will skip it.
+			if(!defined('SITEPAD') && defined('SPEEDYCACHE_PRO')){
+				echo '<div class="speedycache-option-wrap">
+					<label for="speedycache_enable_cloudflare" class="speedycache-custom-checkbox">
+						<input type="checkbox" id="speedycache_enable_cloudflare" name="enabled_cloudflare" '.(!empty($speedycache->cdn['enabled_cloudflare']) ? ' checked' : '').'/>
+						<div class="speedycache-input-slider"></div>
+					</label>
+					<div class="speedycache-option-info">
+						<span class="speedycache-option-name">'.esc_html__('Enable Cloudflare Page Cache', 'speedycache').'</span>
+						<span class="speedycache-option-desc">'.esc_html__('Use Cloudflare Cache Rules for page caching', 'speedycache').'</span><a href="https://speedycache.com/docs/cdn/how-to-setup-cloudflare/" target="_blank">How to setup Cloudflare Page Cache</a>&nbsp;&nbsp;
+						'.(!empty($speedycache->cdn['enabled_cloudflare']) ? '<button id="speedycache-update-cf-rules" class="speedycache-button speedycache-btn-black">'.esc_html__('Update Rules', 'speedycache').'<span class="speedycache-spinner"></span><span class="dashicons dashicons-yes speedycache-spinner-done"></button>' : '').'
+					</div>
+				</div>';
+			}
+		echo '</div>
 		
 		<div class="speedycache-stacked-option-wrap">
 			<div class="speedycache-option-info">
@@ -1850,6 +1874,15 @@ class Settings{
 				<option value="desktop">Desktop</option>
 				<option value="mobile">Mobile</option>
 			</select></label>
+			</div>';
+		}
+		
+		if(isset($fields['pages'])){
+			$html .= '<div class="speedycache-stacked-label"><label>
+			<span>Pages <span class="dashicons dashicons-editor-help" spdf-hover-tooltip="Add URL(s) of the pages, One per line." spdf-tooltip-position="top"></span></span>
+			<span>Leave empty to preload resource for all pages.</span>
+			<textarea name="preload_resource_pages" rows="5" cols="50" resize="vertical" placeholder="https://example.com/your-site-name/sample-page"></textarea>
+			</label>
 			</div>';
 		}
 		
