@@ -51,6 +51,8 @@ class Admin{
 			$hooknames[] = add_submenu_page('smtp-mail.php', 'SpeedyCache Settings', 'Site Cache', $capability, 'speedycache', '\SpeedyCache\Settings::base', $url);
 		}else{
 			$hooknames[] = add_menu_page('SpeedyCache Settings', 'SpeedyCache', $capability, 'speedycache', '\SpeedyCache\Settings::base', $url);
+			$hooknames[] = add_submenu_page('speedycache', __('Dashboard', 'speedycache'), __('Dashboard', 'speedycache'), $capability, 'speedycache', '\SpeedyCache\Settings::base');
+			$hooknames[] = add_submenu_page('speedycache', __('AI Abilities', 'speedycache'), __('AI Abilities', 'speedycache') . ' <span  style="vertical-align:middle;background:#d63638;font-size:9px;padding:0 6px;border-radius:10px;line-height:18px;">New!</span>', $capability, 'speedycache-ai-abilities', '\SpeedyCache\Abilities::ui_abilities');
 		}
 	
 		foreach($hooknames as $hookname){

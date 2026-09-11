@@ -1,5 +1,5 @@
 (function($){
-	window.addEventListener('DOMContentLoaded', function(){
+	$(document).ready(function () {
 		speedycache_handle_tab();
 		
 		window.addEventListener('hashchange', speedycache_handle_tab);
@@ -299,6 +299,7 @@
 		jQuery('.speedycache-flush-db').on('click', speedycache_flush_objects);
 		jQuery('.speedycache-import-settings').on('click', speedycache_import_settings);
 		jQuery('.speedycache-export-settings').on('click', speedycache_export_settings);
+		jQuery('.speedycache-reset-settings').on('click', speedycache_reset_settings);
 		jQuery('#speedycache-license-btn').on('click', speedycache_verify_license);
 	});
 })(jQuery);
@@ -871,6 +872,40 @@ function speedycache_export_settings(){
 		},
 		error: function(){
 			alert('Export failed. Please try again.');
+		}
+	}).always(function(){
+		spinner.removeClass('speedycache-spinner-active');
+	});
+}
+
+function speedycache_reset_settings(e){
+  e.preventDefault();
+
+  if(!confirm('This will reset all SpeedyCache settings to their default values. Your current custom settings will be lost. Do you want to continue?')){
+    return;
+  }
+
+  let jEle = jQuery(e.target);
+  spinner = jEle.find('.speedycache-spinner');
+  spinner.addClass('speedycache-spinner-active');
+
+	jQuery.ajax({
+		url : speedycache_ajax.url,
+		type : 'POST',
+		data : {
+			action: 'speedycache_reset_settings',
+			nonce : speedycache_ajax.nonce
+		},
+		success : function(response){
+			if(response.success){
+				alert(response.data);
+				location.reload();
+			} else {
+				alert(response.data || 'Something went wrong while resetting settings.');
+			}
+		},
+		error : function(){
+			alert('Ajax error occurred');
 		}
 	}).always(function(){
 		spinner.removeClass('speedycache-spinner-active');

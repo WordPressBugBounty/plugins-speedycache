@@ -59,6 +59,8 @@ class Preload{
 		}
 
 		$preload_urls = array_unique($preload_urls);
+		$preload_urls = apply_filters('speedycache_preload_urls', $preload_urls);
+		$preload_urls = array_unique($preload_urls);
 
 		set_transient('speedycache_preload_transient', $preload_urls, HOUR_IN_SECONDS);
 		wp_schedule_single_event(time(), 'speedycache_preload_split');
@@ -135,4 +137,34 @@ class Preload{
 			wp_schedule_single_event(time() + 60, 'speedycache_preload_split');
 		}
 	}
+	
+    static function wpml_urls($preload_urls){
+
+		$languages = apply_filters('wpml_active_languages', null, [
+			'skip_missing' => 0,
+		]);
+
+		if(empty($languages) || !is_array($languages)){
+			return $preload_urls;
+		}
+		
+		// Getting Language URLs for Homepage
+		foreach($languages as $language){
+			$lang_code = isset($language['language_code']) ? $language['language_code'] : $language['code'];
+			$preload_urls[] = apply_filters('wpml_permalink', home_url('/'), $lang_code);
+		}
+		
+		// Getting Language URLs for other pages
+		foreach($preload_urls as $preload_url){
+			foreach($languages as $language){
+				$lang_code = isset($language['language_code']) ? $language['language_code'] : $language['code'];
+				$translated_url = apply_filters('wpml_permalink', $preload_url, $lang_code, true);
+
+				if(!empty($translated_url)){
+					$preload_urls[] = $translated_url;
+				}
+			}
+		}
+		return $preload_urls;
+    }
 }

@@ -1,0 +1,663 @@
+/* ============================================================
+* AI Abilities page (classic SpeedyCache look)
+*
+* This stylesheet intentionally reuses the SpeedyCache design tokens
+* already defined in admin.css (:root variables) and the classic
+* card / sidebar / button / checkbox-slider patterns so the
+* Abilities page feels native to SpeedyCache.
+* ============================================================ */
+
+#speedycache-abilities-page{
+display: flex;
+flex-direction: row;
+color: var(--speedycache-txcolor);
+}
+
+#speedycache-abilities-page *{
+box-sizing: border-box;
+}
+
+.speedycache-abilities-content{
+display: flex;
+flex-direction: column;
+flex: 1 1 auto;
+max-width: 1024px;
+margin-left:10px;
+}
+
+/* The main tab card reuses the classic .speedycache-tab look */
+.speedycache-abilities-tab{
+display: flex;
+flex-direction: column;
+}
+
+/* Intro paragraph below the h2 */
+.speedycache-abilities-intro{
+margin: 0 0 18px 0;
+color: #6b6b6b;
+font-size: 0.95rem;
+line-height: 1.5rem;
+}
+
+/* ---------- Setup progress bar ---------- */
+.speedycache-abilities-progress{
+margin: 0 0 20px 0;
+}
+
+.speedycache-abilities-progress-bar{
+height: 8px;
+width: 100%;
+background: #e0e0e0;
+border-radius: 6px;
+overflow: hidden;
+}
+
+.speedycache-abilities-progress-fill{
+display: block;
+height: 100%;
+background: var(--speedycache-color);
+border-radius: 6px;
+transition: width 0.3s ease;
+}
+
+.speedycache-abilities-progress-meta{
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-top: 8px;
+font-size: 0.85rem;
+color: #6b6b6b;
+}
+
+.speedycache-abilities-progress-next strong{ color: var(--speedycache-txcolor); }
+.speedycache-abilities-progress-done{ color: #16a34a; }
+.speedycache-abilities-progress-count{ font-size: 0.8rem; }
+
+/* ---------- Steps (accordion rows) ---------- */
+.speedycache-abilities-steps{
+display: flex;
+flex-direction: column;
+gap: 10px;
+}
+
+.speedycache-abilities-step{
+border: 1px solid #e0e0e0;
+border-radius: 6px;
+background: #fff;
+overflow: hidden;
+transition: border-color 0.15s ease;
+}
+
+.speedycache-abilities-step:hover{ border-color: #cbd5e1; }
+.speedycache-abilities-step-done{ border-color: #bbf7d0; background: #fbfffd; }
+
+.speedycache-abilities-step-toggle{
+display: grid;
+grid-template-columns: 32px 1fr auto;
+gap: 14px;
+align-items: center;
+width: 100%;
+background: transparent;
+border: 0;
+padding: 14px 16px;
+text-align: left;
+cursor: pointer;
+color: inherit;
+font: inherit;
+}
+
+.speedycache-abilities-step-toggle:focus{
+outline: 2px solid var(--speedycache-color);
+outline-offset: -2px;
+}
+
+.speedycache-abilities-step-indicator{
+width: 28px;
+height: 28px;
+display: inline-flex;
+align-items: center;
+justify-content: center;
+border-radius: 50%;
+background: #f1f5f9;
+color: #475569;
+font-size: 12px;
+font-weight: 700;
+border: 1px solid #e0e0e0;
+}
+
+.speedycache-abilities-step-done .speedycache-abilities-step-indicator{
+background: #16a34a;
+color: #fff;
+border-color: #16a34a;
+}
+
+.speedycache-abilities-step-text{ min-width: 0; }
+
+.speedycache-abilities-step-title{
+display: block;
+font-size: 1rem;
+font-weight: 600;
+color: var(--speedycache-txcolor);
+line-height: 1.3;
+}
+
+.speedycache-abilities-step-sub{
+display: block;
+font-size: 0.8rem;
+color: #6b6b6b;
+margin-top: 2px;
+}
+
+.speedycache-abilities-step-body{
+padding: 0 16px 16px 60px;
+font-size: 0.9rem;
+color: #475569;
+border-top: 1px dashed #e0e0e0;
+margin-top: -1px;
+}
+
+.speedycache-abilities-step-body > p:first-child{ margin-top: 14px; }
+.speedycache-abilities-step-body > p:last-child{ margin-bottom: 0; }
+.speedycache-abilities-step-body[hidden]{ padding: 0 16px; }
+.speedycache-abilities-step-body .speedycache-button{ margin-top: 10px; }
+
+/* ---------- Pills ---------- */
+.speedycache-abilities-pill{
+display: inline-flex;
+align-items: center;
+gap: 5px;
+padding: 3px 9px;
+font-size: 11px;
+font-weight: 600;
+border-radius: 999px;
+line-height: 1.4;
+white-space: nowrap;
+}
+
+.speedycache-abilities-pill-success{ background: #ecfdf5; color: #16a34a; }
+.speedycache-abilities-pill-warning{ background: #fef3c7; color: #d97706; }
+.speedycache-abilities-pill-error{   background: #fef2f2; color: #dc2626; }
+.speedycache-abilities-pill-neutral{ background: #f1f5f9; color: #6b7280; }
+
+/* ---------- Inline feedback ---------- */
+.speedycache-abilities-feedback{
+display: none;
+margin-top: 10px;
+padding: 8px 12px;
+border-radius: 6px;
+font-size: 0.85rem;
+line-height: 1.45;
+}
+
+.speedycache-abilities-feedback[hidden]{ display: none; }
+
+.speedycache-abilities-feedback.is-success{
+display: block;
+background: #ecfdf5;
+color: #16a34a;
+border: 1px solid #bbf7d0;
+}
+
+.speedycache-abilities-feedback.is-error{
+display: block;
+background: #fef2f2;
+color: #dc2626;
+border: 1px solid #fecaca;
+}
+
+/* ---------- App password fields ---------- */
+.speedycache-abilities-app-pass-fields{
+display: flex;
+flex-wrap: wrap;
+gap: 12px;
+margin: 12px 0 14px;
+padding: 14px;
+background: #f1f5f9;
+border: 1px solid #e0e0e0;
+border-radius: 6px;
+}
+
+.speedycache-abilities-app-pass-fields[data-hidden="true"]{ display: none; }
+
+.speedycache-abilities-field{
+flex: 1;
+min-width: 220px;
+display: flex;
+flex-direction: column;
+font-size: 0.8rem;
+color: #475569;
+font-weight: 600;
+}
+
+.speedycache-abilities-field span{ margin-bottom: 4px; }
+
+.speedycache-abilities-field input{
+font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+font-size: 0.85rem;
+padding: 6px 10px;
+border: 1px solid #e0e0e0;
+border-radius: 4px;
+background: #fff;
+}
+
+.speedycache-abilities-profile-link{
+align-self: flex-end;
+font-size: 0.8rem;
+color: var(--speedycache-color);
+text-decoration: none;
+}
+
+.speedycache-abilities-profile-link:hover{ text-decoration: underline; }
+
+/* ---------- Test result ---------- */
+.speedycache-abilities-test-result{
+margin-top: 12px;
+padding: 10px 14px;
+border-radius: 6px;
+font-size: 0.85rem;
+line-height: 1.45;
+}
+
+.speedycache-abilities-test-result[data-hidden="true"]{ display: none; }
+
+.speedycache-abilities-test-result-ok{
+background: #ecfdf5;
+border: 1px solid #bbf7d0;
+color: #16a34a;
+}
+
+.speedycache-abilities-test-result-error{
+background: #fef2f2;
+border: 1px solid #fecaca;
+color: #dc2626;
+}
+
+/* ---------- Abilities list (step 1) ---------- */
+.speedycache-abilities-list{
+display: block;
+column-width: 250px;
+column-gap: 15px;
+margin-top: 10px;
+}
+
+.speedycache-abilities-group{
+display: inline-block;
+width: 100%;
+background: #f1f5f9;
+border: 1px solid #e0e0e0;
+border-radius: 4px;
+padding: 15px;
+margin-bottom: 15px;
+break-inside: avoid;
+-webkit-column-break-inside: avoid;
+page-break-inside: avoid;
+}
+
+.speedycache-abilities-group h4{
+margin: 0 0 8px;
+font-size: 11px;
+color: #6b6b6b;
+text-transform: uppercase;
+letter-spacing: 0.04em;
+font-weight: 700;
+}
+
+.speedycache-abilities-group ul{
+margin: 0;
+padding: 0;
+list-style: none;
+}
+
+.speedycache-abilities-group li{
+padding: 8px 0;
+border-top: 1px solid #e0e0e0;
+font-size: 0.8rem;
+display: flex;
+align-items: flex-start;
+gap: 8px;
+flex-wrap: wrap;
+}
+
+.speedycache-abilities-group li:first-child{ border-top: 0; padding-top: 0; }
+
+.speedycache-abilities-ability-name{
+display: block;
+font-weight: 600;
+color: var(--speedycache-txcolor);
+font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+font-size: 0.75rem;
+flex: 1 1 auto;
+}
+
+.speedycache-abilities-ability-desc{
+display: block;
+color: #6b6b6b;
+margin-top: 2px;
+font-size: 0.75rem;
+flex-basis: 100%;
+}
+
+.speedycache-abilities-ability-pro{
+display: inline-block;
+background: var(--speedycache-color);
+color: #fff;
+font-size: 10px;
+font-weight: 700;
+padding: 1px 7px;
+border-radius: 999px;
+text-transform: uppercase;
+letter-spacing: 0.04em;
+flex: 0 0 auto;
+}
+
+.speedycache-abilities-empty{
+color: #6b6b6b;
+font-size: 0.85rem;
+margin: 8px 0;
+}
+
+/* ---------- AI Client Configuration ---------- */
+.speedycache-abilities-clients{
+margin-top: 30px;
+}
+
+.speedycache-abilities-clients h3{
+display: flex;
+align-items: center;
+gap: 10px;
+padding: 0 0 15px 0;
+border-bottom: 1px solid #e0e0e0;
+margin: 0;
+}
+
+.speedycache-abilities-clients-desc{
+margin: 12px 0;
+color: #6b6b6b;
+font-size: 0.85rem;
+}
+
+/* ---------- Segmented client tabs ---------- */
+.speedycache-abilities-segmented{
+display: flex;
+flex-wrap: wrap;
+justify-content: space-around;
+background: #f1f5f9;
+border: 1px solid #e0e0e0;
+border-radius: 6px;
+padding: 4px;
+margin: 4px 0 18px;
+}
+
+.speedycache-abilities-segmented-btn{
+background: transparent;
+border: 0;
+padding: 7px 14px;
+font-size: 12px;
+font-weight: 600;
+color: #6b6b6b;
+border-radius: 4px;
+cursor: pointer;
+transition: background 0.15s ease, color 0.15s ease;
+}
+
+.speedycache-abilities-segmented-btn:hover{ color: var(--speedycache-txcolor); }
+
+.speedycache-abilities-segmented-btn.active{
+background: #fff;
+color: var(--speedycache-color);
+box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.07);
+}
+
+.speedycache-abilities-segmented-btn:disabled,
+.speedycache-abilities-segmented-btn[aria-disabled="true"]{
+opacity: 0.5;
+cursor: not-allowed;
+}
+
+.speedycache-deprecated-badge{
+background-color: #ffebee;
+color: #c62828;
+font-size: 8px;
+padding: 2px 6px;
+border-radius: 4px;
+text-transform: uppercase;
+font-weight: bold;
+border: 1px solid #ef9a9a;
+display: inline-block;
+vertical-align: middle;
+}
+
+/* ---------- Client panel ---------- */
+.speedycache-abilities-client-panel{
+background: #f1f5f9;
+border: 1px solid #e0e0e0;
+border-radius: 6px;
+padding: 16px;
+}
+
+.speedycache-abilities-client-meta{
+display: flex;
+flex-wrap: wrap;
+gap: 8px;
+align-items: center;
+margin-bottom: 10px;
+font-size: 0.8rem;
+}
+
+.speedycache-abilities-client-path-label{
+color: #6b6b6b;
+font-weight: 600;
+text-transform: uppercase;
+letter-spacing: 0.04em;
+font-size: 0.7rem;
+}
+
+.speedycache-abilities-client-path-value{
+background: #fff;
+border-radius: 4px;
+padding: 4px 10px;
+color: #475569;
+white-space: pre-wrap;
+font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+font-size: 0.75rem;
+border: 1px solid #eef0f3;
+}
+
+/* ---------- Snippet ---------- */
+.speedycache-abilities-snippet-wrap{
+position: relative;
+margin-bottom: 14px;
+}
+
+.speedycache-abilities-snippet{
+display: block;
+background: #0f172a;
+color: #e2e8f0;
+padding: 16px 18px;
+border-radius: 6px;
+overflow: auto;
+font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+font-size: 0.85rem;
+line-height: 1.55;
+white-space: pre;
+margin: 0;
+min-height: 64px;
+max-height: 360px;
+tab-size: 2;
+}
+
+.speedycache-abilities-snippet.unsupported{ opacity: 0.65; }
+
+.speedycache-abilities-copy-btn{
+position: absolute;
+top: 8px;
+right: 20px;
+display: inline-flex;
+align-items: center;
+gap: 6px;
+padding: 5px 11px;
+font-size: 0.75rem;
+font-weight: 600;
+color: #e2e8f0;
+background: rgba(255, 255, 255, 0.08);
+border: 1px solid rgba(255, 255, 255, 0.14);
+border-radius: 4px;
+cursor: pointer;
+transition: background 0.15s ease;
+}
+
+.speedycache-abilities-copy-btn:hover{ background: rgba(255, 255, 255, 0.18); }
+.speedycache-abilities-copy-btn:focus{ outline: 2px solid var(--speedycache-color); outline-offset: 1px; }
+
+.speedycache-abilities-copy-btn.is-copied{
+background: #16a34a;
+border-color: #16a34a;
+color: #fff;
+}
+
+.speedycache-abilities-copy-btn:disabled{ opacity: 0.5; cursor: not-allowed; }
+
+/* ---------- Instructions ---------- */
+.speedycache-abilities-instructions{
+margin: 0;
+padding-left: 22px;
+color: #475569;
+font-size: 0.85rem;
+counter-reset: abstep;
+list-style: none;
+}
+
+.speedycache-abilities-instructions li{
+position: relative;
+margin-bottom: 6px;
+padding-left: 4px;
+line-height: 1.55;
+counter-increment: abstep;
+}
+
+.speedycache-abilities-instructions li::before{
+content: counter(abstep);
+position: absolute;
+left: -22px;
+top: 1px;
+width: 18px;
+height: 18px;
+display: inline-flex;
+align-items: center;
+justify-content: center;
+background: #e8eaff;
+color: var(--speedycache-color);
+border-radius: 50%;
+font-size: 10px;
+font-weight: 700;
+}
+
+/* ---------- Sidebar (reuses the classic .speedycache-sidebar styles from admin.css) ---------- */
+.speedycache-abilities-enable-block{
+background: #f1f1f191;
+border-radius: 15px;
+padding: 10px;
+}
+
+/* The enable toggle row reuses the classic .speedycache-option-wrap + slider */
+.speedycache-abilities-enable-block .speedycache-option-wrap{
+margin: 0;
+}
+
+/* ---------- Status list ---------- */
+.speedycache-abilities-status-list{
+margin: 0;
+padding: 0;
+display: flex;
+flex-direction: column;
+gap: 10px;
+}
+
+.speedycache-abilities-status-list > div{
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 10px;
+}
+
+.speedycache-abilities-status-list dt{
+margin: 0;
+font-size: 0.8rem;
+color: #475569;
+font-weight: 500;
+}
+
+.speedycache-abilities-status-list dd{
+margin: 0;
+}
+
+/* ---------- Sidebar lists ---------- */
+.speedycache-abilities-tip-list,
+.speedycache-abilities-resource-list{
+list-style: none;
+margin: 0;
+padding: 0;
+}
+
+.speedycache-abilities-tip-list li{
+position: relative;
+padding: 6px 0 6px 18px;
+font-size: 0.8rem;
+color: #475569;
+line-height: 1.45;
+}
+
+.speedycache-abilities-tip-list li::before{
+content: "";
+position: absolute;
+left: 2px;
+top: 13px;
+width: 6px;
+height: 6px;
+background: var(--speedycache-color);
+border-radius: 50%;
+}
+
+.speedycache-abilities-resource-list li{
+padding: 7px 0;
+border-top: 1px solid #eef0f3;
+}
+
+.speedycache-abilities-resource-list li:first-child{
+border-top: 0;
+padding-top: 0;
+}
+
+.speedycache-abilities-resource-list a{
+display: block;
+color: var(--speedycache-txcolor);
+font-size: 0.8rem;
+font-weight: 600;
+text-decoration: none;
+}
+
+.speedycache-abilities-resource-list a:hover{ color: var(--speedycache-color); }
+
+/* ---------- Toast ---------- */
+.speedycache-toast{
+position: fixed;
+bottom: 28px;
+right: 28px;
+z-index: 99999;
+padding: 12px 18px;
+border-radius: 6px;
+background: #16a34a;
+color: #fff;
+font-size: 0.85rem;
+font-weight: 600;
+box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+display: none;
+}
+
+.speedycache-toast.error{
+background: #dc2626;
+}
+
+.speedycache-abilities-copy-btn svg{
+color:#fff;
+}

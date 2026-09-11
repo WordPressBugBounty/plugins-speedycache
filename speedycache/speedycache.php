@@ -3,7 +3,7 @@
 Plugin Name: SpeedyCache
 Plugin URI: https://speedycache.com
 Description: SpeedyCache is a plugin that helps you reduce the load time of your website by means of caching, minification, and compression of your website.
-Version: 1.4.0
+Version: 1.4.1
 Author: Softaculous Team
 Author URI: https://speedycache.com/
 Text Domain: speedycache
@@ -51,7 +51,7 @@ if(defined('SPEEDYCACHE_VERSION')) {
 	return;
 }
 
-define('SPEEDYCACHE_VERSION', '1.4.0');
+define('SPEEDYCACHE_VERSION', '1.4.1');
 define('SPEEDYCACHE_DIR', dirname(__FILE__));
 define('SPEEDYCACHE_FILE', __FILE__);
 define('SPEEDYCACHE_BASE', plugin_basename(SPEEDYCACHE_FILE));
@@ -135,6 +135,13 @@ function speedycache_load_plugin(){
 	$speedycache->asset_stats = 0;
 	$speedycache->html_size = (int) get_option('speedycache_html_size', 0);
 	
+	// Register SpeedyCache FREE abilities with the WordPress 6.9+ Abilities API.
+	// Pro abilities are registered separately by the SpeedyCache Pro plugin.
+	if(!empty($speedycache->options['ai_abilities']) && !empty($speedycache->options['ai_abilities']['enabled']) && class_exists('\SpeedyCache\AbilitiesRegister') && function_exists('wp_register_ability')){
+		add_action('wp_abilities_api_categories_init', '\SpeedyCache\AbilitiesRegister::register_categories');
+		add_action('wp_abilities_api_init', '\SpeedyCache\AbilitiesRegister::register_abilities');
+	}
+	
 	if(!is_dir(SPEEDYCACHE_CACHE_DIR) && is_writable(WP_CONTENT_DIR)){
 		if(mkdir(SPEEDYCACHE_CACHE_DIR, 0755, true)){
 			touch(SPEEDYCACHE_CACHE_DIR .'/index.html');
@@ -149,6 +156,11 @@ function speedycache_load_plugin(){
 	}
 	
 	add_action('cron_schedules', '\SpeedyCache\Util::custom_cron');
+	
+	// WPML Preload URLs
+	if(defined('ICL_SITEPRESS_VERSION')){
+		add_filter('speedycache_preload_urls', '\SpeedyCache\Preload::wpml_urls');
+	}
 
 	if(wp_doing_ajax() && !empty($_REQUEST['action']) && strpos($_REQUEST['action'], 'speedycache') === 0){
 		\SpeedyCache\Ajax::hooks();

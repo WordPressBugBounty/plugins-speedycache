@@ -1741,12 +1741,18 @@ class Settings{
 	static function settings_tab(){
 		echo '<h2><img src="'.esc_url(SPEEDYCACHE_URL).'/assets/images/icons/settings.svg" height="32" width="32"/> '.esc_html__('General Settings', 'speedycache').'</h2>';
 		
+		echo '<div class="speedycache-option-info speedycache-option-reset">
+			<span class="speedycache-option-name">'. esc_html__('Factory Reset') .'</span>
+			<span class="speedycache-option-desc">'. esc_html__('Reset all configurations to factory default. Your current custom settings will be lost.') .'</span>
+			<button class="speedycache-button speedycache-btn-black speedycache-reset-settings" style="margin-top:10px;">'.esc_html__('Reset Settings', 'speedycache').'<span class="speedycache-spinner"></span></button>
+		</div>';
+
 		$roles = get_editable_roles();
 		
 		if(!empty($roles)){
 			$saved_roles = get_option('speedycache_deletion_roles', []);
 			
-			echo '<div class="speedycache-option-info">
+			echo '<div class="speedycache-option-info speedycache-option-roles">
 			<span class="speedycache-option-name">'.esc_html__('Can Delete Cache', 'speedycache').'</span>
 			<span class="speedycache-option-desc">'.esc_html__('Allows roles to delete cache using Admin bar and post links, Admin is included by default', 'speedycache').'</span>
 			<form method="POST">';
@@ -1778,7 +1784,7 @@ class Settings{
 			<div class="speedycache-btn-spl-wrapper"><button class="speedycache-button speedycache-btn-black" style="margin-top:10px;">Save<span class="speedycache-spinner"></span></button></div></form></div>';
 		}
 
-		echo '<div class="speedycache-option-info" style="margin-top:20px;">
+		echo '<div class="speedycache-option-info">
 		<label class="speedycache-option-name">'.esc_html__('Import / Export Settings', 'speedycache').'</label>
 		<span class="speedycache-option-desc" style="margin-bottom:10px;">'.esc_html__('Imports SpeedyCache Settings from another site or Exports your current SpeedyCache Settings as a JSON file', 'speedycache').'</span>
 		</div>

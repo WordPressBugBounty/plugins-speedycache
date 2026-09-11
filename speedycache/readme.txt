@@ -2,9 +2,9 @@
 Contributors: softaculous
 Tags: cache, minify, pagespeed, seo, cdn, wordpress cache, website cache, lazy loading, mobile cache, minify css, combine css, minify js, combine js, gzip, browser caching, render blocking js, preload, widget cache, softaculous, speedycache, performance
 Requires at least: 4.7
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 7.0
-Stable tag: 1.4.0
+Stable tag: 1.4.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -69,6 +69,39 @@ Get professional support and more features to make your website load faster with
 * **Lazy Render HTML:** User can lazy render HTML elements which are not in view-port.
 * **Preload Critical Images:** Preload above-the-fold images to improve LCP(Largest Contentful paint).
 
+== AI Abilities ==
+
+SpeedyCache exposes AI Abilities through the WordPress Abilities API, allowing AI clients, assistants, and MCP (Model Context Protocol) adapters to securely interact with your site's caching and performance settings.
+
+=== Free Abilities ===
+
+- Get SpeedyCache Settings: Returns the current cache configuration, including cache status, logged-in users, mobile cache, preload, Varnish, CDN, and related settings.
+- Delete All Cache: Clears the entire page cache and optionally removes minified files, fonts, and database cache.
+- Delete Cache For A URL: Clears the cache for one or more specific URLs.
+- Delete Cache For A Post: Clears the cache for a specific post ID. Use 1-20 for the homepage.
+- Get Cache Statistics: Returns basic cache statistics, including the total number of cached HTML files and their combined storage size.
+- Get File Optimization Settings: Returns HTML, CSS, and JavaScript optimization settings, including combine, minify, delay JavaScript, lazy loading, and related options.
+- Get CDN Settings: Returns the current CDN configuration, including CDN status, CDN URL, supported file types, and configured include and exclude keywords.- List Cache Exclude Rules: Returns all configured cache exclusion rules.
+- List Cache Exclude Rules: Returns all configured cache exclusion rules.
+- Delete A Cache Exclude Rule: Deletes a specific cache exclusion rule.
+- Get Preload Status: Returns the current preload status, including the total number of URLs and the remaining items.
+- Build The Preload List: Rebuilds the preload URL list and restarts the preload process.
+- Export SpeedyCache Settings: Exports SpeedyCache plugin settings in JSON format.
+
+=== Pro Abilities ===
+
+- Optimize The Database: Performs database optimization by cleaning revisions, spam comments, trash, and other unnecessary data.
+- Get Database Optimization Settings: Returns advanced database optimization settings and scheduled cleanup options.
+- List Cache Delete Logs: Returns cache deletion logs with the associated trigger information.
+- Get Cache Statistics: Returns cache statistics for desktop, mobile, CSS, and JavaScript files.
+- Get Image Optimization Stats: Returns image optimization statistics, including optimized images, pending images, and storage savings.
+- Get Image Optimization Settings: Returns image optimization settings, including compression level, WebP conversion, automatic optimization, and EXIF options.
+- Revert All Image Optimizations: Restores all optimized images from their original backups.
+- Get Object Cache Settings: Returns Redis object cache settings, including host, port, TTL, and serialization configuration.
+- Flush The Object Cache: Clears all Redis object cache entries.
+- Get Object Cache Status: Returns the current Redis object cache status and memory usage information.
+- Get Bloat Settings: Returns all bloat reduction settings, including XML-RPC, jQuery Migrate, oEmbeds, Heartbeat, and other optimization options.
+- Get License Status: Returns the current SpeedyCache Pro license status and expiration details.
 
 == Caching ==
 SpeedyCache caches the website by creating static files on the server and delivers those static files to most of the users who visit the website, The static files eliminate the heavy load of Querying the database for data hence the load of your website is faster.
@@ -146,6 +179,17 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 4. SpeedyCache Exclude page
 
 == Changelog ==
+
+= 1.4.1 (11th September 2026) =
+* [Pro-Feature] Support for Pro AI Abilities: Database Optimization & Settings, Cache Delete Logs, Advanced Cache Stats, Image Optimization Stats & Controls, Revert Images, Object Cache Management, Bloat Settings, and License Status.
+* [Feature] Support for AI Abilities: Get Settings, Delete Cache (All, URL, Post), Get Cache Statistics, File Optimization Settings, CDN Settings, Exclude Rules, Preload Management, and Export Settings.
+* [Feature] Added an option to reset all SpeedyCache settings to their default values.
+* [Improvement] Excluded high-priority fetch requests to improve cache fetching performance.
+* [Improvement] Added multi-language caching support for WPML, allowing cache preloading for all active site languages instead of just English.
+* [Bug-Fix] Fixed an issue where a blank alt attribute (`alt=""`) was added to images during lazy loading.
+* [Bug-Fix] Fixed an issue with spaces and line breaks in Non-Cache Groups not being properly sanitized and saved.
+* [Bug-Fix] Normalized PageSpeed score output to integer values to prevent decimal overflow in the UI.
+* [Task] Tested with Wordpress 7.1
 
 = 1.4.0 (24rd June 2026) =
 * [Feature Pro] Cloudflare Page cache rules, allowing you to cache the pages on the edge, option available in CDN tab.

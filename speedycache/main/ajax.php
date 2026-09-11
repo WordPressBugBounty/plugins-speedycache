@@ -24,6 +24,12 @@ class Ajax{
 		add_action('wp_ajax_speedycache_import_settings', '\SpeedyCache\Ajax::import_settings');
 		add_action('wp_ajax_speedycache_export_settings', '\SpeedyCache\Ajax::export_settings');
 		add_action('wp_ajax_speedycache_close_update_notice', '\SpeedyCache\Ajax::close_update_notice');
+		add_action('wp_ajax_speedycache_reset_settings', '\SpeedyCache\Ajax::reset_settings');
+		add_action('wp_ajax_speedycache_save_ai_abilities', '\SpeedyCache\Ajax::save_ai_abilities');
+		add_action('wp_ajax_speedycache_install_mcp_adapter', '\SpeedyCache\Ajax::install_mcp_adapter');
+		add_action('wp_ajax_speedycache_generate_app_password', '\SpeedyCache\Ajax::generate_app_password');
+		add_action('wp_ajax_speedycache_test_mcp_connection', '\SpeedyCache\Ajax::test_mcp_connection');
+		add_action('wp_ajax_speedycache_save_test_status', '\SpeedyCache\Ajax::save_test_status');
 
 		// This is just to make sure, close of update notice works.
 		if(isset($_GET['action']) && 'speedycache_close_update_notice' === sanitize_text_field(wp_unslash($_GET['action']))){
@@ -243,6 +249,15 @@ class Ajax{
 		$options['compress'] = Util::sanitize_request('compress');
 		$options['non_cache_group'] = !empty($_REQUEST['non_cache_group']) ? explode("\n", sanitize_textarea_field(wp_unslash($_REQUEST['non_cache_group']))) : [];
 	
+		// Sanitize and store non-cache group as an array.
+		if(!empty($_REQUEST['non_cache_group'])){
+			$raw_input = sanitize_textarea_field( wp_unslash( $_REQUEST['non_cache_group'] ) );
+			$groups_array = preg_split( '/\r\n|\r|\n/', $raw_input );
+			$options['non_cache_group'] = array_values( array_filter( array_map( 'trim', $groups_array ) ) );
+		}else {
+   			$options['non_cache_group'] = [];
+		}
+
 		$speedycache->object = $options;
 		
 		if(!empty($speedycache->object['enable'])){
@@ -528,6 +543,10 @@ class Ajax{
 			wp_send_json_error('Result is empty');
 		}
 
+		// Normalize the score to an integer
+		if(!empty($body['results']['score'])){
+			$body['results']['score'] = (int) round((float) $body['results']['score']);
+		}
 		//Saving the pagespeed test
 		update_option('speedycache_pagespeed_test', $body['results'], false);
 
@@ -711,6 +730,67 @@ class Ajax{
 		update_option('speedycache_deletion_roles', $roles);
 		wp_send_json_success();
 	}
+
+	static function reset_settings(){
+
+		check_ajax_referer('speedycache_ajax_nonce', 'nonce');
+
+		if(!current_user_can('manage_options')){
+			wp_send_json_error(__('You do not have required permission.', 'speedycache'));
+		}
+
+		global $speedycache;
+
+		// Restore the factory defaults set during activation (see \SpeedyCache\Install::activate).
+		$default_options = [
+			'lbc' => true,
+			'gzip' => true,
+			'minify_css' => true,
+			'minify_html' => true,
+			'minify_js' => true
+		];
+
+		// Remove all custom options so the rest fall back to their unchecked/default state.
+		delete_option('speedycache_options');
+		update_option('speedycache_options', $default_options);
+
+		// Reset the auxiliary settings groups to a clean state.
+		delete_option('speedycache_cdn');
+		delete_option('speedycache_exclude');
+		delete_option('speedycache_bloat');
+		delete_option('speedycache_deletion_roles');
+		delete_option('speedycache_pagespeed_test');
+
+		if(defined('SPEEDYCACHE_PRO')){
+			delete_option('speedycache_img');
+		}
+
+		// Clear any scheduled cron events so they do not run with stale configuration.
+		wp_clear_scheduled_hook('speedycache_purge_cache');
+		wp_clear_scheduled_hook('speedycache_preload');
+		wp_clear_scheduled_hook('speedycache_preload_split');
+		wp_clear_scheduled_hook('speedycache_optimize_db');
+
+		// Refresh the in-memory global so the rest of this request sees the defaults.
+		if(empty($speedycache)){
+			$speedycache = new \SpeedyCache();
+		}
+
+		$speedycache->options = $default_options;
+		$speedycache->cdn = [];
+		$speedycache->bloat = [];
+
+		// Rebuild the htaccess / config files to match the defaults.
+		if(class_exists('\SpeedyCache\Htaccess')){
+			\SpeedyCache\Htaccess::init();
+		}
+
+		if(class_exists('\SpeedyCache\Util')){
+			Util::set_config_file();
+		}
+
+		wp_send_json_success(__('Settings have been reset to default.', 'speedycache'));
+	}
 	
 	static function delete_exclude_rule(){
 
@@ -843,5 +923,303 @@ class Ajax{
 		}
 
 		update_option('softaculous_plugin_update_notice', $plugin_update_notice);
+	}
+
+	// =========================================================================
+	// AI Abilities / MCP Adapter handlers
+	// =========================================================================
+
+	/**
+	 * Save the "Enable AI Abilities" toggle.
+	 *
+	 * @return void
+	 */
+	static function save_ai_abilities(){
+		
+		check_ajax_referer('speedycache_ajax_nonce', 'nonce');
+	
+		if(!current_user_can('manage_options')){
+			wp_send_json_error(__('You do not have required permission.', 'speedycache'));
+		}
+
+		$options = get_option('speedycache_options', []);
+		$options['ai_abilities']['enabled'] = !empty($_POST['enabled']) ? 1 : 0;
+
+		update_option('speedycache_options', $options);
+
+		wp_send_json_success([
+			'message' => __('Settings Updated Successfully', 'speedycache'),
+		]);
+	}
+
+	/**
+	 * Install (or activate) the official WordPress MCP Adapter plugin with one click.
+	 *
+	 * @return void
+	 */
+	static function install_mcp_adapter(){
+		
+		check_ajax_referer('speedycache_ajax_nonce', 'nonce');
+	
+		if(!current_user_can('manage_options')){
+			wp_send_json_error(__('You do not have permission to do that.', 'speedycache'));
+		}
+
+		$options = get_option('speedycache_options', []);
+
+		if(empty($options['ai_abilities']['enabled'])){
+			wp_send_json_error(__('The MCP Adapter cannot be installed because the Enable AI Abilities Toggle in the right sidebar is turned off. Please check it and try again.', 'speedycache'));
+		}
+
+		$requested_action = !empty($_POST['adapter_action']) ? sanitize_key(wp_unslash($_POST['adapter_action'])) : 'install';
+
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+		$installed_file = \SpeedyCache\Abilities::get_installed_mcp_adapter_file();
+
+		// Update path -> fetch the latest release and re-install over the existing plugin.
+		if($requested_action === 'update'){
+
+			if(empty($installed_file)){
+				wp_send_json_error(__('The MCP Adapter is not installed yet, so there is nothing to update.', 'speedycache'));
+			}
+
+			$release = \SpeedyCache\Abilities::get_mcp_adapter_release();
+			
+			if(empty($release['download_url'])){
+				wp_send_json_error(__('Could not resolve the MCP Adapter download URL. Please try again in a moment.', 'speedycache'));
+			}
+
+			// Include WordPress core File and Upgrader dependencies.
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+			require_once ABSPATH . 'wp-admin/includes/misc.php';
+			require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+
+			$skin = new \WP_Ajax_Upgrader_Skin();
+			$upgrader = new \Plugin_Upgrader($skin);
+			$result   = $upgrader->install($release['download_url'], ['overwrite_package' => true]);
+
+			if(is_wp_error($result)){
+				wp_send_json_error($result->get_error_message());
+			}
+
+			if(false === $result || !$upgrader->plugin_info()){
+				$errors = method_exists($skin, 'get_errors') ? $skin->get_errors() : new \WP_Error();
+				$message = is_wp_error($errors) && $errors->get_error_message() ? $errors->get_error_message() : __('The MCP Adapter could not be updated.', 'speedycache');
+				wp_send_json_error($message);
+			}
+
+			// Activate the updated plugin file.
+			$plugin_file = $upgrader->plugin_info() ?: $installed_file;
+			$activated   = activate_plugin($plugin_file);
+
+			if(is_wp_error($activated)){
+				wp_send_json_error($activated->get_error_message());
+			}
+
+			wp_send_json_success([
+				'message' => sprintf(__('MCP Adapter updated to version %s and activated.', 'speedycache'), $release['version']),
+				'state'   => 'active',
+				'version' => $release['version'],
+			]);
+		}
+
+		// Installed but inactive -> just activate.
+		if($installed_file){
+			$activated = activate_plugin($installed_file);
+			if(is_wp_error($activated)){
+				wp_send_json_error($activated->get_error_message());
+			}
+			wp_send_json_success([
+				'message' => __('MCP Adapter activated.', 'speedycache'),
+				'state'   => 'active',
+			]);
+		}
+
+		// Nothing installed yet -> fetch the release and run the upgrader.
+		if($requested_action !== 'install'){
+			wp_send_json_error(__('Invalid adapter action.', 'speedycache'));
+		}
+
+		$release = \SpeedyCache\Abilities::get_mcp_adapter_release();
+		if(empty($release['download_url'])){
+			wp_send_json_error(__('Could not resolve the MCP Adapter download URL. Please try again in a moment.', 'speedycache'));
+		}
+
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		require_once ABSPATH . 'wp-admin/includes/misc.php';
+		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+
+		$skin     = new \WP_Ajax_Upgrader_Skin();
+		$upgrader = new \Plugin_Upgrader($skin);
+		$result   = $upgrader->install($release['download_url']);
+
+		if(is_wp_error($result)){
+			wp_send_json_error($result->get_error_message());
+		}
+
+		if(false === $result || !$upgrader->plugin_info()){
+			$errors = method_exists($skin, 'get_errors') ? $skin->get_errors() : new \WP_Error();
+			$message = is_wp_error($errors) && $errors->get_error_message() ? $errors->get_error_message() : __('The MCP Adapter could not be installed.', 'speedycache');
+			wp_send_json_error($message);
+		}
+
+		// Activate the newly installed plugin package.
+		$plugin_file = $upgrader->plugin_info();
+		$activated    = activate_plugin($plugin_file);
+
+		if(is_wp_error($activated)){
+			wp_send_json_error($activated->get_error_message());
+		}
+
+		wp_send_json_success([
+			'message' => sprintf(__('MCP Adapter %s installed and activated.', 'speedycache'), $release['version']),
+			'state'   => 'active',
+			'version' => $release['version'],
+		]);
+	}
+
+	/**
+	 * Generate a WordPress Application Password for the current user.
+	 *
+	 * @return void
+	 */
+	static function generate_app_password(){
+		
+		check_ajax_referer('speedycache_ajax_nonce', 'nonce');
+	
+		if(!current_user_can('manage_options')){
+			wp_send_json_error(__('You do not have permission to do that.', 'speedycache'));
+		}
+
+		$options = get_option('speedycache_options', []);
+
+		if(empty($options['ai_abilities']['enabled'])){
+			wp_send_json_error(__('Cannot generate AI Application Password because the Abilities feature is disabled. Please enable it first.', 'speedycache'));
+		}
+
+		if(!class_exists('\WP_Application_Passwords')){
+			wp_send_json_error(__('Application Passwords are not available on this site.', 'speedycache'));
+		}
+
+		$user_id = get_current_user_id();
+		if(!$user_id){
+			wp_send_json_error(__('You must be logged in to generate an Application Password.', 'speedycache'));
+		}
+
+		if(!wp_is_application_passwords_available_for_user($user_id)){
+			wp_send_json_error(__('Application Passwords are not available for your account. Please contact a site administrator.', 'speedycache'));
+		}
+
+		// Create a new Application Password using WordPress core API.
+		$created = \WP_Application_Passwords::create_new_application_password($user_id, [
+			'name'   => \SpeedyCache\Abilities::$APP_PASSWORD_NAME,
+			'app_id' => \SpeedyCache\Abilities::$APP_PASSWORD_APP_ID,
+		]);
+
+		// Handle WP_Error if password generation fails.
+		if(is_wp_error($created)){
+			wp_send_json_error($created->get_error_message());
+		}
+
+		$user = wp_get_current_user();
+
+		wp_send_json_success([
+			'username' => $user ? $user->user_login : '',
+			'password' => isset($created[0]) ? (string)$created[0] : '',
+			'message'  => __('Application Password generated. Copy it now — it will not be shown again.', 'speedycache'),
+		]);
+	}
+
+	/**
+	 * Server-side test of the MCP endpoint (fallback when client-side fetch
+	 * is blocked by CORS or unavailable).
+	 *
+	 * @return void
+	 */
+	static function test_mcp_connection(){
+		
+		check_ajax_referer('speedycache_ajax_nonce', 'nonce');
+	
+		if(!current_user_can('manage_options')){
+			wp_send_json_error(__('You do not have permission to test the connection.', 'speedycache'));
+		}
+
+		$start  = microtime(true);
+		$url    = trailingslashit(home_url()) . ltrim(\SpeedyCache\Abilities::$ABILITIES_ENDPOINT, '/');
+
+		$username = isset($_POST['username']) ? sanitize_text_field(wp_unslash($_POST['username'])) : '';
+		$password = isset($_POST['password']) ? sanitize_text_field(wp_unslash($_POST['password'])) : '';
+
+		$response = wp_remote_get($url, [
+			'headers' => [
+				'Accept' => 'application/json',
+				'Authorization' => 'Basic ' . base64_encode($username . ':' . $password),
+			],
+		]);
+
+		$elapsed = round((microtime(true) - $start) * 1000);
+
+		if(is_wp_error($response)){
+			$message = sprintf(__('Could not reach the abilities endpoint (%s).', 'speedycache'), $response->get_error_message());
+			\SpeedyCache\Abilities::save_test_connection_status(false, $message);
+			wp_send_json_error(['message' => $message]);
+		}
+
+		$code = wp_remote_retrieve_response_code($response);
+		$body = json_decode(wp_remote_retrieve_body($response), true);
+
+		if($code >= 200 && $code < 300 && is_array($body)){
+			$speedycache_abilities = 0;
+			foreach($body as $ability){
+				$name = isset($ability['name']) ? $ability['name'] : (isset($ability['id']) ? $ability['id'] : '');
+				if(is_string($name) && strpos($name, 'speedycache-') === 0){
+					$speedycache_abilities++;
+				}
+			}
+
+			$message = sprintf(__('Authenticated with your Application Password and discovered %1$d SpeedyCache abilities in %2$dms. Your site is ready to connect an AI client below.', 'speedycache'), $speedycache_abilities, $elapsed);
+
+			\SpeedyCache\Abilities::save_test_connection_status(true, $message);
+
+			wp_send_json_success([
+				'message'    => $message,
+				'abilities'  => $speedycache_abilities,
+				'elapsed_ms' => $elapsed,
+			]);
+		}
+
+		if($code === 401 || $code === 403){
+			$message = __('Your Application Password was rejected — it may have been revoked. Generate a new one and test again.', 'speedycache');
+			\SpeedyCache\Abilities::save_test_connection_status(false, $message);
+			wp_send_json_error(['message' => $message]);
+		}
+
+		$message = sprintf(__('The abilities endpoint responded with status %1$d. Check the MCP Adapter is active and try again.', 'speedycache'), $code);
+		\SpeedyCache\Abilities::save_test_connection_status(false, $message);
+		wp_send_json_error(['message' => $message]);
+	}
+
+	/**
+	 * Persist the "Test connection" result produced by the client-side fetch
+	 * (which owns the plaintext Application Password) so the pill keeps its
+	 * state across page reloads.
+	 *
+	 * @return void
+	 */
+	static function save_test_status(){
+		
+		check_ajax_referer('speedycache_ajax_nonce', 'nonce');
+	
+		if(!current_user_can('manage_options')){
+			wp_send_json_error(__('You do not have permission to do that.', 'speedycache'));
+		}
+
+		$ok = !empty($_POST['ok']);
+		$message = !empty($_POST['message']) ? sanitize_text_field(wp_unslash($_POST['message'])) : '';
+
+		\SpeedyCache\Abilities::save_test_connection_status($ok, $message);
+
+		wp_send_json_success();
 	}
 }
