@@ -21,8 +21,7 @@ box-sizing: border-box;
 display: flex;
 flex-direction: column;
 flex: 1 1 auto;
-max-width: 1024px;
-margin-left:10px;
+max-width: 906px;
 }
 
 /* The main tab card reuses the classic .speedycache-tab look */

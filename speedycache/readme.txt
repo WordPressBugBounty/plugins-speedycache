@@ -4,7 +4,7 @@ Tags: cache, minify, pagespeed, seo, cdn, wordpress cache, website cache, lazy l
 Requires at least: 4.7
 Tested up to: 7.1
 Requires PHP: 7.0
-Stable tag: 1.4.1
+Stable tag: 1.4.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -179,6 +179,9 @@ You can report security bugs through the Patchstack Vulnerability Disclosure Pro
 4. SpeedyCache Exclude page
 
 == Changelog ==
+
+= 1.4.2 (23rd September 2026) =
+* [Improvement Pro] Added Code Signing: Every update now verifies the code signature to ensure secure updates.
 
 = 1.4.1 (11th September 2026) =
 * [Pro-Feature] Support for Pro AI Abilities: Database Optimization & Settings, Cache Delete Logs, Advanced Cache Stats, Image Optimization Stats & Controls, Revert Images, Object Cache Management, Bloat Settings, and License Status.
